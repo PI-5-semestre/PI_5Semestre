@@ -1,6 +1,6 @@
 {
-    "name": "cestas_app",
-    "short_name": "cestas_app",
+    "name": "cesta_web",
+    "short_name": "cesta_web",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

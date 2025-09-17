@@ -1,5 +1,8 @@
+
 import 'package:cestas_app/widgets/app_drawer.dart';
-import 'package:cestas_app/widgets/statCard.dart';
+import 'package:core/widgets/card_header.dart';
+import 'package:core/widgets/family_card.dart';
+import 'package:core/widgets/statCard.dart';
 import 'package:flutter/material.dart';
 
 class FamilyPage extends StatelessWidget {
@@ -38,50 +41,180 @@ class FamilyPage extends StatelessWidget {
       ),
     ];
 
+    final families = [
+      FamilyCard(
+        name: "Maria da Silva Santos",
+        phone: "(11) 99999-0001",
+        members: 4,
+        income: 800,
+        cpf: "123.456.789-00",
+        address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
+        observations:
+            "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
+        status: "ativa",
+        deliveryStatus: "recebendo",
+      ),
+      FamilyCard(
+        name: "João Carlos Santos",
+        phone: "(11) 99999-0002",
+        members: 3,
+        income: 600,
+        cpf: "987.654.321-00",
+        address: "Av. Central, 456 - Centro, São Paulo - SP",
+        observations:
+            "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
+        status: "pendente",
+        deliveryStatus: "aguardando",
+      ),
+      FamilyCard(
+        name: "Maria da Silva Santos",
+        phone: "(11) 99999-0001",
+        members: 4,
+        income: 800,
+        cpf: "123.456.789-00",
+        address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
+        observations:
+            "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
+        status: "ativa",
+        deliveryStatus: "recebendo",
+      ),
+      FamilyCard(
+        name: "João Carlos Santos",
+        phone: "(11) 99999-0002",
+        members: 3,
+        income: 600,
+        cpf: "987.654.321-00",
+        address: "Av. Central, 456 - Centro, São Paulo - SP",
+        observations:
+            "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
+        status: "pendente",
+        deliveryStatus: "aguardando",
+      ),
+      FamilyCard(
+        name: "Maria da Silva Santos",
+        phone: "(11) 99999-0001",
+        members: 4,
+        income: 800,
+        cpf: "123.456.789-00",
+        address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
+        observations:
+            "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
+        status: "ativa",
+        deliveryStatus: "recebendo",
+      ),
+      FamilyCard(
+        name: "João Carlos Santos",
+        phone: "(11) 99999-0002",
+        members: 3,
+        income: 600,
+        cpf: "987.654.321-00",
+        address: "Av. Central, 456 - Centro, São Paulo - SP",
+        observations:
+            "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
+        status: "pendente",
+        deliveryStatus: "aguardando",
+      ),
+    ];
+
     return Scaffold(
-      appBar: AppBar(title: Text("")),
+      appBar: AppBar(),
       drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Grid de cards
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 3.5,
-                ),
-                itemCount: cards.length,
-                itemBuilder: (context, index) => cards[index],
-              ),
-              SizedBox(height: spacing),
+        child: ListView(
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final bool isMobile = constraints.maxWidth < 600;
 
-
-              // Search
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                    return isMobile
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _buildCardHeader(),
+                              const SizedBox(height: 16),
+                              _buildButton(),
+                            ],
+                          )
+                        : Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(child: _buildCardHeader()),
+                                const SizedBox(width: 16),
+                                _buildButton(),
+                              ],
+                            ),
+                          );
+                  },
                 ),
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "Buscar família...",
-                      prefixIcon: Icon(Icons.search),
-                      border: InputBorder.none,
+
+                SizedBox(height: spacing),
+
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.start,
+                  alignment: WrapAlignment.spaceBetween,
+                  runAlignment: WrapAlignment
+                      .spaceBetween, // controla o alinhamento das linhas
+                  spacing: 8.0, // espaço horizontal entre os itens
+                  runSpacing: 8.0, // espaço vertical entre as linhas
+                  children: cards,
+                ),
+
+                // Wrap(children: List.generate(30, (index) => Text('${index + 1}'),),),
+                SizedBox(height: spacing),
+
+                // Search
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 4,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: "Buscar família...",
+                        prefixIcon: Icon(Icons.search),
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+
+                SizedBox(height: spacing),
+
+                // Lista de famílias
+                Column(children: families),
+              ],
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCardHeader() {
+    return CardHeader(
+      title: 'Famílias Cadastradas',
+      subtitle: 'Gerencie as famílias beneficiárias',
+      colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
+      icon: Icons.group,
+    );
+  }
+
+  Widget _buildButton() {
+    return ElevatedButton.icon(
+      onPressed: () {},
+      icon: const Icon(Icons.add, color: Colors.white),
+      label: const Text('Nova Família', style: TextStyle(color: Colors.white)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF155DFC),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }

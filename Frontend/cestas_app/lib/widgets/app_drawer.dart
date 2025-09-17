@@ -82,10 +82,7 @@ class AppDrawer extends StatelessWidget {
                     ),
                     title: const Text('Famílias'),
                     onTap: () {
-                      Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (context) => const FamilyPage()),
-                      );
+                      Navigator.pushNamed(context,'/family');
                     },
                   ),
                   ListTile(
