@@ -1,4 +1,4 @@
-
+import 'package:cestas_app/pages/family/new_family_page.dart';
 import 'package:cestas_app/widgets/app_drawer.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/family_card.dart';
@@ -12,13 +12,6 @@ class FamilyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final spacing = screenWidth < 600 ? 8.0 : 16.0; // menos espaço no mobile
-
-    int crossAxisCount = 1;
-    if (screenWidth > 1200) {
-      crossAxisCount = 3; // web grande
-    } else if (screenWidth > 800) {
-      crossAxisCount = 2; // tablet
-    }
 
     final cards = [
       StatCard(
@@ -120,36 +113,19 @@ class FamilyPage extends StatelessWidget {
       appBar: AppBar(),
       drawer: const AppDrawer(),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(left: 16, right: 16),
         child: ListView(
           children: [
             Column(
               mainAxisSize: MainAxisSize.max,
               children: [
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final bool isMobile = constraints.maxWidth < 600;
-
-                    return isMobile
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildCardHeader(),
-                              const SizedBox(height: 16),
-                              _buildButton(),
-                            ],
-                          )
-                        : Expanded(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(child: _buildCardHeader()),
-                                const SizedBox(width: 16),
-                                _buildButton(),
-                              ],
-                            ),
-                          );
-                  },
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildCardHeader(),
+                    const SizedBox(height: 16),
+                    _buildButton(context),
+                  ],
                 ),
 
                 SizedBox(height: spacing),
@@ -157,18 +133,17 @@ class FamilyPage extends StatelessWidget {
                 Wrap(
                   crossAxisAlignment: WrapCrossAlignment.start,
                   alignment: WrapAlignment.spaceBetween,
-                  runAlignment: WrapAlignment
-                      .spaceBetween, // controla o alinhamento das linhas
-                  spacing: 8.0, // espaço horizontal entre os itens
-                  runSpacing: 8.0, // espaço vertical entre as linhas
+                  runAlignment: WrapAlignment.spaceBetween,
+                  spacing: 8.0,
+                  runSpacing: 8.0,
                   children: cards,
                 ),
 
-                // Wrap(children: List.generate(30, (index) => Text('${index + 1}'),),),
                 SizedBox(height: spacing),
 
                 // Search
                 Card(
+                  color: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -188,7 +163,17 @@ class FamilyPage extends StatelessWidget {
                 SizedBox(height: spacing),
 
                 // Lista de famílias
-                Column(children: families),
+                Column(
+                  children: families.map((family) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: 4.0,
+                      ), // horizontal agora
+                      child: SizedBox(width: double.infinity, child: family),
+                    );
+                  }).toList(),
+                ),
               ],
             ),
           ],
@@ -206,13 +191,17 @@ class FamilyPage extends StatelessWidget {
     );
   }
 
-  Widget _buildButton() {
+  Widget _buildButton(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const NewFamilyPage()));
+      },
       icon: const Icon(Icons.add, color: Colors.white),
       label: const Text('Nova Família', style: TextStyle(color: Colors.white)),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFF155DFC),
+        backgroundColor: const Color(0xFF155DFC),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
