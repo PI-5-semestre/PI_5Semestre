@@ -7,12 +7,18 @@ class CardHeader extends StatelessWidget {
     required this.colors,
     required this.title,
     required this.subtitle,
+    this.iconSize = 24.0,
+    this.titleStyle,
+    this.subtitleStyle,
   });
 
   final IconData icon;
   final List<Color> colors;
   final String title;
   final String subtitle;
+  final double iconSize;
+  final TextStyle? titleStyle;
+  final TextStyle? subtitleStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -20,48 +26,53 @@ class CardHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
       child: Row(
         children: [
-          // Ícone e textos
+          // Ícone
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: colors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: iconSize,
+            ),
+          ),
+          
+          const SizedBox(width: 12),
+          
+          // Textos com quebra de linha
           Expanded(
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Ícone
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: colors,
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon, // ou qualquer outro ícone
-                    color: Colors.white,
+                Text(
+                  title,
+                  style: titleStyle ?? TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(width: 12),
-                // Título e subtítulo
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: subtitleStyle ?? TextStyle(
+                    fontSize: 14, 
+                    color: Colors.grey,
+                  ),
+                  softWrap: true, // Permite quebra de linha
+                  overflow: TextOverflow.visible, // Mostra todo o texto
+                  maxLines: 3, // Limite máximo de linhas (opcional)
                 ),
               ],
             ),
-          ), // Botão "Nova Família"
+          ),
         ],
       ),
     );

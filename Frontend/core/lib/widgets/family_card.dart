@@ -49,6 +49,7 @@ class FamilyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 4,
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -59,11 +60,10 @@ class FamilyCard extends StatelessWidget {
           children: [
             // 🔹 Nome + chips de status
             Row(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Flexible(
-                  fit: FlexFit.loose, // não ocupa tudo, só o necessário
+                Expanded(
+                  // ocupa o máximo disponível
                   child: Text(
                     name,
                     style: const TextStyle(
@@ -131,7 +131,7 @@ class FamilyCard extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 color: Color.fromARGB(17, 171, 171, 171),
-                borderRadius: BorderRadius.circular(6)
+                borderRadius: BorderRadius.circular(6),
               ),
               padding: const EdgeInsets.all(12),
               child: Text.rich(
