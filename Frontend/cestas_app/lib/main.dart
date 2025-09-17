@@ -1,3 +1,4 @@
+import 'package:cestas_app/pages/family_page.dart';
 import 'package:cestas_app/pages/home_page.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +12,16 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: HomePage()
+      title: 'Cestas App',
+      // theme: ThemeData(
+      //   fontFamily: 'Montserrat'
+      // ),
+      initialRoute: '/',
+      routes: {
+        '/' : (context) => HomePage(),
+        '/dasboard' : (context) => Scaffold(appBar: AppBar(title: Text('Dashboard'),), body: Placeholder(),),
+        '/family' : (context) => FamilyPage(),
+      }
     );
   }
 }
