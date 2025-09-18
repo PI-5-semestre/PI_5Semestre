@@ -211,17 +211,18 @@ class HomePage extends StatelessWidget {
                   child: Center(child: msg),
                 ),
               ),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 3.5,
-                ),
-                itemCount: cards.length,
-                itemBuilder: (context, index) => cards[index],
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Wrap(
+                      alignment: WrapAlignment.start,
+                      spacing: 16.0,
+                      runSpacing: 16.0,
+                      children: cards,
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 16),
