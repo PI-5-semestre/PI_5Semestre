@@ -70,7 +70,7 @@ class AppDrawer extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, '/dashboard');
+                      Navigator.pushReplacementNamed(context, '/');
                     },
                   ),
                   ListTile(
