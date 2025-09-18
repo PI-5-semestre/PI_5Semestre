@@ -84,10 +84,8 @@ class AppDrawer extends StatelessWidget {
                         iconColor: Colors.white,
                         iconBg: Colors.blueAccent,
                         title: 'Dashboard',
-                        onTap: () => Navigator.pushReplacementNamed(
-                          context,
-                          '/dashboard',
-                        ),
+                        onTap: () =>
+                            Navigator.pushReplacementNamed(context, '/'),
                       ),
                       _buildMenuItem(
                         context,
