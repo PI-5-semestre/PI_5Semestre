@@ -38,9 +38,10 @@ class AppDrawer extends StatelessWidget {
                             Text(
                               'Cestas de Amor',
                               style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold),
+                                color: Colors.black,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             SizedBox(height: 4),
                             Text(
@@ -51,7 +52,7 @@ class AppDrawer extends StatelessWidget {
                               ),
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -59,8 +60,9 @@ class AppDrawer extends StatelessWidget {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                          color: Colors.blueAccent,
-                          borderRadius: BorderRadius.circular(8)),
+                        color: Colors.blueAccent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       child: const Icon(Icons.home, color: Colors.white),
                     ),
                     title: const Text(
@@ -68,40 +70,48 @@ class AppDrawer extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, '/dashboard');
+                      Navigator.pushReplacementNamed(context, '/');
                     },
                   ),
                   ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                          color: Colors.green[100],
-                          borderRadius: BorderRadius.circular(8)),
+                        color: Colors.green[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       child: const Icon(Icons.group, color: Colors.green),
                     ),
                     title: const Text('Famílias'),
                     onTap: () {
-                      Navigator.pushNamed(context,'/family');
+                      Navigator.pushNamed(context, '/family');
                     },
                   ),
                   ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                          color: Colors.purple[100],
-                          borderRadius: BorderRadius.circular(8)),
+                        color: Colors.purple[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       child: const Icon(Icons.inventory, color: Colors.purple),
                     ),
                     title: const Text('Estoque'),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pushNamed(context, '/stock');
+                    },
                   ),
                   ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                          color: Colors.orange[100],
-                          borderRadius: BorderRadius.circular(8)),
-                      child: const Icon(Icons.shopping_cart, color: Colors.orange),
+                        color: Colors.orange[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.shopping_cart,
+                        color: Colors.orange,
+                      ),
                     ),
                     title: const Text('Cestas'),
                     onTap: () {},
@@ -110,9 +120,13 @@ class AppDrawer extends StatelessWidget {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                          color: Colors.blue[100],
-                          borderRadius: BorderRadius.circular(8)),
-                      child: const Icon(Icons.local_shipping, color: Colors.blue),
+                        color: Colors.blue[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.local_shipping,
+                        color: Colors.blue,
+                      ),
                     ),
                     title: const Text('Entregas'),
                     onTap: () {},
