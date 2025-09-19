@@ -114,7 +114,9 @@ class AppDrawer extends StatelessWidget {
                       ),
                     ),
                     title: const Text('Cestas'),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pushNamed(context, '/basket');
+                    },
                   ),
                   ListTile(
                     leading: Container(

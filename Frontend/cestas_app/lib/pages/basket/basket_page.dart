@@ -1,7 +1,10 @@
 import 'package:cestas_app/main.dart';
+import 'package:cestas_app/pages/basket/type_basket.dart';
 import 'package:flutter/material.dart';
 import 'package:cestas_app/widgets/app_drawer.dart';
 import 'package:core/widgets/statCard.dart';
+import '../basket/list_family.dart';
+import '../basket/generate_basket.dart';
 
 
 

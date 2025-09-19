@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cestas_app/pages/stock_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:cestas_app/pages/basket/basket_page.dart';
 
 void main() {
   runApp(const App());
@@ -57,6 +58,7 @@ class App extends StatelessWidget {
         '/stock': (context) => StockPage(),
         '/delivery': (context) => DeliveryPage(),
         '/visits': (context) => VisitsPage(),
+        '/basket':(context)=>BasketPage(),
       },
     );
   }
