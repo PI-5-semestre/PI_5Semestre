@@ -12,8 +12,6 @@ class FamilyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final spacing = screenWidth < 600 ? 8.0 : 16.0; // menos espaço no mobile
-    bool isWeb =
-        MediaQuery.of(context).size.width > 600; // menos espaço no mobile
 
     final cards = [
       StatCard(

@@ -2,6 +2,7 @@ import 'package:cestas_app/pages/delivery_page.dart';
 import 'package:cestas_app/pages/family/family_page.dart';
 import 'package:cestas_app/pages/family/new_family_page.dart';
 import 'package:cestas_app/pages/home_page.dart';
+import 'package:cestas_app/pages/visits_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cestas_app/pages/stock_page.dart';
@@ -55,6 +56,7 @@ class App extends StatelessWidget {
         '/family/new_family': (context) => NewFamilyPage(),
         '/stock': (context) => StockPage(),
         '/delivery': (context) => DeliveryPage(),
+        '/visits': (context) => VisitsPage(),
       },
     );
   }
