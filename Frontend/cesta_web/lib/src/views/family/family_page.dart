@@ -142,7 +142,7 @@ class FamilyPage extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Wrap(
-                            alignment: WrapAlignment.start,
+                            alignment: WrapAlignment.center,
                             spacing: 16.0,
                             runSpacing: 16.0,
                             children: cards,
