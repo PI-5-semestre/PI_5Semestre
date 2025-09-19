@@ -133,6 +133,23 @@ class AppDrawer extends StatelessWidget {
                       Navigator.pushNamed(context, '/delivery');
                     },
                   ),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        FontAwesomeIcons.calendar,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    title: const Text('Visitas'),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/visits');
+                    },
+                  ),
                 ],
               ),
             ),
