@@ -129,7 +129,9 @@ class AppDrawer extends StatelessWidget {
                       ),
                     ),
                     title: const Text('Entregas'),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pushNamed(context, '/delivery');
+                    },
                   ),
                 ],
               ),
