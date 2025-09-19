@@ -1,9 +1,11 @@
+import 'package:cestas_app/pages/delivery_page.dart';
 import 'package:cestas_app/pages/family/family_page.dart';
 import 'package:cestas_app/pages/family/new_family_page.dart';
 import 'package:cestas_app/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cestas_app/pages/stock_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(const App());
@@ -15,6 +17,9 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      locale: const Locale('pt', 'BR'),
+      supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       title: 'Cestas App',
       theme: ThemeData(
         scaffoldBackgroundColor: Color(0xFFF7F9FA),
@@ -48,7 +53,8 @@ class App extends StatelessWidget {
         ),
         '/family': (context) => FamilyPage(),
         '/family/new_family': (context) => NewFamilyPage(),
-        '/stock': (context) => StockPage()
+        '/stock': (context) => StockPage(),
+        '/delivery': (context) => DeliveryPage(),
       },
     );
   }
