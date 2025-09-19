@@ -119,6 +119,16 @@ class AppDrawer extends StatelessWidget {
                         title: 'Entregas',
                         onTap: () {},
                       ),
+                      _buildMenuItem(
+                        context,
+                        icon: FontAwesomeIcons.calendar,
+                        iconColor: Colors.blue,
+                        iconBg: Colors.blue[100]!,
+                        title: 'Visitas',
+                        onTap: () {
+                          Navigator.pushNamed(context, '/visits');
+                        },
+                      ),
                     ],
                   ),
                 ),
