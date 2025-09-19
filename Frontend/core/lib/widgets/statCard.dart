@@ -7,12 +7,14 @@ class StatCard extends StatelessWidget {
     required this.colors,
     required this.title,
     required this.value,
+    this.boxSize = 409,
   });
 
   final IconData icon;
   final List<Color> colors;
   final String title;
   final String value;
+  final double boxSize;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class StatCard extends StatelessWidget {
     bool isSmallScreen = screenWidth > 800;
 
     return SizedBox(
-      width: isSmallScreen ? 409 : null,
+      width: isSmallScreen ? boxSize : null,
       child: Card(
         color: Colors.white,
         shape: RoundedRectangleBorder(

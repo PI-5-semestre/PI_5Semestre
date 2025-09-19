@@ -1,8 +1,6 @@
-import 'package:cesta_web/src/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:core/widgets/card_info.dart';
-import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/statCard.dart';
 
 class HomePage extends StatelessWidget {
@@ -10,7 +8,6 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
 
     var message =
         "Bem-vindo ao sistema de gestão de cestas básicas da nossa comunidade. Aqui você\npode acompanhar todas as atividades e ajudar quem mais precisa.";
@@ -57,24 +54,28 @@ class HomePage extends StatelessWidget {
         colors: [Color(0xFF2196F3), Color(0xFF1565C0)],
         title: "Famílias Cadastradas",
         value: "156",
+        boxSize: 303,
       ),
       StatCard(
         icon: Icons.shopping_cart,
         colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
         title: "Cestas Disponíveis",
         value: "24",
+        boxSize: 303,
       ),
       StatCard(
         icon: Icons.local_shipping,
         colors: [Color(0xFFFF9800), Color(0xFFEF6C00)],
         title: "Visitas Pendentes",
         value: "8",
+        boxSize: 303,
       ),
       StatCard(
         icon: Icons.inventory,
         colors: [Color(0xFF9C27B0), Color(0xFF6A1B9A)],
         title: "Produtos em estoque",
         value: "342",
+        boxSize: 303,
       ),
     ];
 
@@ -198,46 +199,51 @@ class HomePage extends StatelessWidget {
       ),
     ];
 
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...startMessage.map(
-                (msg) => Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Center(child: msg),
-                ),
-              ),
-              Row(
+    return Center(
+      child: Container(
+        width: 1300,
+        child: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SingleChildScrollView(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Wrap(
-                      alignment: WrapAlignment.start,
-                      spacing: 16.0,
-                      runSpacing: 16.0,
-                      children: cards,
+                  ...startMessage.map(
+                    (msg) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Center(child: msg),
                     ),
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 16.0,
+                          runSpacing: 16.0,
+                          children: cards,
+                        ),
+                      ),
+                    ],
+                  ),
+        
+                  const SizedBox(height: 16),
+        
+                  Column(
+                    children: infoCard
+                        .map(
+                          (card) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: card,
+                          ),
+                        )
+                        .toList(),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 16),
-
-              Column(
-                children: infoCard
-                    .map(
-                      (card) => Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: card,
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
+            ),
           ),
         ),
       ),
