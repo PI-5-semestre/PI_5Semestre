@@ -1,652 +1,266 @@
+import 'package:cestas_app/pages/family/new_family_page.dart';
+import 'package:core/widgets/card_header.dart';
+import 'package:core/widgets/modal/product_card.dart';
+import 'package:core/widgets/statCard.dart';
 import 'package:flutter/material.dart';
 import 'package:cestas_app/widgets/app_drawer.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:core/widgets/card_info.dart';
+import 'package:core/widgets/filter-search.dart';
 
-class StockPage extends StatefulWidget {
+class StockPage extends StatelessWidget {
   const StockPage({super.key});
 
   @override
-  State<StockPage> createState() => _StockPageState();
-}
-
-class _StockPageState extends State<StockPage> {
-  String searchTerm = "";
-  String selectedCategory = "all";
-
-  final List<Product> mockProducts = [
-    Product(
-      id: "1",
-      name: "Arroz Branco",
-      category: "Grãos",
-      currentStock: 150,
-      stockPerBasket: 2,
-      possibleBaskets: 75,
-      minStock: 30,
-      unit: "kg",
-      status: "in-stock",
-    ),
-    Product(
-      id: "2",
-      name: "Feijão Carioca",
-      category: "Grãos",
-      currentStock: 120,
-      stockPerBasket: 1,
-      possibleBaskets: 120,
-      minStock: 25,
-      unit: "kg",
-      status: "in-stock",
-    ),
-    Product(
-      id: "3",
-      name: "Óleo de Soja",
-      category: "Óleos",
-      currentStock: 80,
-      stockPerBasket: 1,
-      possibleBaskets: 80,
-      minStock: 15,
-      unit: "l",
-      status: "in-stock",
-    ),
-    Product(
-      id: "4",
-      name: "Farinha de Trigo",
-      category: "Grãos",
-      currentStock: 15,
-      stockPerBasket: 1,
-      possibleBaskets: 15,
-      minStock: 20,
-      unit: "kg",
-      status: "low-stock",
-    ),
-  ];
-
-  final Map<String, int> stats = {
-    "availableBaskets": 15,
-    "activeProducts": 8,
-    "lowStock": 1,
-    "outOfStock": 0,
-  };
-
-  double getStockPercentage(int current, int min) {
-    final maxStock = min * 3;
-    final v = current / maxStock;
-    if (v < 0) return 0;
-    if (v > 1) return 1;
-    return v;
-  }
-
-  Color getProgressColor(double percent) {
-    if (percent >= 0.6) return Colors.green;
-    if (percent >= 0.3) return Colors.yellow[700]!;
-    return Colors.red;
-  }
-
-  Color getStockLevelColor(double percent) {
-    if (percent >= 0.6) return Colors.green[700]!;
-    if (percent >= 0.3) return Colors.yellow[700]!;
-    return Colors.red[700]!;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final lowStockProducts = mockProducts
-        .where((p) => p.status == "low-stock")
-        .toList();
+    final screenWidth = MediaQuery.of(context).size.width;
+    final spacing = screenWidth < 600 ? 8.0 : 16.0;
 
-    final filteredProducts = mockProducts.where((product) {
-      final matchesSearch = product.name.toLowerCase().contains(
-        searchTerm.toLowerCase(),
-      );
-      final matchesCategory =
-          selectedCategory == "all" || product.category == selectedCategory;
-      return matchesSearch && matchesCategory;
-    }).toList();
+    final cards = [
+      StatCard(
+        icon: Icons.inventory_2,
+        colors: [Color(0xFF3d89ff), Color(0xFF165ffc)],
+        title: "Cestas Disponíveis",
+        value: "15",
+      ),
+      StatCard(
+        icon: Icons.show_chart,
+        colors: [Color(0xFF00c64f), Color(0xFF00a73e)],
+        title: "Produtos Ativos",
+        value: "8",
+      ),
+      StatCard(
+        icon: Icons.warning_amber_rounded,
+        colors: [Color(0xFFecab00), Color(0xFFd69417)],
+        title: "Estoque Baixo",
+        value: "1",
+      ),
+      StatCard(
+        icon: Icons.error,
+        colors: [Color(0xFFf82632), Color(0xFFe90012)],
+        title: "Sem Estoque",
+        value: "0",
+      ),
+    ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final w = constraints.maxWidth;
-        final isSmall = w < 600;
-        final isMedium = w >= 600 && w < 1024;
-        final statCols = isSmall ? 1 : (isMedium ? 2 : 4);
+    final products = [
+      ProductCard(
+        name: "Arroz Branco",
+        category: "Grãos",
+        currentStock: 150,
+        stockPerBasket: 2,
+        possibleBaskets: 75,
+        minStock: 30,
+        unit: "kg",
+        status: "in-stock",
+      ),
+      ProductCard(
+        name: "Feijão Carioca",
+        category: "Grãos",
+        currentStock: 120,
+        stockPerBasket: 1,
+        possibleBaskets: 120,
+        minStock: 25,
+        unit: "kg",
+        status: "in-stock",
+      ),
+      ProductCard(
+        name: "Óleo de Soja",
+        category: "Óleos",
+        currentStock: 80,
+        stockPerBasket: 1,
+        possibleBaskets: 80,
+        minStock: 15,
+        unit: "l",
+        status: "in-stock",
+      ),
+      ProductCard(
+        name: "Farinha de Trigo",
+        category: "Grãos",
+        currentStock: 15,
+        stockPerBasket: 1,
+        possibleBaskets: 15,
+        minStock: 20,
+        unit: "kg",
+        status: "low-stock",
+      ),
+    ];
 
-        return Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.background,
-          appBar: AppBar(),
-          drawer: const AppDrawer(),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+    final infoCard = [
+      InfoCard(
+        title: "Estoque Baixo",
+        color: Colors.red,
+        icon: Icons.warning_amber_rounded,
+        iconColor: Colors.white,
+        iconBackground: Colors.red[700],
+        child: Column(
+          children: [
+            ListTile(
+              leading: FaIcon(FontAwesomeIcons.boxOpen, color: Colors.red),
+              title: Text("Arroz 5kg"),
+              subtitle: Text("Mínimo: 10 unidades"),
+              trailing: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent,
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                child: Text(
+                  "2 unidades",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Divider(),
+            ListTile(
+              leading: FaIcon(FontAwesomeIcons.boxOpen, color: Colors.red),
+              title: Text("Feijão 1kg"),
+              subtitle: Text("Mínimo: 15 unidades"),
+              trailing: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent,
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                child: Text(
+                  "4 unidades",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Divider(),
+            ListTile(
+              leading: FaIcon(FontAwesomeIcons.boxOpen, color: Colors.red),
+              title: Text("Óleo de Soja"),
+              subtitle: Text("Mínimo: 8 unidades"),
+              trailing: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent,
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                child: Text(
+                  "3 unidades",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
+
+    return Scaffold(
+      appBar: AppBar(),
+      drawer: const AppDrawer(),
+      body: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        child: ListView(
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.max,
               children: [
-                if (isSmall)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.inventory_2_outlined,
-                              color: Colors.white,
-                              size: 22,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Controle de Estoque",
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                "Gerencie os produtos das cestas básicas",
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.add, size: 18),
-                          label: const Text("Novo Produto"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.inventory_2_outlined,
-                              color: Colors.white,
-                              size: 22,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Controle de Estoque",
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                "Gerencie os produtos das cestas básicas",
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.add, size: 18),
-                        label: const Text("Novo Produto"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                const SizedBox(height: 16),
-
-                GridView(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: statCols,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 3.2,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    StatCard(
-                      title: "Cestas Disponíveis",
-                      value: stats["availableBaskets"]!,
-                      icon: Icons.shopping_cart_outlined,
-                      accentColor: Colors.blue,
-                    ),
-                    StatCard(
-                      title: "Produtos Ativos",
-                      value: stats["activeProducts"]!,
-                      icon: Icons.trending_up_rounded,
-                      accentColor: Theme.of(context).colorScheme.primary,
-                    ),
-                    StatCard(
-                      title: "Estoque Baixo",
-                      value: stats["lowStock"]!,
-                      icon: Icons.warning_amber_rounded,
-                      accentColor: Colors.orange,
-                    ),
-                    StatCard(
-                      title: "Sem Estoque",
-                      value: stats["outOfStock"]!,
-                      icon: Icons.cancel_outlined,
-                      accentColor: Colors.red,
+                    _buildCardHeader(),
+                    const SizedBox(height: 16),
+                    _buildButton(context),
+                  ],
+                ),
+
+                SizedBox(height: spacing),
+
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.start,
+                  alignment: WrapAlignment.spaceBetween,
+                  runAlignment: WrapAlignment.spaceBetween,
+                  spacing: 8.0,
+                  runSpacing: 8.0,
+                  children: cards,
+                ),
+
+                SizedBox(height: spacing),
+
+                Column(
+                  children: infoCard
+                      .map(
+                        (card) => Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: card,
+                        ),
+                      )
+                      .toList(),
+                ),
+
+                SizedBox(height: spacing),
+
+                Column(
+                  children: [
+                    FilterSearch(
+                      categories: ["Bebida", "Grãos", "Café"],
+                      onChanged: (search, category) {
+                        print("Sucesso");
+                      }
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 16),
-
-                if (lowStockProducts.isNotEmpty)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      border: Border.all(color: Colors.redAccent),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.warning, color: Colors.red, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              "Atenção: Produtos Precisam de Reposição",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        ...lowStockProducts.map(
-                          (p) => Text(
-                            "${p.name} (${p.currentStock} ${p.unit})",
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                const SizedBox(height: 16),
-
-                if (isSmall)
-                  Column(
-                    children: [
-                      TextField(
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.search),
-                          hintText: "Buscar produtos...",
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) =>
-                            setState(() => searchTerm = value.trim()),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: selectedCategory,
-                              isExpanded: true,
-                              items: const [
-                                DropdownMenuItem(
-                                  value: "all",
-                                  child: Text("Todas as categorias"),
-                                ),
-                                DropdownMenuItem(
-                                  value: "Grãos",
-                                  child: Text("Grãos"),
-                                ),
-                                DropdownMenuItem(
-                                  value: "Óleos",
-                                  child: Text("Óleos"),
-                                ),
-                              ],
-                              onChanged: (val) =>
-                                  setState(() => selectedCategory = val!),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.search),
-                            hintText: "Buscar produtos...",
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (value) =>
-                              setState(() => searchTerm = value.trim()),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      SizedBox(
-                        width: 220,
-                        child: InputDecorator(
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: selectedCategory,
-                              isExpanded: true,
-                              items: const [
-                                DropdownMenuItem(
-                                  value: "all",
-                                  child: Text("Todas as categorias"),
-                                ),
-                                DropdownMenuItem(
-                                  value: "Grãos",
-                                  child: Text("Grãos"),
-                                ),
-                                DropdownMenuItem(
-                                  value: "Óleos",
-                                  child: Text("Óleos"),
-                                ),
-                              ],
-                              onChanged: (val) =>
-                                  setState(() => selectedCategory = val!),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                const SizedBox(height: 16),
-
-                // ===== LISTA DE PRODUTOS =====
+                // Lista de famílias
                 Column(
-                  children: filteredProducts.map((product) {
-                    final percent = getStockPercentage(
-                      product.currentStock,
-                      product.minStock,
-                    );
-
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Wrap(
-                                    crossAxisAlignment:
-                                        WrapCrossAlignment.center,
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: [
-                                      Text(
-                                        product.name,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      Chip(
-                                        label: Text(product.category),
-                                        backgroundColor: Colors.grey
-                                            .withOpacity(0.15),
-                                      ),
-                                      Chip(
-                                        label: const Text("Em estoque"),
-                                        backgroundColor:
-                                            product.status == "in-stock"
-                                            ? Theme.of(
-                                                context,
-                                              ).colorScheme.primary
-                                            : Colors.red,
-                                        labelStyle: const TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.edit),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            GridView(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    childAspectRatio: 3.4,
-                                    crossAxisSpacing: 8,
-                                    mainAxisSpacing: 4,
-                                  ),
-                              children: [
-                                ProductInfo(
-                                  "Estoque atual",
-                                  "${product.currentStock} ${product.unit}",
-                                ),
-                                ProductInfo(
-                                  "Por cesta",
-                                  "${product.stockPerBasket} ${product.unit}",
-                                ),
-                                ProductInfo(
-                                  "Cestas possíveis",
-                                  "${product.possibleBaskets}",
-                                ),
-                                ProductInfo(
-                                  "Estoque mínimo",
-                                  "${product.minStock} ${product.unit}",
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  "Nível de estoque",
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                                Text(
-                                  "${(percent * 100).round()}%",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: getStockLevelColor(percent),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: LinearProgressIndicator(
-                                value: percent,
-                                minHeight: 8,
-                                backgroundColor: Colors.grey[300],
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  getProgressColor(percent),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                  children: products.map((family) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: 4.0,
+                      ), // horizontal agora
+                      child: SizedBox(width: double.infinity, child: family),
                     );
                   }).toList(),
                 ),
               ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class Product {
-  final String id;
-  final String name;
-  final String category;
-  final int currentStock;
-  final int stockPerBasket;
-  final int possibleBaskets;
-  final int minStock;
-  final String unit;
-  final String status;
-
-  Product({
-    required this.id,
-    required this.name,
-    required this.category,
-    required this.currentStock,
-    required this.stockPerBasket,
-    required this.possibleBaskets,
-    required this.minStock,
-    required this.unit,
-    required this.status,
-  });
-}
-
-class StatCard extends StatelessWidget {
-  final String title;
-  final int value;
-  final IconData icon;
-  final Color accentColor;
-
-  const StatCard({
-    super.key,
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.accentColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final iconBg = accentColor.withOpacity(0.15);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: iconBg,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: accentColor, size: 26),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "$value",
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class ProductInfo extends StatelessWidget {
-  final String label;
-  final String value;
+  Widget _buildCardHeader() {
+    return CardHeader(
+      title: 'Controle de Estoque',
+      subtitle: 'Gerencie os produtos das cestas básicas',
+      colors: [Color(0xFF00c64f), Color(0xFF00a73e)],
+      icon: Icons.archive_outlined,
+    );
+  }
 
-  const ProductInfo(this.label, this.value, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        const SizedBox(height: 2),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-      ],
+  Widget _buildButton(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const NewFamilyPage()));
+      },
+      icon: const Icon(Icons.add, color: Colors.white),
+      label: const Text('Novo Produto', style: TextStyle(color: Colors.white)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF00c64f),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
     );
   }
 }
