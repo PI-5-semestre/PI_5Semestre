@@ -1,4 +1,5 @@
-import 'package:cestas_app/pages/delivery_page.dart';
+import 'package:cestas_app/pages/delivery/delivery_page.dart';
+import 'package:cestas_app/pages/delivery/new_delivery_page.dart';
 import 'package:cestas_app/pages/family/family_page.dart';
 import 'package:cestas_app/pages/family/new_family_page.dart';
 import 'package:cestas_app/pages/home_page.dart';
@@ -57,8 +58,9 @@ class App extends StatelessWidget {
         '/family/new_family': (context) => NewFamilyPage(),
         '/stock': (context) => StockPage(),
         '/delivery': (context) => DeliveryPage(),
+        '/delivery/new_delivery': (context) => NewDeliveryPage(),
         '/visits': (context) => VisitsPage(),
-        '/basket':(context)=>BasketPage(),
+        '/basket': (context) => BasketPage(),
       },
     );
   }
