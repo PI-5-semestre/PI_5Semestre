@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class DeliveryCard extends StatelessWidget {
+class DeliveryCard extends StatefulWidget {
   final String name;
   final String phone;
   final String address;
-  final String deliveryStatus; // "Pendente" | "Entregue" | "Não Entregue"
+  final String deliveryStatus;
   final String observations;
+  final void Function(String newStatus)? onStatusChanged;
 
   const DeliveryCard({
     super.key,
@@ -15,9 +16,30 @@ class DeliveryCard extends StatelessWidget {
     required this.address,
     required this.deliveryStatus,
     this.observations = "",
+    this.onStatusChanged,
   });
 
-  // retorna cor do texto e cor de fundo para o chip
+  @override
+  State<DeliveryCard> createState() => _DeliveryCardState();
+}
+
+class _DeliveryCardState extends State<DeliveryCard> {
+  late String _status;
+
+  @override
+  void initState() {
+    super.initState();
+    _status = widget.deliveryStatus;
+  }
+
+  @override
+  void didUpdateWidget(covariant DeliveryCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.deliveryStatus != widget.deliveryStatus) {
+      _status = widget.deliveryStatus;
+    }
+  }
+
   Color _getTextColor(String status) {
     switch (status.toLowerCase()) {
       case "entregue":
@@ -26,6 +48,15 @@ class DeliveryCard extends StatelessWidget {
         return Colors.red.shade800;
       default:
         return Colors.orange.shade800;
+    }
+  }
+
+  void _updateStatus(String newStatus) {
+    setState(() {
+      _status = newStatus;
+    });
+    if (widget.onStatusChanged != null) {
+      widget.onStatusChanged!(_status);
     }
   }
 
@@ -75,6 +106,11 @@ class DeliveryCard extends StatelessWidget {
     }
   }
 
+  void _openStatusModal() {
+    // Aqui você vai implementar o modal depois
+    debugPrint("Abrir modal de status...");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -87,51 +123,60 @@ class DeliveryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Nome + chip + botão mapa
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          widget.name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _buildChip(_status),
+                    ],
                   ),
                 ),
-                _buildChip(deliveryStatus),
-                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.orange),
+                  tooltip: "Alterar status",
+                  onPressed: _openStatusModal,
+                ),
                 IconButton(
                   icon: const Icon(Icons.send, color: Colors.blueAccent),
-                  onPressed: () => _openInGoogleMaps(address),
+                  onPressed: () => _openInGoogleMaps(widget.address),
                   tooltip: "Abrir no Google Maps",
                 ),
               ],
             ),
+
             const SizedBox(height: 8),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.phone, size: 16),
                 const SizedBox(width: 4),
-                Text(phone),
+                Text(widget.phone),
               ],
             ),
             const SizedBox(height: 8),
-
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Icons.location_on, size: 16),
                 const SizedBox(width: 4),
-                Expanded(child: Text(address)),
+                Expanded(child: Text(widget.address)),
               ],
             ),
             const SizedBox(height: 8),
-
-            if (observations.isNotEmpty)
+            if (widget.observations.isNotEmpty)
               Container(
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(17, 171, 171, 171),
@@ -144,7 +189,7 @@ class DeliveryCard extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     children: [
                       TextSpan(
-                        text: observations,
+                        text: widget.observations,
                         style: const TextStyle(fontWeight: FontWeight.normal),
                       ),
                     ],
