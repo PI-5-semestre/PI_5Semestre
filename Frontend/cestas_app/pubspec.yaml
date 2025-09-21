@@ -41,6 +41,7 @@ dependencies:
   google_fonts: ^6.3.1
   flutter_localizations:
     sdk: flutter
+  file_picker: ^10.3.3
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,5 @@
 import 'package:core/widgets/card_header.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -11,6 +12,8 @@ class NewFamilyPage extends StatefulWidget {
 
 class _NewFamilyPageState extends State<NewFamilyPage> {
   final TextEditingController familySizeController = TextEditingController();
+  final TextEditingController comprovanteController = TextEditingController();
+
   int familySize = 0;
 
   List<Map<String, dynamic>> familyMembers = [];
@@ -45,6 +48,20 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
           "relationship": "Filho(a)",
           "otherController": TextEditingController(),
         });
+      });
+    }
+  }
+
+  Future<void> _pickComprovante() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'png'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        comprovanteController.text =
+            result.files.single.name; // salva no controller
       });
     }
   }
@@ -95,7 +112,7 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
                         ),
                       ],
                     ),
-        
+
                     // membros da família
                     if (familySize > 0)
                       _buildSection(
@@ -124,7 +141,10 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
                                     "Nome",
                                     controller: member["name"],
                                   ),
-                                  _buildTextField("CPF", controller: member["cpf"]),
+                                  _buildTextField(
+                                    "CPF",
+                                    controller: member["cpf"],
+                                  ),
                                   DropdownButtonFormField<String>(
                                     items: const [
                                       DropdownMenuItem(
@@ -171,7 +191,36 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
                           );
                         }).toList(),
                       ),
-                    // pessoas autorizadas
+
+                    _buildSection(
+                      title: "Endereço",
+                      icon: Icons.location_on,
+                      children: [
+                        _buildTextField("CEP"),
+                        _buildTextField("Rua *"),
+                        _buildTextField("Número *"),
+                        _buildTextField("Bairro *"),
+                        _buildTextField("Estado *"),
+
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: comprovanteController,
+                          readOnly: true,
+                          onTap:
+                              _pickComprovante, // <-- agora o campo todo abre o seletor
+                          decoration: InputDecoration(
+                            labelText: "Comprovante de Endereço *",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            suffixIcon: const Icon(
+                              Icons.upload_file,
+                            ), // ícone fica só visual
+                          ),
+                        ),
+                      ],
+                    ),
+
                     // pessoas autorizadas
                     _buildSection(
                       title: "Pessoas Autorizadas",
@@ -219,7 +268,10 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
                                     "Nome",
                                     controller: person["name"],
                                   ),
-                                  _buildTextField("CPF", controller: person["cpf"]),
+                                  _buildTextField(
+                                    "CPF",
+                                    controller: person["cpf"],
+                                  ),
                                   DropdownButtonFormField<String>(
                                     items: const [
                                       DropdownMenuItem(
@@ -271,7 +323,8 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
                             icon: const Icon(Icons.add),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: Colors.deepPurple, // ícone e texto
+                              foregroundColor:
+                                  Colors.deepPurple, // ícone e texto
                             ),
                             label: const Text(
                               "Adicionar Pessoa",
@@ -312,7 +365,7 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
                             ),
                           ),
                         ),
-        
+
                         _buildTextField("Observações", maxLines: 3),
                       ],
                     ),
@@ -322,7 +375,10 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () {
-                              Navigator.pushReplacementNamed(context, "/family");
+                              Navigator.pushReplacementNamed(
+                                context,
+                                "/family",
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.black,

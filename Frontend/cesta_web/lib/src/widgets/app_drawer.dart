@@ -101,7 +101,7 @@ class AppDrawer extends StatelessWidget {
                         iconColor: Colors.purple,
                         iconBg: Colors.purple[100]!,
                         title: 'Estoque',
-                        onTap: () {},
+                        onTap: () => Navigator.pushNamed(context, "/stock"),
                       ),
                       _buildMenuItem(
                         context,
