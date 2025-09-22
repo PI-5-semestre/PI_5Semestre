@@ -54,28 +54,24 @@ class HomePage extends StatelessWidget {
         colors: [Color(0xFF2196F3), Color(0xFF1565C0)],
         title: "Famílias Cadastradas",
         value: "156",
-        boxSize: 303,
       ),
       StatCard(
         icon: Icons.shopping_cart,
         colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
         title: "Cestas Disponíveis",
         value: "24",
-        boxSize: 303,
       ),
       StatCard(
         icon: Icons.local_shipping,
         colors: [Color(0xFFFF9800), Color(0xFFEF6C00)],
         title: "Visitas Pendentes",
         value: "8",
-        boxSize: 303,
       ),
       StatCard(
         icon: Icons.inventory,
         colors: [Color(0xFF9C27B0), Color(0xFF6A1B9A)],
         title: "Produtos em estoque",
         value: "342",
-        boxSize: 303,
       ),
     ];
 
@@ -215,18 +211,42 @@ class HomePage extends StatelessWidget {
                       child: Center(child: msg),
                     ),
                   ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Wrap(
-                          alignment: WrapAlignment.center,
-                          spacing: 16.0,
-                          runSpacing: 16.0,
-                          children: cards,
-                        ),
-                      ),
-                    ],
+
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      double maxWidth = constraints.maxWidth;
+                      double spacing = 16;
+
+                      // Define o número máximo de colunas baseado na largura da tela
+                      int maxColumns = maxWidth > 1300
+                          ? 5
+                          : maxWidth > 1200
+                          ? 4
+                          : maxWidth > 800
+                          ? 3
+                          : maxWidth > 500
+                          ? 2
+                          : 1;
+
+                      // Número de colunas não pode ser maior que a quantidade de cards
+                      int columns = cards.length < maxColumns
+                          ? cards.length
+                          : maxColumns;
+
+                      double totalSpacing = spacing * (columns - 1);
+                      double cardWidth = (maxWidth - totalSpacing) / columns;
+
+                      return Wrap(
+                        spacing: spacing,
+                        runSpacing: spacing,
+                        children: cards
+                            .map(
+                              (card) =>
+                                  SizedBox(width: cardWidth, child: card),
+                            )
+                            .toList(),
+                      );
+                    },
                   ),
         
                   const SizedBox(height: 16),

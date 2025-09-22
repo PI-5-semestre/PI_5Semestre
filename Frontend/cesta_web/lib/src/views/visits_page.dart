@@ -17,22 +17,19 @@ class VisitsPage extends StatelessWidget {
         icon: FontAwesomeIcons.clock,
         colors: [Color(0xFFF0B100), Color(0xFFD08700)],
         title: "Pendentes",
-        value: "2",
-        boxSize: 414,
+        value: "2"
       ),
       StatCard(
         icon: FontAwesomeIcons.calendar,
         colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
         title: "Agendadas",
-        value: "0",
-        boxSize: 414,
+        value: "0"
       ),
       StatCard(
         icon: FontAwesomeIcons.circleCheck,
         colors: [Color(0xFF00C951), Color(0xFF00A63E)],
         title: "Realizadas",
-        value: "0",
-        boxSize: 414,
+        value: "0"
       ),
     ];
 
@@ -97,13 +94,41 @@ class VisitsPage extends StatelessWidget {
 
                     SizedBox(height: spacing),
 
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.start,
-                      alignment: WrapAlignment.spaceBetween,
-                      runAlignment: WrapAlignment.spaceBetween,
-                      spacing: 8.0,
-                      runSpacing: 8.0,
-                      children: cards,
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        double maxWidth = constraints.maxWidth;
+                        double spacing = 16;
+
+                        // Define o número máximo de colunas baseado na largura da tela
+                        int maxColumns = maxWidth > 1300
+                            ? 5
+                            : maxWidth > 1200
+                            ? 4
+                            : maxWidth > 800
+                            ? 3
+                            : maxWidth > 500
+                            ? 2
+                            : 1;
+
+                        // Número de colunas não pode ser maior que a quantidade de cards
+                        int columns = cards.length < maxColumns
+                            ? cards.length
+                            : maxColumns;
+
+                        double totalSpacing = spacing * (columns - 1);
+                        double cardWidth = (maxWidth - totalSpacing) / columns;
+
+                        return Wrap(
+                          spacing: spacing,
+                          runSpacing: spacing,
+                          children: cards
+                              .map(
+                                (card) =>
+                                    SizedBox(width: cardWidth, child: card),
+                              )
+                              .toList(),
+                        );
+                      },
                     ),
 
                     SizedBox(height: spacing),

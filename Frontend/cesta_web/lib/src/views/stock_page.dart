@@ -119,76 +119,115 @@ class StockPage extends StatelessWidget {
       ),
     ];
 
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16),
-      child: ListView(
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.max,
+    return Center(
+      child: SizedBox(
+        width: 1300,
+        child: Padding(
+          padding: screenWidth > 800
+              ? const EdgeInsets.only(left: 16, right: 16, top: 50)
+              : EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                ), // ou outro padding para telas menores
+          child: ListView(
             children: [
               Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.max,
                 children: [
-                  _buildCardHeader(),
-                  const SizedBox(height: 16),
-                  _buildButton(context),
-                ],
-              ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(child: _buildCardHeader()),
+                      const SizedBox(width: 16),
+                      _buildButton(context),
+                    ],
+                  ),
+        
+                  SizedBox(height: spacing),
+        
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      double maxWidth = constraints.maxWidth;
+                      double spacing = 16;
 
-              SizedBox(height: spacing),
+                      // Define o número máximo de colunas baseado na largura da tela
+                      int maxColumns = maxWidth > 1300
+                          ? 5
+                          : maxWidth > 1200
+                          ? 4
+                          : maxWidth > 800
+                          ? 3
+                          : maxWidth > 500
+                          ? 2
+                          : 1;
 
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.start,
-                alignment: WrapAlignment.spaceBetween,
-                runAlignment: WrapAlignment.spaceBetween,
-                spacing: 8.0,
-                runSpacing: 8.0,
-                children: cards,
-              ),
+                      // Número de colunas não pode ser maior que a quantidade de cards
+                      int columns = cards.length < maxColumns
+                          ? cards.length
+                          : maxColumns;
 
-              SizedBox(height: spacing),
+                      double totalSpacing = spacing * (columns - 1);
+                      double cardWidth = (maxWidth - totalSpacing) / columns;
 
-              Column(
-                children: infoCard
-                    .map(
-                      (card) => Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: card,
-                      ),
-                    )
-                    .toList(),
-              ),
-
-              SizedBox(height: spacing),
-
-              Column(
-                children: [
-                  FilterSearch(
-                    categories: ["Bebida", "Grãos", "Café"],
-                    onChanged: (search, category) {
-                      print("Filtro: $search / $category");
+                      return Wrap(
+                        spacing: spacing,
+                        runSpacing: spacing,
+                        children: cards
+                            .map(
+                              (card) =>
+                                  SizedBox(width: cardWidth, child: card),
+                            )
+                            .toList(),
+                      );
                     },
+                  ),
+
+        
+                  SizedBox(height: spacing),
+        
+                  Column(
+                    children: infoCard
+                        .map(
+                          (card) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: card,
+                          ),
+                        )
+                        .toList(),
+                  ),
+        
+                  SizedBox(height: spacing),
+        
+                  Column(
+                    children: [
+                      FilterSearch(
+                        categories: ["Bebida", "Grãos", "Café"],
+                        onChanged: (search, category) {
+                          print("Filtro: $search / $category");
+                        },
+                      ),
+                    ],
+                  ),
+        
+                  SizedBox(height: spacing),
+        
+                  // Lista de produtos
+                  Column(
+                    children: products.map((product) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 4.0,
+                        ),
+                        child: SizedBox(width: double.infinity, child: product),
+                      );
+                    }).toList(),
                   ),
                 ],
               ),
-
-              SizedBox(height: spacing),
-
-              // Lista de produtos
-              Column(
-                children: products.map((product) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8.0,
-                      horizontal: 4.0,
-                    ),
-                    child: SizedBox(width: double.infinity, child: product),
-                  );
-                }).toList(),
-              ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
