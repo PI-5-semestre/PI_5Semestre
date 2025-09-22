@@ -117,8 +117,11 @@ class FamilyPage extends StatelessWidget {
           width: 1300,
           child: Padding(
             padding: screenWidth > 800
-                ? const EdgeInsets.only(left: 16, right: 16, top: 16)
-                : EdgeInsets.only(left: 16, right: 16), // ou outro padding para telas menores
+                ? const EdgeInsets.only(left: 16, right: 16, top: 50)
+                : EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                  ), // ou outro padding para telas menores
             child: ListView(
               children: [
                 Column(
@@ -135,18 +138,41 @@ class FamilyPage extends StatelessWidget {
 
                     SizedBox(height: spacing),
 
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Wrap(
-                            alignment: WrapAlignment.center,
-                            spacing: 16.0,
-                            runSpacing: 16.0,
-                            children: cards,
-                          ),
-                        ),
-                      ],
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        double maxWidth = constraints.maxWidth;
+                        double spacing = 16;
+
+                        // Define o número máximo de colunas baseado na largura da tela
+                        int maxColumns = maxWidth > 1300
+                            ? 5
+                            : maxWidth > 1200
+                            ? 4
+                            : maxWidth > 800
+                            ? 3
+                            : maxWidth > 500
+                            ? 2
+                            : 1;
+
+                        // Número de colunas não pode ser maior que a quantidade de cards
+                        int columns = cards.length < maxColumns
+                            ? cards.length
+                            : maxColumns;
+
+                        double totalSpacing = spacing * (columns - 1);
+                        double cardWidth = (maxWidth - totalSpacing) / columns;
+
+                        return Wrap(
+                          spacing: spacing,
+                          runSpacing: spacing,
+                          children: cards
+                              .map(
+                                (card) =>
+                                    SizedBox(width: cardWidth, child: card),
+                              )
+                              .toList(),
+                        );
+                      },
                     ),
 
                     SizedBox(height: spacing),
