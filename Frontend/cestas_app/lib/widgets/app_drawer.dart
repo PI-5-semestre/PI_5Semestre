@@ -152,6 +152,23 @@ class AppDrawer extends StatelessWidget {
                       Navigator.pushNamed(context, '/visits');
                     },
                   ),
+                  ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        FontAwesomeIcons.circleUser,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    title: const Text('Tela Login'),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/login');
+                    },
+                  ),
                 ],
               ),
             ),

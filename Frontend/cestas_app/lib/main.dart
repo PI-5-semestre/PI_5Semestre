@@ -2,7 +2,11 @@ import 'package:cestas_app/pages/delivery/delivery_page.dart';
 import 'package:cestas_app/pages/delivery/new_delivery_page.dart';
 import 'package:cestas_app/pages/family/family_page.dart';
 import 'package:cestas_app/pages/family/new_family_page.dart';
+import 'package:cestas_app/pages/forgot_password_page.dart';
 import 'package:cestas_app/pages/home_page.dart';
+import 'package:cestas_app/pages/login_page.dart';
+import 'package:cestas_app/pages/new_password_page.dart';
+import 'package:cestas_app/pages/register_page.dart';
 import 'package:cestas_app/pages/visits_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -61,6 +65,10 @@ class App extends StatelessWidget {
         '/delivery/new_delivery': (context) => NewDeliveryPage(),
         '/visits': (context) => VisitsPage(),
         '/basket': (context) => BasketPage(),
+        '/login': (context) => LoginPage(),
+        '/register': (context) => RegisterPage(),
+        '/forgot_password': (context) => ForgotPasswordPage(),
+        '/new_password': (context) => NewPasswordPage(),
       },
     );
   }

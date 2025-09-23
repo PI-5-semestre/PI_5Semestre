@@ -1,6 +1,10 @@
 import 'package:cesta_web/src/views/family/family_page.dart';
 import 'package:cesta_web/src/views/family/new_family_page.dart';
+import 'package:cesta_web/src/views/forgot_password_page.dart';
 import 'package:cesta_web/src/views/home_page.dart';
+import 'package:cesta_web/src/views/login_page.dart';
+import 'package:cesta_web/src/views/new_password_page.dart';
+import 'package:cesta_web/src/views/register_page.dart';
 import 'package:cesta_web/src/views/stock_page.dart';
 import 'package:cesta_web/src/views/visits_page.dart';
 import 'package:cesta_web/src/widgets/app_drawer.dart';
@@ -36,24 +40,23 @@ class App extends StatelessWidget {
         highlightColor: Colors.transparent,
       ),
       builder: (context, child) {
-        return ScrollConfiguration(
-          behavior: MyWebScrollBehavior(),
-          child: Container(
-            color: const Color(0xFFF7F9FA),
-            child: SafeArea(child: child!),
-          ),
+        return Container(
+          color: const Color(0xFFF7F9FA),
+          child: SafeArea(child: child!),
         );
       },
       initialRoute: '/',
       routes: {
         '/': (context) => const ResponsiveScaffold(child: HomePage()),
-        '/dasboard': (context) =>
-            const ResponsiveScaffold(child: PlaceholderPage(title: 'Dashboard')),
+        '/dasboard': (context) => const ResponsiveScaffold(child: HomePage()),
         '/family': (context) => const ResponsiveScaffold(child: FamilyPage()),
-        '/family/new_family': (context) =>const ResponsiveScaffold(child: NewFamilyPage()),
-        '/visits': (context) =>const ResponsiveScaffold(child: VisitsPage()),
+        '/family/new_family': (context) => const ResponsiveScaffold(child: NewFamilyPage()),
+        '/visits': (context) => const ResponsiveScaffold(child: VisitsPage()),
         '/stock': (context) => const ResponsiveScaffold(child: StockPage()),
-
+        '/login': (context) => LoginPage(),
+        '/register': (context) => RegisterPage(),
+        '/forgot_password': (context) => ForgotPasswordPage(),
+        '/new_password': (context) => NewPasswordPage(),
       },
     );
   }
@@ -82,34 +85,6 @@ class ResponsiveScaffold extends StatelessWidget {
             ),
           Expanded(child: child),
         ],
-      ),
-    );
-  }
-}
-
-// Placeholder para Dashboard
-class PlaceholderPage extends StatelessWidget {
-  final String title;
-  const PlaceholderPage({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Text(title, style: Theme.of(context).textTheme.headlineLarge));
-  }
-}
-
-// Comportamento global de scroll para Web
-class MyWebScrollBehavior extends MaterialScrollBehavior {
-  @override
-  Widget buildScrollbar(
-    BuildContext context,
-    Widget child,
-    ScrollableDetails details,
-  ) {
-    return Scrollbar(
-      child: Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: child,
       ),
     );
   }
