@@ -1,3 +1,5 @@
+import 'package:cesta_web/src/views/delivery/delivery_page.dart';
+import 'package:cesta_web/src/views/delivery/new_delivery_page.dart';
 import 'package:cesta_web/src/views/family/family_page.dart';
 import 'package:cesta_web/src/views/family/new_family_page.dart';
 import 'package:cesta_web/src/views/forgot_password_page.dart';
@@ -50,13 +52,17 @@ class App extends StatelessWidget {
         '/': (context) => const ResponsiveScaffold(child: HomePage()),
         '/dasboard': (context) => const ResponsiveScaffold(child: HomePage()),
         '/family': (context) => const ResponsiveScaffold(child: FamilyPage()),
-        '/family/new_family': (context) => const ResponsiveScaffold(child: NewFamilyPage()),
+        '/family/new_family': (context) =>
+            const ResponsiveScaffold(child: NewFamilyPage()),
         '/visits': (context) => const ResponsiveScaffold(child: VisitsPage()),
         '/stock': (context) => const ResponsiveScaffold(child: StockPage()),
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),
         '/forgot_password': (context) => ForgotPasswordPage(),
         '/new_password': (context) => NewPasswordPage(),
+        '/delivery': (context) => ResponsiveScaffold(child: DeliveryPage()),
+        '/delivery/new_delivery': (context) =>
+            ResponsiveScaffold(child: NewDeliveryPage()),
       },
     );
   }
