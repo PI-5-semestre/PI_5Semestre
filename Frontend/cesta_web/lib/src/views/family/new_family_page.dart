@@ -82,14 +82,15 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: 800,
-        child: Scaffold(
-          appBar: AppBar(),
-          body: Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-            child: ListView(
+    return Scaffold(
+      appBar: AppBar(),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container(
+            padding: EdgeInsets.only(left: 16, right: 16),
+            margin: EdgeInsets.only(bottom: 16),
+            width: 800,
+            child: Column(
               children: [
                 Column(
                   mainAxisSize: MainAxisSize.max,

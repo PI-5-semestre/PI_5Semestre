@@ -129,6 +129,16 @@ class AppDrawer extends StatelessWidget {
                           Navigator.pushNamed(context, '/visits');
                         },
                       ),
+                      _buildMenuItem(
+                        context,
+                        icon: FontAwesomeIcons.circleUser,
+                        iconColor: Colors.blue,
+                        iconBg: Colors.blue[100]!,
+                        title: 'Tela de Login',
+                        onTap: () {
+                          Navigator.pushNamed(context, '/login');
+                        },
+                      ),
                     ],
                   ),
                 ),

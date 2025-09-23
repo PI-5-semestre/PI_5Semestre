@@ -1,4 +1,5 @@
 import 'package:cesta_web/src/views/family/new_family_page.dart';
+import 'package:cesta_web/src/widgets/screen_size_widget.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:flutter/material.dart';
@@ -119,115 +120,100 @@ class StockPage extends StatelessWidget {
       ),
     ];
 
-    return Center(
-      child: SizedBox(
-        width: 1300,
-        child: Padding(
-          padding: screenWidth > 800
-              ? const EdgeInsets.only(left: 16, right: 16, top: 50)
-              : EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                ), // ou outro padding para telas menores
-          child: ListView(
+    return ScreenSizeWidget(
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(child: _buildCardHeader()),
-                      const SizedBox(width: 16),
-                      _buildButton(context),
-                    ],
+              Expanded(child: _buildCardHeader()),
+              const SizedBox(width: 16),
+              _buildButton(context),
+            ],
+          ),
+      
+          SizedBox(height: spacing),
+      
+          LayoutBuilder(
+            builder: (context, constraints) {
+              double maxWidth = constraints.maxWidth;
+              double spacing = 16;
+            
+              // Define o número máximo de colunas baseado na largura da tela
+              int maxColumns = maxWidth > 1300
+                  ? 5
+                  : maxWidth > 1200
+                  ? 4
+                  : maxWidth > 800
+                  ? 3
+                  : maxWidth > 500
+                  ? 2
+                  : 1;
+            
+              // Número de colunas não pode ser maior que a quantidade de cards
+              int columns = cards.length < maxColumns
+                  ? cards.length
+                  : maxColumns;
+            
+              double totalSpacing = spacing * (columns - 1);
+              double cardWidth = (maxWidth - totalSpacing) / columns;
+            
+              return Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                children: cards
+                    .map(
+                      (card) =>
+                          SizedBox(width: cardWidth, child: card),
+                    )
+                    .toList(),
+              );
+            },
+          ),
+            
+      
+          SizedBox(height: spacing),
+      
+          Column(
+            children: infoCard
+                .map(
+                  (card) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: card,
                   ),
-        
-                  SizedBox(height: spacing),
-        
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      double maxWidth = constraints.maxWidth;
-                      double spacing = 16;
-
-                      // Define o número máximo de colunas baseado na largura da tela
-                      int maxColumns = maxWidth > 1300
-                          ? 5
-                          : maxWidth > 1200
-                          ? 4
-                          : maxWidth > 800
-                          ? 3
-                          : maxWidth > 500
-                          ? 2
-                          : 1;
-
-                      // Número de colunas não pode ser maior que a quantidade de cards
-                      int columns = cards.length < maxColumns
-                          ? cards.length
-                          : maxColumns;
-
-                      double totalSpacing = spacing * (columns - 1);
-                      double cardWidth = (maxWidth - totalSpacing) / columns;
-
-                      return Wrap(
-                        spacing: spacing,
-                        runSpacing: spacing,
-                        children: cards
-                            .map(
-                              (card) =>
-                                  SizedBox(width: cardWidth, child: card),
-                            )
-                            .toList(),
-                      );
-                    },
-                  ),
-
-        
-                  SizedBox(height: spacing),
-        
-                  Column(
-                    children: infoCard
-                        .map(
-                          (card) => Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: card,
-                          ),
-                        )
-                        .toList(),
-                  ),
-        
-                  SizedBox(height: spacing),
-        
-                  Column(
-                    children: [
-                      FilterSearch(
-                        categories: ["Bebida", "Grãos", "Café"],
-                        onChanged: (search, category) {
-                          print("Filtro: $search / $category");
-                        },
-                      ),
-                    ],
-                  ),
-        
-                  SizedBox(height: spacing),
-        
-                  // Lista de produtos
-                  Column(
-                    children: products.map((product) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8.0,
-                          horizontal: 4.0,
-                        ),
-                        child: SizedBox(width: double.infinity, child: product),
-                      );
-                    }).toList(),
-                  ),
-                ],
+                )
+                .toList(),
+          ),
+      
+          SizedBox(height: spacing),
+      
+          Column(
+            children: [
+              FilterSearch(
+                categories: ["Bebida", "Grãos", "Café"],
+                onChanged: (search, category) {
+                  print("Filtro: $search / $category");
+                },
               ),
             ],
           ),
-        ),
+      
+          SizedBox(height: spacing),
+      
+          // Lista de produtos
+          Column(
+            children: products.map((product) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8.0,
+                  horizontal: 4.0,
+                ),
+                child: SizedBox(width: double.infinity, child: product),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
