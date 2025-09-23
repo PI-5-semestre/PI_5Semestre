@@ -1,3 +1,4 @@
+import 'package:cesta_web/src/widgets/screen_size_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:core/widgets/card_info.dart';
@@ -195,76 +196,68 @@ class HomePage extends StatelessWidget {
       ),
     ];
 
-    return Center(
-      child: Container(
-        width: 1300,
-        child: Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.all(16),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...startMessage.map(
-                    (msg) => Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Center(child: msg),
-                    ),
-                  ),
-
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      double maxWidth = constraints.maxWidth;
-                      double spacing = 16;
-
-                      // Define o número máximo de colunas baseado na largura da tela
-                      int maxColumns = maxWidth > 1300
-                          ? 5
-                          : maxWidth > 1200
-                          ? 4
-                          : maxWidth > 800
-                          ? 3
-                          : maxWidth > 500
-                          ? 2
-                          : 1;
-
-                      // Número de colunas não pode ser maior que a quantidade de cards
-                      int columns = cards.length < maxColumns
-                          ? cards.length
-                          : maxColumns;
-
-                      double totalSpacing = spacing * (columns - 1);
-                      double cardWidth = (maxWidth - totalSpacing) / columns;
-
-                      return Wrap(
-                        spacing: spacing,
-                        runSpacing: spacing,
-                        children: cards
-                            .map(
-                              (card) =>
-                                  SizedBox(width: cardWidth, child: card),
-                            )
-                            .toList(),
-                      );
-                    },
-                  ),
-        
-                  const SizedBox(height: 16),
-        
-                  Column(
-                    children: infoCard
-                        .map(
-                          (card) => Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: card,
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ],
+    return Scaffold(
+      body: ScreenSizeWidget(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...startMessage.map(
+              (msg) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Center(child: msg),
               ),
             ),
-          ),
+              
+            LayoutBuilder(
+              builder: (context, constraints) {
+                double maxWidth = constraints.maxWidth;
+                double spacing = 16;
+              
+                // Define o número máximo de colunas baseado na largura da tela
+                int maxColumns = maxWidth > 1300
+                    ? 5
+                    : maxWidth > 1200
+                    ? 4
+                    : maxWidth > 800
+                    ? 3
+                    : maxWidth > 500
+                    ? 2
+                    : 1;
+              
+                // Número de colunas não pode ser maior que a quantidade de cards
+                int columns = cards.length < maxColumns
+                    ? cards.length
+                    : maxColumns;
+              
+                double totalSpacing = spacing * (columns - 1);
+                double cardWidth = (maxWidth - totalSpacing) / columns;
+              
+                return Wrap(
+                  spacing: spacing,
+                  runSpacing: spacing,
+                  children: cards
+                      .map(
+                        (card) =>
+                            SizedBox(width: cardWidth, child: card),
+                      )
+                      .toList(),
+                );
+              },
+            ),
+              
+            const SizedBox(height: 16),
+              
+            Column(
+              children: infoCard
+                  .map(
+                    (card) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: card,
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
         ),
       ),
     );
