@@ -10,6 +10,10 @@ class FamilyCard extends StatelessWidget {
   final String observations;
   final String status; // ativo | pendente
   final String deliveryStatus; // recebendo | aguardando
+  final bool? selected;
+  final ValueChanged<bool?>? onSelected;
+
+
 
   const FamilyCard({
     super.key,
@@ -22,6 +26,8 @@ class FamilyCard extends StatelessWidget {
     required this.observations,
     required this.status,
     required this.deliveryStatus,
+    this.selected,
+    this.onSelected,
   });
 
   Color _getStatusColor(String status) {
@@ -63,30 +69,39 @@ class FamilyCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  // ocupa o máximo disponível
-                  child: Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+                  child: Row(
+                    children: [
+                      if(selected != null && onSelected != null)
+                        Checkbox(
+                          value: selected,
+                          onChanged: onSelected,
+                        )else
+                          const SizedBox.shrink(),
+                      Expanded(
+                        child: Text(
+                          name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 8),
                 Wrap(
                   spacing: 6,
-                  runSpacing: -6, // deixa mais compacto na vertical se quebrar
+                  runSpacing: -6,
                   children: [
                     _buildChip(status, _getStatusColor(status)),
-                    _buildChip(
-                      deliveryStatus,
-                      _getDeliveryColor(deliveryStatus),
-                    ),
+                    _buildChip(deliveryStatus, _getDeliveryColor(deliveryStatus)),
                   ],
                 ),
               ],
             ),
+
             const SizedBox(height: 8),
 
             // 🔹 Linha com telefone, membros, renda e cpf
