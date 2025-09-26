@@ -10,8 +10,10 @@ class FamilyCard extends StatelessWidget {
   final String observations;
   final String status; // ativo | pendente
   final String deliveryStatus; // recebendo | aguardando
+  final String recommended;
   final bool? selected;
   final ValueChanged<bool?>? onSelected;
+  
 
 
 
@@ -26,6 +28,7 @@ class FamilyCard extends StatelessWidget {
     required this.observations,
     required this.status,
     required this.deliveryStatus,
+    required this.recommended,
     this.selected,
     this.onSelected,
   });
@@ -47,6 +50,19 @@ class FamilyCard extends StatelessWidget {
         return Color(0xFF193CB8);
       case "aguardando":
         return Color(0xFF6E11B0);
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Color _getBasketColor(String recommended) {
+    switch (recommended) {
+      case "Recomendado Pequena":
+        return Colors.green;
+      case "Recomendado Média":
+        return Colors.orange;
+      case "Recomendado Grande":
+        return Colors.blue;  
       default:
         return Colors.grey;
     }
@@ -91,19 +107,21 @@ class FamilyCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: -6,
-                  children: [
-                    _buildChip(status, _getStatusColor(status)),
-                    _buildChip(deliveryStatus, _getDeliveryColor(deliveryStatus)),
-                  ],
-                ),
+                //mudei aqui
               ],
             ),
 
             const SizedBox(height: 8),
-
+            Wrap(
+              spacing: 6,
+              runSpacing: -6,
+              children: [
+                _buildChip(recommended, _getBasketColor(recommended)),
+                _buildChip(status, _getStatusColor(status)),
+                _buildChip(deliveryStatus, _getDeliveryColor(deliveryStatus)),                
+              ],
+            ),
+            const SizedBox(height: 8),
             // 🔹 Linha com telefone, membros, renda e cpf
             Wrap(
               spacing: 16,
@@ -125,12 +143,17 @@ class FamilyCard extends StatelessWidget {
                     Text("$members pessoas"),
                   ],
                 ),
-                Text("Renda: R\$ ${income.toStringAsFixed(2)}"),
-                Text("CPF: $cpf"),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.attach_money, size: 16,),
+                    Text("Renda: R\$ ${income.toStringAsFixed(2)}"),
+                    Text("CPF: $cpf"),
+                  ],
+                ),
               ],
             ),
             const SizedBox(height: 8),
-
             // 🔹 Endereço
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,7 +164,6 @@ class FamilyCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-
             // 🔹 Observações Color(0xFFFBF9FA),
             Container(
               decoration: BoxDecoration(

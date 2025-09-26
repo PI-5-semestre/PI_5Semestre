@@ -1,3 +1,4 @@
+import 'package:cestas_app/pages/basket/basket_list_page.dart';
 import 'package:cestas_app/pages/family/new_family_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cestas_app/widgets/app_drawer.dart';
@@ -19,6 +20,15 @@ class _BasketPageState extends State<BasketPage> {
     "João Carlos Santos": false,
   };
 
+  final Map<String, double> familyIncome = {
+    "Maria da Silva Santos": 700.00,
+    "Ana Oliveira": 1200.00,
+    "João Carlos Santos": 950.00,
+  };
+
+  final List<String> basketSizes = ['Pequena', 'Média', 'Grande'];
+  final Map<String, String> basketSizeByFamily = {};
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -39,8 +49,6 @@ class _BasketPageState extends State<BasketPage> {
                   children: [
                     _buildCardHeader(),
                     const SizedBox(height: 16),
-                    _buildButton(context),
-                    const SizedBox(height: 16),
                   ],
                 ),
                 SizedBox(height: spacing),
@@ -54,43 +62,222 @@ class _BasketPageState extends State<BasketPage> {
                       title: "Famílias Selecionadas",
                       value: selectedCount.toString(),
                       onTap: () {
-                        
                         showModalBottomSheet(
                           context: context,
+                          isScrollControlled: true,
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.vertical(
                               top: Radius.circular(16),
                             ),
                           ),
                           builder: (ctx) {
-                            return Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Famílias Selecionadas",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                            return StatefulBuilder(
+                              builder: (ctx, setModalState) {
+                                final selected = selectedFamilies.entries
+                                    .where((e) => e.value)
+                                    .map((e) => e.key)
+                                    .toList();
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    left: 16,
+                                    right: 16,
+                                    top: 16,
+                                    bottom:
+                                        MediaQuery.of(ctx).viewInsets.bottom +
+                                        16,
+                                  ),
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxHeight:
+                                          MediaQuery.of(ctx).size.height * 0.8,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Row(
+                                          children: const [
+                                            Expanded(
+                                              child: Text(
+                                                "Famílias Selecionadas",
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Expanded(
+                                          child: selected.isEmpty
+                                              ? const Center(
+                                                  child: Text(
+                                                    "Nenhuma família selecionada.",
+                                                  ),
+                                                )
+                                              : SingleChildScrollView(
+                                                  child: Column(
+                                                    children: selected.map((
+                                                      name,
+                                                    ) {
+                                                      basketSizeByFamily
+                                                          .putIfAbsent(
+                                                            name,
+                                                            () => 'Média',
+                                                          );
+                                                      final renda =
+                                                          familyIncome[name] ??
+                                                          0.0;
+                                                      return Card(
+                                                        elevation: 2,
+                                                        margin:
+                                                            const EdgeInsets.only(
+                                                              bottom: 12,
+                                                            ),
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                10,
+                                                              ),
+                                                        ),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets.all(
+                                                                12,
+                                                              ),
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                name,
+                                                                style: const TextStyle(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                ),
+                                                              ),
+                                                              const SizedBox(
+                                                                height: 4,
+                                                              ),
+                                                              Text(
+                                                                "Renda: R\$ ${renda.toStringAsFixed(2)}",
+                                                                style: const TextStyle(
+                                                                  color: Colors
+                                                                      .black54,
+                                                                ),
+                                                              ),
+                                                              const SizedBox(
+                                                                height: 12,
+                                                              ),
+                                                              const Text(
+                                                                "Tamanho da cesta",
+                                                                style: TextStyle(
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                              const SizedBox(
+                                                                height: 6,
+                                                              ),
+                                                              DropdownButtonFormField<
+                                                                String
+                                                              >(
+                                                                value:
+                                                                    basketSizeByFamily[name],
+                                                                isExpanded:
+                                                                    true,
+                                                                decoration: const InputDecoration(
+                                                                  border:
+                                                                      OutlineInputBorder(),
+                                                                  contentPadding:
+                                                                      EdgeInsets.symmetric(
+                                                                        horizontal:
+                                                                            12,
+                                                                        vertical:
+                                                                            10,
+                                                                      ),
+                                                                ),
+                                                                items: basketSizes
+                                                                    .map(
+                                                                      (
+                                                                        s,
+                                                                      ) => DropdownMenuItem(
+                                                                        value:
+                                                                            s,
+                                                                        child:
+                                                                            Text(
+                                                                              s,
+                                                                            ),
+                                                                      ),
+                                                                    )
+                                                                    .toList(),
+                                                                onChanged: (v) {
+                                                                  if (v == null)
+                                                                    return;
+                                                                  setModalState(
+                                                                    () {
+                                                                      basketSizeByFamily[name] =
+                                                                          v;
+                                                                    },
+                                                                  );
+                                                                },
+                                                              ),
+                                                              _buildButton(context, name),
+                                                              const SizedBox(height: 16),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: ElevatedButton.icon(
+                                                onPressed: selected.isEmpty
+                                                    ? null
+                                                    : () {
+                                                        Navigator.pop(ctx);
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text(
+                                                              'Cestas salvas para ${selected.length} família(s).',
+                                                            ),
+                                                          ),
+                                                        );
+                                                        setState(
+                                                          () {},
+                                                        ); 
+                                                      },
+                                                icon: const Icon(Icons.save),
+                                                label: const Text(
+                                                  "Salvar cestas",
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        vertical: 12,
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
-                                  ...selectedFamilies.entries
-                                      .where((e) => e.value)
-                                      .map(
-                                        (e) => ListTile(
-                                          leading: const Icon(
-                                            Icons.check_circle_outline,
-                                            color: Colors.green,
-                                          ),
-                                          title: Text(e.key),
-                                        ),
-                                      ),
-                                  const SizedBox(height: 8),
-                                ],
-                              ),
+                                );
+                              },
                             );
                           },
                         );
@@ -123,29 +310,31 @@ class _BasketPageState extends State<BasketPage> {
                 ),
                 SizedBox(height: spacing),
                 ...selectedFamilies.entries.map((entry) {
-  return Column(
-    children: [
-      FamilyCard(
-        name: entry.key,
-        phone: "(19) 99999-0000",
-        members: 4,
-        income: 700,
-        cpf: "000.000.000-00",
-        address: "Rua Exemplo, 123 - Bairro Exemplo, São Paulo - SP",
-        observations: "Família em situação de vulnerabilidade.",
-        status: "ativa",
-        deliveryStatus: "aguardando",
-        selected: entry.value,
-        onSelected: (bool? v) {
-          setState(() {
-            selectedFamilies[entry.key] = v ?? false;
-          });
-        },
-      ),
-      const SizedBox(height: 12),
-    ],
-  );
-}).toList(),
+                  return Column(
+                    children: [
+                      FamilyCard(
+                        name: entry.key,
+                        phone: "(19) 99999-0000",
+                        members: 4,
+                        income: 700,
+                        cpf: "000.000.000-00",
+                        address:
+                            "Rua Exemplo, 123 - Bairro Exemplo, São Paulo - SP",
+                        observations: "Família em situação de vulnerabilidade.",
+                        status: "ativa",
+                        deliveryStatus: "aguardando",
+                        recommended: "Recomendado Pequena",
+                        selected: entry.value,
+                        onSelected: (bool? v) {
+                          setState(() {
+                            selectedFamilies[entry.key] = v ?? false;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  );
+                }).toList(),
                 const SizedBox(height: 24),
               ],
             ),
@@ -164,23 +353,39 @@ class _BasketPageState extends State<BasketPage> {
     );
   }
 
-  Widget _buildButton(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: () {
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const NewFamilyPage()));
-      },
-      icon: const Icon(Icons.settings, color: Colors.white),
-      label: const Text(
-        'Configurar Cesta',
-        style: TextStyle(color: Colors.white),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF155DFC),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-    );
-  }
+  Widget _buildButton(BuildContext context, String name){
+  return ElevatedButton.icon(
+    onPressed: () {
+      final itemControllers = <String, TextEditingController>{};
+
+      void handleSave() {
+        // Lógica ao salvar
+        for (var entry in itemControllers.entries) {
+          print('${entry.key}: ${entry.value.text}');
+        }
+
+        // Voltar para a tela anterior
+        Navigator.of(context).pop();
+      }
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => FamilyBasketEditor(
+            familyName: name,
+            itemControllers: itemControllers,
+            onSave: handleSave,
+          ),
+        ),
+      );
+    },
+    icon: const Icon(Icons.add, color: Colors.white),
+    label: const Text('Editar Cesta', style: TextStyle(color: Colors.white)),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF155DFC),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    ),
+  );
 }
+}
+
