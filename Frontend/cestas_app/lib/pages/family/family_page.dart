@@ -46,6 +46,7 @@ class FamilyPage extends StatelessWidget {
             "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
         status: "ativa",
         deliveryStatus: "recebendo",
+        recommended: "Recomendado Pequena",
       ),
       FamilyCard(
         name: "João Carlos Santos",
@@ -58,6 +59,7 @@ class FamilyPage extends StatelessWidget {
             "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
         status: "pendente",
         deliveryStatus: "aguardando",
+        recommended: "Recomendado Grande",
       ),
       FamilyCard(
         name: "Maria da Silva Santos",
@@ -70,6 +72,7 @@ class FamilyPage extends StatelessWidget {
             "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
         status: "ativa",
         deliveryStatus: "recebendo",
+        recommended: "Recomendado Média",
       ),
       FamilyCard(
         name: "João Carlos Santos",
@@ -82,6 +85,7 @@ class FamilyPage extends StatelessWidget {
             "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
         status: "pendente",
         deliveryStatus: "aguardando",
+        recommended: "Recomendado Pequena",
       ),
       FamilyCard(
         name: "Maria da Silva Santos",
@@ -94,6 +98,7 @@ class FamilyPage extends StatelessWidget {
             "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
         status: "ativa",
         deliveryStatus: "recebendo",
+        recommended: "Recomendado Grande",
       ),
       FamilyCard(
         name: "João Carlos Santos",
@@ -106,6 +111,7 @@ class FamilyPage extends StatelessWidget {
             "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
         status: "pendente",
         deliveryStatus: "aguardando",
+        recommended: "Recomendado Média",
       ),
     ];
 
@@ -127,9 +133,7 @@ class FamilyPage extends StatelessWidget {
                     _buildButton(context),
                   ],
                 ),
-
                 SizedBox(height: spacing),
-
                 Wrap(
                   crossAxisAlignment: WrapCrossAlignment.start,
                   alignment: WrapAlignment.spaceBetween,
@@ -138,9 +142,7 @@ class FamilyPage extends StatelessWidget {
                   runSpacing: 8.0,
                   children: cards,
                 ),
-
                 SizedBox(height: spacing),
-
                 // Search
                 Card(
                   color: Colors.white,
@@ -159,9 +161,7 @@ class FamilyPage extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 SizedBox(height: spacing),
-
                 // Lista de famílias
                 Column(
                   children: families.map((family) {
