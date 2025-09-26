@@ -10,7 +10,7 @@ import 'package:cestas_app/pages/register_page.dart';
 import 'package:cestas_app/pages/visits_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cestas_app/pages/stock_page.dart';
+import 'package:cestas_app/pages/stock/stock_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:cestas_app/pages/basket/basket_page.dart';
 
