@@ -7,7 +7,7 @@ import 'package:cesta_web/src/views/home_page.dart';
 import 'package:cesta_web/src/views/login_page.dart';
 import 'package:cesta_web/src/views/new_password_page.dart';
 import 'package:cesta_web/src/views/register_page.dart';
-import 'package:cesta_web/src/views/stock_page.dart';
+import 'package:cesta_web/src/views/stock/stock_page.dart';
 import 'package:cesta_web/src/views/visits_page.dart';
 import 'package:cesta_web/src/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +55,7 @@ class App extends StatelessWidget {
         '/family/new_family': (context) =>
             const ResponsiveScaffold(child: NewFamilyPage()),
         '/visits': (context) => const ResponsiveScaffold(child: VisitsPage()),
-        '/stock': (context) => const ResponsiveScaffold(child: StockPage()),
+        '/stock': (context) => ResponsiveScaffold(child: StockPage()),
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),
         '/forgot_password': (context) => ForgotPasswordPage(),
