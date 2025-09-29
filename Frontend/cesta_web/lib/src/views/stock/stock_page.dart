@@ -1,4 +1,5 @@
 import 'package:cesta_web/src/views/delivery/new_delivery_page.dart';
+import 'package:cesta_web/src/views/stock/new_stock_page.dart';
 import 'package:cesta_web/src/widgets/app_drawer.dart';
 import 'package:core/services/state/stock_provider.dart';
 import 'package:core/widgets/card_header.dart';
@@ -84,7 +85,6 @@ class _StockViewState extends State<_StockView> {
                     ),
                     const SizedBox(height: _spacing),
 
-                    // 🔎 Campo de busca
                     Card(
                       color: Colors.white,
                       shape: RoundedRectangleBorder(
@@ -240,7 +240,7 @@ class _StockViewState extends State<_StockView> {
     return ElevatedButton.icon(
       onPressed: () {
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => NewDeliveryPage()),
+          MaterialPageRoute(builder: (_) => NewStockPage()),
         );
       },
       icon: const Icon(Icons.add, color: Colors.white),
