@@ -1,0 +1,1 @@
+python manage.py LOGIN EMAIL SENHA "NOME" TYPE

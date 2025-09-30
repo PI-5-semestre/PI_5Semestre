@@ -6,10 +6,6 @@ class DeliveryProvider extends BaseProvider<List<Delivery>> {
     try {
       setLoading(true);
       notifyListeners();
-
-      print("Fetching deliveries..."); // Debug
-
-      // Simulação de delay
       await Future.delayed(Duration(seconds: 1));
 
       setData([
@@ -73,7 +69,6 @@ class DeliveryProvider extends BaseProvider<List<Delivery>> {
         ),
       ]);
 
-      print("Data set: ${data?.length ?? 0}"); // Debug
     } catch (e) {
       setError("Erro ao carregar entregas\n${e.toString()}");
       print("Erro no fetchDeliveries: $e");

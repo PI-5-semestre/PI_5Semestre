@@ -47,6 +47,7 @@ class FamilyPage extends StatelessWidget {
             "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
         status: "ativa",
         deliveryStatus: "recebendo",
+        recommended: "teste"
       ),
       FamilyCard(
         name: "João Carlos Santos",
@@ -59,6 +60,7 @@ class FamilyPage extends StatelessWidget {
             "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
         status: "pendente",
         deliveryStatus: "aguardando",
+        recommended: "teste"
       ),
       FamilyCard(
         name: "Maria da Silva Santos",
@@ -71,6 +73,7 @@ class FamilyPage extends StatelessWidget {
             "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
         status: "ativa",
         deliveryStatus: "recebendo",
+        recommended: "teste"
       ),
       FamilyCard(
         name: "João Carlos Santos",
@@ -83,6 +86,7 @@ class FamilyPage extends StatelessWidget {
             "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
         status: "pendente",
         deliveryStatus: "aguardando",
+        recommended: "teste"
       ),
       FamilyCard(
         name: "Maria da Silva Santos",
@@ -95,6 +99,7 @@ class FamilyPage extends StatelessWidget {
             "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
         status: "ativa",
         deliveryStatus: "recebendo",
+        recommended: "teste"
       ),
       FamilyCard(
         name: "João Carlos Santos",
@@ -107,6 +112,7 @@ class FamilyPage extends StatelessWidget {
             "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
         status: "pendente",
         deliveryStatus: "aguardando",
+        recommended: "teste"
       ),
     ];
 
