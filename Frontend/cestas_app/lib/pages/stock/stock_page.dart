@@ -1,21 +1,206 @@
-import 'package:cestas_app/pages/family/new_family_page.dart';
+import 'package:cestas_app/pages/stock/new_stock_page.dart';
+import 'package:cestas_app/widgets/app_drawer.dart';
+import 'package:core/services/state/stock_provider.dart';
 import 'package:core/widgets/card_header.dart';
-import 'package:core/widgets/modal/product_card.dart';
+import 'package:core/widgets/card_info.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:flutter/material.dart';
-import 'package:cestas_app/widgets/app_drawer.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:core/widgets/card_info.dart';
-import 'package:core/widgets/filter-search.dart';
+import 'package:provider/provider.dart';
 
 class StockPage extends StatelessWidget {
-  const StockPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) {
+        final provider = StockProvider();
+        provider.fetchStocks();
+        return provider;
+      },
+      child: const _StockView(),
+    );
+  }
+}
+
+class _StockView extends StatefulWidget {
+  const _StockView({super.key});
+
+  @override
+  State<_StockView> createState() => _StockViewState();
+}
+
+class _StockViewState extends State<_StockView> {
+  static const double _pagePadding = 16;
+  static const double _spacing = 16;
+
+  String selectedStatus = "Todos";
+  String searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final spacing = screenWidth < 600 ? 8.0 : 16.0;
+    final provider = Provider.of<StockProvider>(context);
+    final stocks = provider.data ?? [];
+    final counts = provider.counts.isNotEmpty
+        ? provider.counts
+        : {
+            "Produtos Ativos": 0,
+            "Estoque Baixo": 0,
+            "Estoque Alto": 0,
+            "Sem Estoque": 0,
+          };
 
+    const statusOptions = ["Todos", "Produtos Ativos", "Estoque Baixo", "Estoque Alto", "Sem Estoque"];
+
+    final filteredStocks = stocks.where((d) {
+      final matchesStatus =
+          selectedStatus == "Todos" || d.status == selectedStatus;
+      final matchesSearch =
+          d.name.toLowerCase().contains(searchQuery.toLowerCase());
+      return matchesStatus && matchesSearch;
+    }).toList();
+
+    return Scaffold(
+      appBar: AppBar(),
+      drawer: const AppDrawer(),
+      body: provider.loading
+          ? const Center(child: CircularProgressIndicator())
+          : (provider.error != null && provider.error!.isNotEmpty)
+              ? Center(child: Text(provider.error!))
+              : ListView(
+                  padding: const EdgeInsets.all(_pagePadding),
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Expanded(
+                          child: CardHeader(
+                            title: 'Controle de estoque',
+                            subtitle: 'Gerencie os produtos das cestas básicas',
+                            colors: [Color(0xFF00c64f), Color(0xFF00a73e)],
+                            icon: Icons.archive_outlined,
+                          ),
+                        ),
+                        const SizedBox(width: _spacing),
+                        _buildButton(context),
+                      ],
+                    ),
+                    const SizedBox(height: _spacing),
+                    InfoCard(
+                      title: "Estoque Atual",
+                      color: const Color(0xFF00a73e),
+                      icon: Icons.today,
+                      iconColor: Colors.white,
+                      iconBackground: Colors.white.withOpacity(0.2),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildStatCards(counts),
+                          const SizedBox(height: _spacing),
+                          Row(
+                            children: [
+                              Expanded(flex: 2, child: _buildSearchField()),
+                              const SizedBox(width: _spacing),
+                              Expanded(
+                                flex: 1,
+                                child: _buildStatusDropdown(statusOptions),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: _spacing),
+                          _buildTable(filteredStocks),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      onChanged: (value) => setState(() => searchQuery = value),
+      decoration: InputDecoration(
+        hintText: "Buscar produto...",
+        prefixIcon: const Icon(Icons.search),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildStatusDropdown(List<String> options) {
+    return DropdownButtonFormField<String>(
+      value: selectedStatus,
+      items: options
+          .map((status) => DropdownMenuItem(value: status, child: Text(status)))
+          .toList(),
+      onChanged: (value) {
+        if (value != null) setState(() => selectedStatus = value);
+      },
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildTable(List stocks) {
+    if (stocks.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32),
+          child: Text(
+            "Estoque Vazio",
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+      );
+    }
+
+    final availableHeight =
+        MediaQuery.of(context).size.height - kToolbarHeight - 350;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: availableHeight),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: constraints.maxWidth,
+              child: DataTable(
+                columnSpacing: 24,
+                headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
+                dataRowMinHeight: 48,
+                dataRowMaxHeight: 56,
+                columns: const [
+                  DataColumn(label: Text("Nome")),
+                  DataColumn(label: Text("Cestas")),
+                  DataColumn(label: Text("Estoque Mínimo")),
+                  DataColumn(label: Text("Quantidade")),
+                ],
+                rows: stocks.map((stock) {
+                  return DataRow(
+                    cells: [
+                      DataCell(Text(stock.name)),
+                      DataCell(Text(stock.cests.toString())),
+                      DataCell(Text(stock.minStock.toString())),
+                      DataCell(Text(stock.quantity.toString())),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildStatCards(Map<String, int> counts) {
     final cards = [
       StatCard(
         icon: Icons.inventory_2,
@@ -27,235 +212,62 @@ class StockPage extends StatelessWidget {
         icon: Icons.show_chart,
         colors: [Color(0xFF00c64f), Color(0xFF00a73e)],
         title: "Produtos Ativos",
-        value: "8",
+        value: counts["Produtos Ativos"].toString(),
       ),
       StatCard(
         icon: Icons.warning_amber_rounded,
         colors: [Color(0xFFecab00), Color(0xFFd69417)],
         title: "Estoque Baixo",
-        value: "1",
+        value: counts["Estoque Baixo"].toString(),
       ),
       StatCard(
         icon: Icons.error,
         colors: [Color(0xFFf82632), Color(0xFFe90012)],
         title: "Sem Estoque",
-        value: "0",
+        value: counts["Sem Estoque"].toString(),
       ),
     ];
 
-    final products = [
-      ProductCard(
-        name: "Arroz Branco",
-        category: "Grãos",
-        currentStock: 150,
-        stockPerBasket: 2,
-        possibleBaskets: 75,
-        minStock: 30,
-        unit: "kg",
-        status: "in-stock",
-      ),
-      ProductCard(
-        name: "Feijão Carioca",
-        category: "Grãos",
-        currentStock: 120,
-        stockPerBasket: 1,
-        possibleBaskets: 120,
-        minStock: 25,
-        unit: "kg",
-        status: "in-stock",
-      ),
-      ProductCard(
-        name: "Óleo de Soja",
-        category: "Óleos",
-        currentStock: 80,
-        stockPerBasket: 1,
-        possibleBaskets: 80,
-        minStock: 15,
-        unit: "l",
-        status: "in-stock",
-      ),
-      ProductCard(
-        name: "Farinha de Trigo",
-        category: "Grãos",
-        currentStock: 15,
-        stockPerBasket: 1,
-        possibleBaskets: 15,
-        minStock: 20,
-        unit: "kg",
-        status: "low-stock",
-      ),
-    ];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+        final maxColumns = maxWidth > 1300
+            ? 5
+            : maxWidth > 1200
+                ? 4
+                : maxWidth > 800
+                    ? 3
+                    : maxWidth > 500
+                        ? 2
+                        : 1;
 
-    final infoCard = [
-      InfoCard(
-        title: "Estoque Baixo",
-        color: Colors.red,
-        icon: Icons.warning_amber_rounded,
-        iconColor: Colors.white,
-        iconBackground: Colors.red[700],
-        child: Column(
-          children: [
-            ListTile(
-              leading: FaIcon(FontAwesomeIcons.boxOpen, color: Colors.red),
-              title: Text("Arroz 5kg"),
-              subtitle: Text("Mínimo: 10 unidades"),
-              trailing: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.redAccent,
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                ),
-                child: Text(
-                  "2 unidades",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            Divider(),
-            ListTile(
-              leading: FaIcon(FontAwesomeIcons.boxOpen, color: Colors.red),
-              title: Text("Feijão 1kg"),
-              subtitle: Text("Mínimo: 15 unidades"),
-              trailing: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.redAccent,
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                ),
-                child: Text(
-                  "4 unidades",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            Divider(),
-            ListTile(
-              leading: FaIcon(FontAwesomeIcons.boxOpen, color: Colors.red),
-              title: Text("Óleo de Soja"),
-              subtitle: Text("Mínimo: 8 unidades"),
-              trailing: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.redAccent,
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                ),
-                child: Text(
-                  "3 unidades",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ];
+        final columns = cards.length < maxColumns ? cards.length : maxColumns;
+        final totalSpacing = _spacing * (columns - 1);
+        final cardWidth = (maxWidth - totalSpacing) / columns;
 
-    return Scaffold(
-      appBar: AppBar(),
-      drawer: const AppDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16),
-        child: ListView(
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildCardHeader(),
-                    const SizedBox(height: 16),
-                    _buildButton(context),
-                  ],
-                ),
-
-                SizedBox(height: spacing),
-
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.start,
-                  alignment: WrapAlignment.spaceBetween,
-                  runAlignment: WrapAlignment.spaceBetween,
-                  spacing: 8.0,
-                  runSpacing: 8.0,
-                  children: cards,
-                ),
-
-                SizedBox(height: spacing),
-
-                Column(
-                  children: infoCard
-                      .map(
-                        (card) => Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: card,
-                        ),
-                      )
-                      .toList(),
-                ),
-
-                SizedBox(height: spacing),
-
-                Column(
-                  children: [
-                    FilterSearch(
-                      categories: ["Bebida", "Grãos", "Café"],
-                      onChanged: (search, category) {
-                        print("Sucesso");
-                      }
-                    ),
-                  ],
-                ),
-
-                // Lista de famílias
-                Column(
-                  children: products.map((family) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8.0,
-                        horizontal: 4.0,
-                      ), // horizontal agora
-                      child: SizedBox(width: double.infinity, child: family),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCardHeader() {
-    return CardHeader(
-      title: 'Controle de Estoque',
-      subtitle: 'Gerencie os produtos das cestas básicas',
-      colors: [Color(0xFF00c64f), Color(0xFF00a73e)],
-      icon: Icons.archive_outlined,
+        return Wrap(
+          spacing: _spacing,
+          runSpacing: _spacing,
+          children: cards
+              .map((c) => SizedBox(width: cardWidth, child: c))
+              .toList(),
+        );
+      },
     );
   }
 
   Widget _buildButton(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: () {
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const NewFamilyPage()));
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => NewStockPage()),
+        );
       },
       icon: const Icon(Icons.add, color: Colors.white),
-      label: const Text('Novo Produto', style: TextStyle(color: Colors.white)),
+      label: const Text(
+        "Adicionar produto",
+        style: TextStyle(color: Colors.white),
+      ),
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF00c64f),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
