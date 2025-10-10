@@ -1,5 +1,5 @@
-import 'package:cestas_app/pages/delivery/new_delivery_page.dart';
-import 'package:cestas_app/widgets/app_drawer.dart';
+import 'package:cestas_app/src/pages/delivery/new_delivery_page.dart';
+import 'package:cestas_app/src/widgets/app_drawer.dart';
 import 'package:core/services/state/delivery_provider.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/delivery_card.dart';
