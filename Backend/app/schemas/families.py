@@ -28,4 +28,19 @@ class FamilyResp(BaseModel):
     membership_id: int
 
 
-# TODO fazer o req
+class FamilyReq(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    owner_id: int
+    family_size: int
+    address: str
+    number: str
+    complement: Optional[str] = None
+    zipcode: str
+    district: str
+    city: str
+    state: str
+    monthly_income: Decimal
+    description: Optional[str] = None
+    situation_type: str
+    membership_id: int

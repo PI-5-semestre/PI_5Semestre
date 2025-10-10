@@ -42,8 +42,10 @@ class Account(BaseModel):
         Enum(AccountType), nullable=False, default=AccountType.BENEFITED
     )
     family_id: Mapped[int] = mapped_column(ForeignKey("families.id"), nullable=True)
-
-    family: Mapped["Family"] = relationship(
+    
+    institution_id: Mapped[int] = mapped_column(ForeignKey("institutions.id"), nullable=True)
+    
+    family: Mapped["Family"]     = relationship(
         "Family", back_populates="members", foreign_keys=[family_id], primaryjoin="Account.family_id == Family.id", uselist=False
     )
     owned_family: Mapped["Family"] = relationship(
@@ -52,8 +54,19 @@ class Account(BaseModel):
     profile: Mapped["Profile"] = relationship(
         "Profile", back_populates="account", uselist=False
     )
-    institution: Mapped["Institution"] = relationship(
-        "Institution", back_populates="owner", uselist=False
+    
+    owned_institution: Mapped["Institution"] = relationship(
+        "Institution", 
+        back_populates="owner", 
+        uselist=False, 
+        foreign_keys=[institution_id],
+        primaryjoin="Account.id == foreign(Institution.owner_id)"
+    )
+
+    institution_membership: Mapped[Optional["Institution"]] = relationship(
+        "Institution",
+        back_populates="members",
+        foreign_keys=[institution_id]
     )
 
     __table_args__ = (Index("accounts_login_idx", login),)
