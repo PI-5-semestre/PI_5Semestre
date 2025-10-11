@@ -8,7 +8,12 @@ import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class DeliveryPage extends StatelessWidget {
+class DeliveryPage extends StatefulWidget {
+  @override
+  State<DeliveryPage> createState() => _DeliveryPageState();
+}
+
+class _DeliveryPageState extends State<DeliveryPage> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -67,7 +72,7 @@ class _DeliveryViewState extends State<_DeliveryView> {
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(),
+      //appBar: AppBar(),
       drawer: const AppDrawer(),
       body: provider.loading
           ? const Center(child: CircularProgressIndicator())
@@ -268,7 +273,7 @@ class _DeliveryViewState extends State<_DeliveryView> {
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
-              width: constraints.maxWidth, // força a largura do InfoCard
+              width: constraints.maxWidth,
               child: DataTable(
                 columnSpacing: 24,
                 headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
