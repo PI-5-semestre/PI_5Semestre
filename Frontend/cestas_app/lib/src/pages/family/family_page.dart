@@ -1,12 +1,12 @@
-import 'package:cestas_app/widgets/app_drawer.dart';
+import 'package:cestas_app/src/pages/family/new_family_page.dart';
+import 'package:cestas_app/src/widgets/app_drawer.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/statCard.dart';
-import 'package:core/widgets/visits_card.dart';
+import 'package:core/widgets2/family_card.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class VisitsPage extends StatelessWidget {
-  const VisitsPage({super.key});
+class FamilyPage extends StatelessWidget {
+  const FamilyPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,57 +15,103 @@ class VisitsPage extends StatelessWidget {
 
     final cards = [
       StatCard(
-        icon: FontAwesomeIcons.clock,
-        colors: [Color(0xFFF0B100), Color(0xFFD08700)],
-        title: "Pendentes",
+        icon: Icons.group,
+        colors: [Color(0xFF00C951), Color(0xFF00A63E)],
+        title: "Famílias Ativas",
         value: "2",
       ),
       StatCard(
-        icon: FontAwesomeIcons.calendar,
-        colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
-        title: "Agendadas",
-        value: "0",
+        icon: Icons.event,
+        colors: [Color(0xFFF0B100), Color(0xFFD08700)],
+        title: "Aguardando Visita",
+        value: "1",
       ),
       StatCard(
-        icon: FontAwesomeIcons.circleCheck,
-        colors: [Color(0xFF00C951), Color(0xFF00A63E)],
-        title: "Realizadas",
-        value: "0",
+        icon: Icons.groups,
+        colors: [Color(0xFFAD46FF), Color(0xFF9810FA)],
+        title: "Total Cadastradas",
+        value: "3",
       ),
     ];
 
     final families = [
-      VisitsCard(
+      FamilyCardModal(
         name: "Maria da Silva Santos",
         phone: "(11) 99999-0001",
+        members: 4,
+        income: 800,
+        cpf: "123.456.789-00",
         address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
         observations:
             "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
-        status: "realizada",
+        status: "ativa",
+        deliveryStatus: "recebendo",
+        recommended: "Pequena",
       ),
-      VisitsCard(
+      FamilyCardModal(
         name: "João Carlos Santos",
         phone: "(11) 99999-0002",
+        members: 3,
+        income: 600,
+        cpf: "987.654.321-00",
         address: "Av. Central, 456 - Centro, São Paulo - SP",
         observations:
             "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
         status: "pendente",
+        deliveryStatus: "aguardando",
+        recommended: "Grande",
       ),
-      VisitsCard(
+      FamilyCardModal(
+        name: "Maria da Silva Santos",
+        phone: "(11) 99999-0001",
+        members: 4,
+        income: 800,
+        cpf: "123.456.789-00",
+        address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
+        observations:
+            "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
+        status: "ativa",
+        deliveryStatus: "recebendo",
+        recommended: "Média",
+      ),
+      FamilyCardModal(
         name: "João Carlos Santos",
         phone: "(11) 99999-0002",
+        members: 3,
+        income: 600,
+        cpf: "987.654.321-00",
         address: "Av. Central, 456 - Centro, São Paulo - SP",
         observations:
             "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
-        status: "agendada",
+        status: "pendente",
+        deliveryStatus: "aguardando",
+        recommended: "Pequena",
       ),
-      VisitsCard(
+      FamilyCardModal(
+        name: "Maria da Silva Santos",
+        phone: "(11) 99999-0001",
+        members: 4,
+        income: 800,
+        cpf: "123.456.789-00",
+        address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
+        observations:
+            "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
+        status: "ativa",
+        deliveryStatus: "recebendo",
+        recommended: "Grande",
+      ),
+      FamilyCardModal(
         name: "João Carlos Santos",
         phone: "(11) 99999-0002",
+        members: 3,
+        income: 600,
+        cpf: "987.654.321-00",
         address: "Av. Central, 456 - Centro, São Paulo - SP",
         observations:
             "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
-        status: "cancelada",
+        status: "pendente",
+        deliveryStatus: "aguardando",
+        recommended: "Média",
       ),
     ];
 
@@ -84,11 +130,10 @@ class VisitsPage extends StatelessWidget {
                   children: [
                     _buildCardHeader(),
                     const SizedBox(height: 16),
+                    _buildButton(context),
                   ],
                 ),
-
                 SizedBox(height: spacing),
-
                 Wrap(
                   crossAxisAlignment: WrapCrossAlignment.start,
                   alignment: WrapAlignment.spaceBetween,
@@ -97,9 +142,7 @@ class VisitsPage extends StatelessWidget {
                   runSpacing: 8.0,
                   children: cards,
                 ),
-
                 SizedBox(height: spacing),
-
                 // Search
                 Card(
                   color: Colors.white,
@@ -118,9 +161,7 @@ class VisitsPage extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 SizedBox(height: spacing),
-
                 // Lista de famílias
                 Column(
                   children: families.map((family) {
@@ -143,10 +184,27 @@ class VisitsPage extends StatelessWidget {
 
   Widget _buildCardHeader() {
     return CardHeader(
-      title: 'Gestão de Visitas',
-      subtitle: 'Agende e gerencie as visitas às famílias cadastradas',
+      title: 'Famílias Cadastradas',
+      subtitle: 'Gerencie as famílias beneficiárias',
       colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
-      icon: FontAwesomeIcons.calendar,
+      icon: Icons.group,
+    );
+  }
+
+  Widget _buildButton(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const NewFamilyPage()));
+      },
+      icon: const Icon(Icons.add, color: Colors.white),
+      label: const Text('Nova Família', style: TextStyle(color: Colors.white)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF155DFC),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
     );
   }
 }

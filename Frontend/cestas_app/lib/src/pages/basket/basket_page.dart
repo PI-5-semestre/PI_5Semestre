@@ -1,7 +1,7 @@
-import 'package:cestas_app/pages/basket/basket_list_page.dart';
-import 'package:cestas_app/pages/family/new_family_page.dart';
+import 'package:cestas_app/src/pages/basket/basket_list_page.dart';
+import 'package:cestas_app/src/pages/family/new_family_page.dart';
 import 'package:flutter/material.dart';
-import 'package:cestas_app/widgets/app_drawer.dart';
+import 'package:cestas_app/src/widgets/app_drawer.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:core/widgets/family_card.dart';
 import 'package:core/widgets/card_header.dart';

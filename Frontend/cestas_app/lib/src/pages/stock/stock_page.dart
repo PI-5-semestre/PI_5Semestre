@@ -1,5 +1,5 @@
-import 'package:cestas_app/pages/stock/new_stock_page.dart';
-import 'package:cestas_app/widgets/app_drawer.dart';
+import 'package:cestas_app/src/pages/stock/new_stock_page.dart';
+import 'package:cestas_app/src/widgets/app_drawer.dart';
 import 'package:core/services/state/stock_provider.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/card_info.dart';
