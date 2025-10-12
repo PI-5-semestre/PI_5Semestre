@@ -16,6 +16,7 @@ export 'widgets/input_widget.dart';
 // Widgets 2.0
 
 export 'widgets2/family_card.dart';
+export 'widgets2/segmented_card_switcher.dart';
 
 
 // UI
