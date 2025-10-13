@@ -105,11 +105,11 @@ class AppDrawer extends StatelessWidget {
                       ),
                       _buildMenuItem(
                         context,
-                        icon: Icons.shopping_cart,
+                        icon: Icons.shopping_basket,
                         iconColor: Colors.orange,
                         iconBg: Colors.orange[100]!,
                         title: 'Cestas',
-                        onTap: () {},
+                        onTap: () => Navigator.pushNamed(context, "/basket"),
                       ),
                       _buildMenuItem(
                         context,
