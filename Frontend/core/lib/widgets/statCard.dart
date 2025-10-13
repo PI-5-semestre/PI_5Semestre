@@ -18,15 +18,10 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // double screenWidth = MediaQuery.of(context).size.width;
-    // bool isSmallScreen = screenWidth > 800;
-
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        color: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 4,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
