@@ -1,6 +1,6 @@
-import 'package:cestas_app/src/pages/basket/basket_list_page.dart';
+import 'package:cesta_web/src/views/basket/basket_list_page.dart';
 import 'package:flutter/material.dart';
-import 'package:cestas_app/src/widgets/app_drawer.dart';
+import 'package:cesta_web/src/widgets/app_drawer.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:core/widgets/family_card.dart';
 import 'package:core/widgets/card_header.dart';

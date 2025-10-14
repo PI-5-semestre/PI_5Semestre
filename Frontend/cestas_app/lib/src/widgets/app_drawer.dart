@@ -109,7 +109,7 @@ class AppDrawer extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
-                        Icons.shopping_cart,
+                        Icons.shopping_basket,
                         color: Colors.orange,
                       ),
                     ),
