@@ -35,7 +35,10 @@ class _FamilyBasketEditorState extends State<FamilyBasketEditor> {
   void initState() {
     super.initState();
     for (var item in defaultItems) {
-      widget.itemControllers.putIfAbsent(item, () => TextEditingController(text: '1'));
+      widget.itemControllers.putIfAbsent(
+        item,
+        () => TextEditingController(text: '1'),
+      );
     }
   }
 
@@ -55,12 +58,10 @@ class _FamilyBasketEditorState extends State<FamilyBasketEditor> {
           children: [
             _buildCardHeader(),
             const SizedBox(height: 16),
+
             Text(
               "Cesta para ${widget.familyName}",
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             ...defaultItems.map((item) {
@@ -68,10 +69,7 @@ class _FamilyBasketEditorState extends State<FamilyBasketEditor> {
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(
                   children: [
-                    Expanded(
-                      flex: 2,
-                      child: Text(item),
-                    ),
+                    Expanded(flex: 2, child: Text(item)),
                     const SizedBox(width: 8),
                     Expanded(
                       flex: 1,
@@ -98,8 +96,13 @@ class _FamilyBasketEditorState extends State<FamilyBasketEditor> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF155DFC),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
           ],
@@ -113,7 +116,7 @@ class _FamilyBasketEditorState extends State<FamilyBasketEditor> {
       title: 'Edição Cesta',
       subtitle: 'Faça edição de itens da cesta',
       colors: [const Color(0xFF2B7FFF), const Color(0xFF155DFC)],
-      icon: FontAwesomeIcons.heart,
+      icon: FontAwesomeIcons.pen,
     );
   }
 }
