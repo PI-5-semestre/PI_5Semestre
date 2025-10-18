@@ -10,6 +10,8 @@ class FamilyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     final cards = [
       StatCard(
         icon: Icons.groups,
@@ -18,7 +20,7 @@ class FamilyPage extends StatelessWidget {
         value: "3",
       ),
       StatCard(
-        icon: Icons.group,
+        icon: Icons.check,
         colors: [Color(0xFF00C951), Color(0xFF00A63E)],
         title: "Famílias Ativas",
         value: "2",
@@ -30,6 +32,8 @@ class FamilyPage extends StatelessWidget {
         value: "1",
       ),
     ];
+
+    final iconCards = [Icons.groups, Icons.check, Icons.event];
 
     final families = [
       FamilyCardModal(
@@ -113,8 +117,6 @@ class FamilyPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(),
-      drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
         child: ListView(
@@ -133,7 +135,7 @@ class FamilyPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(4),
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: "Nome, celular ou cpf...",
@@ -147,7 +149,7 @@ class FamilyPage extends StatelessWidget {
 
                 SegmentedCardSwitcher(
                   options: cards,
-                  labels: ['Todos', 'Ativas', 'Aguardando'],
+                  icons: iconCards,
                 ),
 
                 SizedBox(height: 20),
@@ -158,7 +160,7 @@ class FamilyPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
                       "Famílias",
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: theme.colorScheme.outline),
                     ),
                   ),
                 ),
@@ -187,6 +189,7 @@ class FamilyPage extends StatelessWidget {
         child: Icon(Icons.add),
       ),
     );
+  
   }
 
   Widget _buildCardHeader() {

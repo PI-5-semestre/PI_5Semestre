@@ -2,6 +2,7 @@ import 'package:cestas_app/src/widgets/app_drawer.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:core/widgets/visits_card.dart';
+import 'package:core/widgets2/segmented_card_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -10,29 +11,40 @@ class VisitsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final spacing = screenWidth < 600 ? 8.0 : 16.0; // menos espaço no mobile
-
     final cards = [
       StatCard(
-        icon: FontAwesomeIcons.clock,
+        icon: Icons.groups,
+        colors: [Color(0xFFAD46FF), Color(0xFF9810FA)],
+        title: "Total de Visititas",
+        value: "3",
+      ),
+      StatCard(
+        icon: Icons.check,
+        colors: [Color(0xFF00C951), Color(0xFF00A63E)],
+        title: "Realizadas",
+        value: "0",
+      ),
+      StatCard(
+        icon: Icons.schedule,
         colors: [Color(0xFFF0B100), Color(0xFFD08700)],
         title: "Pendentes",
         value: "2",
       ),
       StatCard(
-        icon: FontAwesomeIcons.calendar,
+        icon: Icons.event,
         colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
         title: "Agendadas",
         value: "0",
       ),
       StatCard(
-        icon: FontAwesomeIcons.circleCheck,
-        colors: [Color(0xFF00C951), Color(0xFF00A63E)],
-        title: "Realizadas",
+        icon: Icons.close,
+        colors: [Color(0xFFC90000), Color(0xFFA60000)],
+        title: "Canceladas",
         value: "0",
       ),
     ];
+
+    final iconCards = [Icons.groups, Icons.check, Icons.schedule, Icons.event, Icons.close];
 
     final families = [
       VisitsCard(
@@ -81,45 +93,47 @@ class VisitsPage extends StatelessWidget {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildCardHeader(),
-                    const SizedBox(height: 16),
-                  ],
+                  children: [_buildCardHeader(), const SizedBox(height: 16)],
                 ),
-
-                SizedBox(height: spacing),
-
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.start,
-                  alignment: WrapAlignment.spaceBetween,
-                  runAlignment: WrapAlignment.spaceBetween,
-                  spacing: 8.0,
-                  runSpacing: 8.0,
-                  children: cards,
-                ),
-
-                SizedBox(height: spacing),
-
+                SizedBox(height: 8),
                 // Search
                 Card(
-                  color: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  elevation: 4,
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(4),
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: "Buscar família...",
+                        hintText: "Nome, celular ou cpf...",
                         prefixIcon: Icon(Icons.search),
                         border: InputBorder.none,
                       ),
                     ),
                   ),
                 ),
+                SizedBox(height: 8),
 
-                SizedBox(height: spacing),
+                SegmentedCardSwitcher(
+                  options: cards,
+                  icons: iconCards,
+                ),
+
+                SizedBox(height: 20),
+
+                Align(
+                  alignment: AlignmentGeometry.topLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      "Famílias",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
 
                 // Lista de famílias
                 Column(
@@ -137,6 +151,12 @@ class VisitsPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/family/new_family');
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
