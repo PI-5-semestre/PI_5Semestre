@@ -22,6 +22,7 @@ from decimal import Decimal
 
 from app.models.products import StockItem
 from .base_modal import BaseModel
+
 if TYPE_CHECKING:
     from .users import Account
     from .families import Family
@@ -42,13 +43,22 @@ class Institution(BaseModel):
     owner_id: Mapped[int] = mapped_column(
         ForeignKey("accounts.id"), nullable=False, unique=True
     )
+
     __table_args__ = (Index("institutions_name_idx", name),)
-    owner: Mapped["Account"] = relationship("Account", back_populates="institution")
+
+    owner: Mapped["Account"] = relationship(foreign_keys=[owner_id])
+
     families: Mapped[List["Family"]] = relationship(
         "Family", back_populates="membership"
-    ) 
+    )
     stock_items: Mapped[List["StockItem"]] = relationship(
         "StockItem", back_populates="institution"
+    )
+
+    members: Mapped[List["Account"]] = relationship(
+        "Account",
+        back_populates="institution_membership",
+        foreign_keys="[Account.institution_id]"
     )
 
     def __str__(self):
