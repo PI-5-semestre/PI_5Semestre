@@ -1,3 +1,4 @@
+import 'package:cesta_web/src/views/basket/basket_page.dart';
 import 'package:cesta_web/src/views/delivery/delivery_page.dart';
 import 'package:cesta_web/src/views/delivery/new_delivery_page.dart';
 import 'package:cesta_web/src/views/family/family_page.dart';
@@ -55,6 +56,7 @@ class App extends StatelessWidget {
         '/family/new_family': (context) =>
             const ResponsiveScaffold(child: NewFamilyPage()),
         '/visits': (context) => const ResponsiveScaffold(child: VisitsPage()),
+        '/basket': (context) => const ResponsiveScaffold(child: BasketPage()),
         '/stock': (context) => ResponsiveScaffold(child: StockPage()),
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),

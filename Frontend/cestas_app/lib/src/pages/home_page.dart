@@ -56,7 +56,7 @@ class HomePage extends StatelessWidget {
         value: "156",
       ),
       StatCard(
-        icon: Icons.shopping_cart,
+        icon: Icons.shopping_basket,
         colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
         title: "Cestas Disponíveis",
         value: "24",

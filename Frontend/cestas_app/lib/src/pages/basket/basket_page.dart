@@ -45,10 +45,24 @@ class _BasketPageState extends State<BasketPage> {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildCardHeader(),
-                    const SizedBox(height: 16),
-                  ],
+                  children: [_buildCardHeader(), const SizedBox(height: 16)],
+                ),
+                SizedBox(height: spacing),
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: TextField(
+                      decoration: const InputDecoration(
+                        hintText: "Buscar família...",
+                        prefixIcon: Icon(Icons.search),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
                 ),
                 SizedBox(height: spacing),
                 Wrap(
@@ -226,8 +240,13 @@ class _BasketPageState extends State<BasketPage> {
                                                                   );
                                                                 },
                                                               ),
-                                                              _buildButton(context, name),
-                                                              const SizedBox(height: 16),
+                                                              _buildButton(
+                                                                context,
+                                                                name,
+                                                              ),
+                                                              const SizedBox(
+                                                                height: 16,
+                                                              ),
                                                             ],
                                                           ),
                                                         ),
@@ -254,9 +273,7 @@ class _BasketPageState extends State<BasketPage> {
                                                             ),
                                                           ),
                                                         );
-                                                        setState(
-                                                          () {},
-                                                        ); 
+                                                        setState(() {});
                                                       },
                                                 icon: const Icon(Icons.save),
                                                 label: const Text(
@@ -290,23 +307,7 @@ class _BasketPageState extends State<BasketPage> {
                     ),
                   ],
                 ),
-                SizedBox(height: spacing),
-                Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: "Buscar família...",
-                        prefixIcon: Icon(Icons.search),
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                ),
+
                 SizedBox(height: spacing),
                 ...selectedFamilies.entries.map((entry) {
                   return Column(
@@ -348,43 +349,42 @@ class _BasketPageState extends State<BasketPage> {
       title: 'Distribuição de Cestas',
       subtitle: 'Faça a distribuição para às famílias cadastradas',
       colors: const [Color(0xFF2B7FFF), Color(0xFF155DFC)],
-      icon: FontAwesomeIcons.calendar,
+      icon: FontAwesomeIcons.basketShopping,
     );
   }
 
-  Widget _buildButton(BuildContext context, String name){
-  return ElevatedButton.icon(
-    onPressed: () {
-      final itemControllers = <String, TextEditingController>{};
+  Widget _buildButton(BuildContext context, String name) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        final itemControllers = <String, TextEditingController>{};
 
-      void handleSave() {
-        // Lógica ao salvar
-        for (var entry in itemControllers.entries) {
-          print('${entry.key}: ${entry.value.text}');
+        void handleSave() {
+          // Lógica ao salvar
+          for (var entry in itemControllers.entries) {
+            print('${entry.key}: ${entry.value.text}');
+          }
+
+          // Voltar para a tela anterior
+          Navigator.of(context).pop();
         }
 
-        // Voltar para a tela anterior
-        Navigator.of(context).pop();
-      }
-
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => FamilyBasketEditor(
-            familyName: name,
-            itemControllers: itemControllers,
-            onSave: handleSave,
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => FamilyBasketEditor(
+              familyName: name,
+              itemControllers: itemControllers,
+              onSave: handleSave,
+            ),
           ),
-        ),
-      );
-    },
-    icon: const Icon(Icons.add, color: Colors.white),
-    label: const Text('Editar Cesta', style: TextStyle(color: Colors.white)),
-    style: ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFF155DFC),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-    ),
-  );
+        );
+      },
+      icon: const Icon(Icons.add, color: Colors.white),
+      label: const Text('Editar Cesta', style: TextStyle(color: Colors.white)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF155DFC),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
 }
-}
-
