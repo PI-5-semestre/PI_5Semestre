@@ -15,7 +15,7 @@ Session = Annotated[AsyncSession, Depends(get_session)]
 
 @router.post("/", response_model=UserResp)
 async def create_users(payload: UserReq, session: Session):
-    account = Account(login=payload.login, email=payload.email, senha=payload.senha, family_id=None)
+    account = Account(login=payload.login, email=payload.email, senha=payload.senha, family_id=payload.family_id, institution_id=payload.institution_id)
     session.add(account)
     try:
         await session.commit()
