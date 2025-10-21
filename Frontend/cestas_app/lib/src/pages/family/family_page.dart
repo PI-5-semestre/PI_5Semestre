@@ -10,6 +10,8 @@ class FamilyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     final cards = [
       StatCard(
         icon: Icons.groups,
@@ -18,7 +20,7 @@ class FamilyPage extends StatelessWidget {
         value: "3",
       ),
       StatCard(
-        icon: Icons.group,
+        icon: Icons.check,
         colors: [Color(0xFF00C951), Color(0xFF00A63E)],
         title: "Famílias Ativas",
         value: "2",
@@ -30,6 +32,8 @@ class FamilyPage extends StatelessWidget {
         value: "1",
       ),
     ];
+
+    final iconCards = [Icons.groups, Icons.check, Icons.event];
 
     final families = [
       FamilyCardModal(
@@ -124,13 +128,12 @@ class FamilyPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [_buildCardHeader(), const SizedBox(height: 16)],
                 ),
-                SizedBox(height: 2),
+                SizedBox(height: 8),
                 // Search
                 Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  color: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(4),
                     child: TextField(
@@ -157,10 +160,7 @@ class FamilyPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
                       "Famílias",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: theme.colorScheme.outline),
                     ),
                   ),
                 ),
@@ -189,6 +189,7 @@ class FamilyPage extends StatelessWidget {
         child: Icon(Icons.add),
       ),
     );
+  
   }
 
   Widget _buildCardHeader() {
