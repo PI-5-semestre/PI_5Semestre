@@ -146,7 +146,7 @@ class FamilyPage extends StatelessWidget {
 
                 SegmentedCardSwitcher(
                   options: cards,
-                  labels: ['Todos', 'Ativas', 'Aguardando'],
+                  icons: iconCards,
                 ),
 
                 SizedBox(height: 20),

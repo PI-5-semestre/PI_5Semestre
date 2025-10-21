@@ -15,10 +15,14 @@ class UserResp(BaseModel):
     email: str
     account_type: str
     family_id: Optional[int]
+    institution_id: Optional[int]
+    
 
-
-class UserReq(BaseModel):
+class UserReq(BaseModel):   
 
     login: str
     email: str
     senha: str
+    family_id: Optional[int] = None
+    institution_id: int
+    
