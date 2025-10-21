@@ -113,8 +113,6 @@ class FamilyPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(),
-      drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
         child: ListView(
@@ -126,14 +124,15 @@ class FamilyPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [_buildCardHeader(), const SizedBox(height: 16)],
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: 2),
                 // Search
                 Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  color: Colors.white,
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(4),
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: "Nome, celular ou cpf...",
@@ -158,7 +157,10 @@ class FamilyPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
                       "Famílias",
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

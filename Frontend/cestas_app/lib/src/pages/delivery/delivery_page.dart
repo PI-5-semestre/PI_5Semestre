@@ -15,7 +15,7 @@ class DeliveryPage extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) {
         final provider = DeliveryProvider();
-        provider.fetchDeliveries(); // já chama aqui
+        provider.fetchDeliveries();
         return provider;
       },
       child: const _DeliveryView(),
@@ -42,13 +42,6 @@ class _DeliveryViewState extends State<_DeliveryView> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<DeliveryProvider>(context);
-
-    // Print de debug
-    print(
-      "Loading: ${provider.loading}, Data: ${provider.data?.length}, Error: ${provider.error}",
-    );
-
-    // Fallback seguro
     final deliveries = provider.data ?? [];
     final counts = provider.counts.isNotEmpty
         ? provider.counts
@@ -67,8 +60,6 @@ class _DeliveryViewState extends State<_DeliveryView> {
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(),
-      drawer: const AppDrawer(),
       body: provider.loading
           ? const Center(child: CircularProgressIndicator())
           : (provider.error != null && provider.error!.isNotEmpty)
@@ -217,7 +208,7 @@ class _DeliveryViewState extends State<_DeliveryView> {
     return const CardHeader(
       title: 'Lista de entregas',
       subtitle: 'Confirme as entregas realizadas',
-      colors: [Color(0xFF9810FA), Color(0xFFA223FC)],
+      colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
       icon: Icons.check_box,
     );
   }
@@ -235,7 +226,7 @@ class _DeliveryViewState extends State<_DeliveryView> {
         style: TextStyle(color: Colors.white),
       ),
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF9810FA),
+        backgroundColor: const Color(0xFF155DFC),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
