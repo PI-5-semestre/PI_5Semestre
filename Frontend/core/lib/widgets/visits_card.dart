@@ -22,7 +22,7 @@ class VisitsCard extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status) {
       case "realizada":
-        return Color(0xFF016630);
+        return Colors.green;
       case "pendente":
         return Colors.orange;
       case "cancelada":
@@ -37,7 +37,6 @@ class VisitsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 4,
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -104,7 +103,8 @@ class VisitsCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (status == "pendente")
-                  ElevatedButton.icon(
+                  FloatingActionButton.small(
+                    elevation: 1,
                     onPressed: () {
                       showDialog(
                         context: context,
@@ -115,16 +115,12 @@ class VisitsCard extends StatelessWidget {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.calendar_today),
-                    label: const Text("Agendar"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
-                    ),
+                    child: const Icon(Icons.calendar_today)
                   ),
 
                 if (status == "agendada")
-                  ElevatedButton.icon(
+                  FloatingActionButton.small(
+                    elevation: 1,
                     onPressed: () {
                       showDialog(
                         context: context,
@@ -135,12 +131,7 @@ class VisitsCard extends StatelessWidget {
                         ),
                       );
                     },
-                    icon: const Icon(FontAwesomeIcons.circleCheck),
-                    label: const Text("Completar"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
-                    ),
+                    child: const Icon(FontAwesomeIcons.circleCheck),
                   ),
               ],
             ),

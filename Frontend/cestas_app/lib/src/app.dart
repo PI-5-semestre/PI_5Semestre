@@ -30,8 +30,8 @@ class App extends StatelessWidget {
       supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       title: 'Cestas App',
-      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
-      // theme: brightness == Brightness.light ? theme.dark() : theme.light(),
+      // theme: brightness == Brightness.light ? theme.light() : theme.dark(),
+      theme: brightness == Brightness.light ? theme.dark() : theme.light(),
       // theme: ThemeData(
       //   scaffoldBackgroundColor: Color(0xFFF7F9FA),
       //   appBarTheme: AppBarTheme(
