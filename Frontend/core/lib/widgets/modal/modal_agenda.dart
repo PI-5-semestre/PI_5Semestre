@@ -13,10 +13,10 @@ class AgendarVisitaModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextEditingController dataHoraController = TextEditingController();
+    final theme = Theme.of(context);
     String? responsavelSelecionado;
 
     return Dialog(
-      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: SizedBox(
         width: 430,
@@ -46,7 +46,7 @@ class AgendarVisitaModal extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: theme.colorScheme.outlineVariant,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -54,7 +54,7 @@ class AgendarVisitaModal extends StatelessWidget {
                   children: [
                     Text(nome, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text(endereco, style: const TextStyle(color: Colors.black54)),
+                    Text(endereco),
                   ],
                 ),
               ),
@@ -129,8 +129,8 @@ class AgendarVisitaModal extends StatelessWidget {
                       Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
                     ),
                     child: const Text("Agendar Visita"),
                   ),
