@@ -34,6 +34,7 @@ class _BasketPageState extends State<BasketPage> {
     final spacing = screenWidth < 600 ? 8.0 : 16.0;
     final selectedCount = selectedFamilies.values.where((v) => v).length;
     return Scaffold(
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
         child: ListView(
