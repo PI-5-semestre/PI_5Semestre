@@ -44,7 +44,13 @@ class VisitsPage extends StatelessWidget {
       ),
     ];
 
-    final iconCards = [Icons.groups, Icons.check, Icons.schedule, Icons.event, Icons.close];
+    final iconCards = [
+      Icons.groups,
+      Icons.check,
+      Icons.schedule,
+      Icons.event,
+      Icons.close,
+    ];
 
     final families = [
       VisitsCard(
@@ -83,7 +89,6 @@ class VisitsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(),
-      drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
         child: ListView(
@@ -114,10 +119,7 @@ class VisitsPage extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
 
-                SegmentedCardSwitcher(
-                  options: cards,
-                  icons: iconCards,
-                ),
+                SegmentedCardSwitcher(options: cards, icons: iconCards),
 
                 SizedBox(height: 20),
 

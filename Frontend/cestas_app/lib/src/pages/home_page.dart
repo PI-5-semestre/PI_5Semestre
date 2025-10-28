@@ -26,7 +26,6 @@ class _HomePageState extends State<HomePage> {
     var pages = [
       _buildDashboard(message),
       const FamilyPage(),
-      const BasketPage(),
       const DeliveryPage(),
       const MorePage(),
     ];
@@ -57,11 +56,11 @@ class _HomePageState extends State<HomePage> {
             selectedIcon: Icon(Icons.group, color: Colors.white),
             label: 'Famílias',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.shopping_basket_outlined, color: Colors.blue),
-            selectedIcon: Icon(Icons.shopping_basket, color: Colors.white),
-            label: 'Cestas',
-          ),
+          // NavigationDestination(
+          //   icon: Icon(Icons.shopping_basket_outlined, color: Colors.blue),
+          //   selectedIcon: Icon(Icons.shopping_basket, color: Colors.white),
+          //   label: 'Cestas',
+          // ),
           NavigationDestination(
             icon: Icon(Icons.local_shipping_outlined, color: Colors.blue),
             selectedIcon: Icon(Icons.local_shipping, color: Colors.white),

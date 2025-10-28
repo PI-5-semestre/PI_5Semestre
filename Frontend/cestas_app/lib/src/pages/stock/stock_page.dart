@@ -48,70 +48,76 @@ class _StockViewState extends State<_StockView> {
             "Sem Estoque": 0,
           };
 
-    const statusOptions = ["Todos", "Produtos Ativos", "Estoque Baixo", "Estoque Alto", "Sem Estoque"];
+    const statusOptions = [
+      "Todos",
+      "Produtos Ativos",
+      "Estoque Baixo",
+      "Estoque Alto",
+      "Sem Estoque",
+    ];
 
     final filteredStocks = stocks.where((d) {
       final matchesStatus =
           selectedStatus == "Todos" || d.status == selectedStatus;
-      final matchesSearch =
-          d.name.toLowerCase().contains(searchQuery.toLowerCase());
+      final matchesSearch = d.name.toLowerCase().contains(
+        searchQuery.toLowerCase(),
+      );
       return matchesStatus && matchesSearch;
     }).toList();
 
     return Scaffold(
       appBar: AppBar(),
-      drawer: const AppDrawer(),
       body: provider.loading
           ? const Center(child: CircularProgressIndicator())
           : (provider.error != null && provider.error!.isNotEmpty)
-              ? Center(child: Text(provider.error!))
-              : ListView(
-                  padding: const EdgeInsets.all(_pagePadding),
+          ? Center(child: Text(provider.error!))
+          : ListView(
+              padding: const EdgeInsets.all(_pagePadding),
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Expanded(
-                          child: CardHeader(
-                            title: 'Controle de estoque',
-                            subtitle: 'Gerencie os produtos das cestas básicas',
-                            colors: [Color(0xFF00c64f), Color(0xFF00a73e)],
-                            icon: Icons.archive_outlined,
-                          ),
-                        ),
-                        const SizedBox(width: _spacing),
-                        _buildButton(context),
-                      ],
-                    ),
-                    const SizedBox(height: _spacing),
-                    InfoCard(
-                      title: "Estoque Atual",
-                      color: const Color(0xFF00a73e),
-                      icon: Icons.today,
-                      iconColor: Colors.white,
-                      iconBackground: Colors.white.withOpacity(0.2),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildStatCards(counts),
-                          const SizedBox(height: _spacing),
-                          Row(
-                            children: [
-                              Expanded(flex: 2, child: _buildSearchField()),
-                              const SizedBox(width: _spacing),
-                              Expanded(
-                                flex: 1,
-                                child: _buildStatusDropdown(statusOptions),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: _spacing),
-                          _buildTable(filteredStocks),
-                        ],
+                    const Expanded(
+                      child: CardHeader(
+                        title: 'Controle de estoque',
+                        subtitle: 'Gerencie os produtos das cestas básicas',
+                        colors: [Color(0xFF00c64f), Color(0xFF00a73e)],
+                        icon: Icons.archive_outlined,
                       ),
                     ),
+                    const SizedBox(width: _spacing),
+                    _buildButton(context),
                   ],
                 ),
+                const SizedBox(height: _spacing),
+                InfoCard(
+                  title: "Estoque Atual",
+                  color: const Color(0xFF00a73e),
+                  icon: Icons.today,
+                  iconColor: Colors.white,
+                  iconBackground: Colors.white.withOpacity(0.2),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildStatCards(counts),
+                      const SizedBox(height: _spacing),
+                      Row(
+                        children: [
+                          Expanded(flex: 2, child: _buildSearchField()),
+                          const SizedBox(width: _spacing),
+                          Expanded(
+                            flex: 1,
+                            child: _buildStatusDropdown(statusOptions),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: _spacing),
+                      _buildTable(filteredStocks),
+                    ],
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
@@ -152,10 +158,7 @@ class _StockViewState extends State<_StockView> {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(32),
-          child: Text(
-            "Estoque Vazio",
-            style: TextStyle(fontSize: 16),
-          ),
+          child: Text("Estoque Vazio", style: TextStyle(fontSize: 16)),
         ),
       );
     }
@@ -234,12 +237,12 @@ class _StockViewState extends State<_StockView> {
         final maxColumns = maxWidth > 1300
             ? 5
             : maxWidth > 1200
-                ? 4
-                : maxWidth > 800
-                    ? 3
-                    : maxWidth > 500
-                        ? 2
-                        : 1;
+            ? 4
+            : maxWidth > 800
+            ? 3
+            : maxWidth > 500
+            ? 2
+            : 1;
 
         final columns = cards.length < maxColumns ? cards.length : maxColumns;
         final totalSpacing = _spacing * (columns - 1);
@@ -259,9 +262,9 @@ class _StockViewState extends State<_StockView> {
   Widget _buildButton(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => NewStockPage()),
-        );
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => NewStockPage()));
       },
       icon: const Icon(Icons.add, color: Colors.white),
       label: const Text(
