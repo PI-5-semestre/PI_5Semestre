@@ -10,10 +10,12 @@ class ProductResp(BaseModel):
     active: bool
     institution_id: int
     name: str
+    sku: str
     quantity: int
 
 class ProductReq(BaseModel):
     institution_id: int
     name: str
+    sku: str
     quantity: int
     

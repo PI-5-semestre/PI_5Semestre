@@ -7,18 +7,20 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_session
 from app.core.exceptions import DuplicatedError, NotFoundError
-from app.models.products import StockItem
+from app.models.products import StockHistory, StockItem
 from app.schemas.products import ProductReq, ProductResp
+from app.models.Institutions import Institution
 
 router = APIRouter(prefix="/products", tags=["products"])
 Session = Annotated[AsyncSession, Depends(get_session)]
 
 @router.post("/", response_model=ProductResp)
-async def create_product(product: ProductReq, session: Session):
+async def create_product(payload: ProductReq, session: Session):
     stock_item = StockItem(
-        institution_id=product.institution_id,
-        name=product.name,
-        quantity=product.quantity
+        institution_id=payload.institution_id,
+        name=payload.name,
+        sku=payload.sku,
+        quantity=payload.quantity
     )
     session.add(stock_item)
     try:
@@ -27,7 +29,7 @@ async def create_product(product: ProductReq, session: Session):
         return ProductResp.model_validate(stock_item)
     except IntegrityError:
         await session.rollback()
-        raise DuplicatedError(detail="Error creating product")
+        raise DuplicatedError(detail="Já Existe um Produto com esse SKU")
     
 @router.get("/", response_model=List[ProductResp])
 async def get_products(session: Session):

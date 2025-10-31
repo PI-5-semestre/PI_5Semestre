@@ -31,6 +31,9 @@ class StockItem(BaseModel):
 
     institution_id: Mapped[int] = mapped_column(ForeignKey("institutions.id"))
     name: Mapped[str] = mapped_column(String(200), nullable=False)
+    sku : Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
+    
+    
     quantity: Mapped[int] = mapped_column(default=0)
     institution: Mapped["Institution"] = relationship(
         "Institution", back_populates="stock_items"
@@ -48,3 +51,4 @@ class StockHistory(BaseModel):
     stock_item: Mapped["StockItem"] = relationship(
         "StockItem", back_populates="history"
     )
+    
