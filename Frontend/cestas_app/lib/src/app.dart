@@ -10,6 +10,7 @@ import 'package:cestas_app/src/pages/login_page.dart';
 import 'package:cestas_app/src/pages/new_password_page.dart';
 import 'package:cestas_app/src/pages/register_page.dart';
 import 'package:cestas_app/src/pages/stock/stock_page.dart';
+import 'package:cestas_app/src/pages/team_page.dart';
 import 'package:cestas_app/src/pages/visits_page.dart';
 import 'package:cestas_app/src/routs.dart';
 import 'package:core/ui/theme.dart';
