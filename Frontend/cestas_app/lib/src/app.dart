@@ -10,6 +10,7 @@ import 'package:cestas_app/src/pages/login_page.dart';
 import 'package:cestas_app/src/pages/new_password_page.dart';
 import 'package:cestas_app/src/pages/register_page.dart';
 import 'package:cestas_app/src/pages/stock/stock_page.dart';
+import 'package:cestas_app/src/pages/team_page.dart';
 import 'package:cestas_app/src/pages/visits_page.dart';
 import 'package:core/ui/theme.dart';
 import 'package:core/ui/util.dart';
@@ -30,8 +31,8 @@ class App extends StatelessWidget {
       supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       title: 'Cestas App',
-      // theme: brightness == Brightness.light ? theme.light() : theme.dark(),
-      theme: brightness == Brightness.light ? theme.dark() : theme.light(),
+      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
+      // theme: brightness == Brightness.light ? theme.dark() : theme.light(),
       // theme: ThemeData(
       //   scaffoldBackgroundColor: Color(0xFFF7F9FA),
       //   appBarTheme: AppBarTheme(
@@ -74,6 +75,7 @@ class App extends StatelessWidget {
         '/register': (context) => RegisterPage(),
         '/forgot_password': (context) => ForgotPasswordPage(),
         '/new_password': (context) => NewPasswordPage(),
+        '/team': (context) => TeamPage(),
       },
     );
   }
