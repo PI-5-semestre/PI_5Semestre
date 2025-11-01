@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
@@ -12,10 +13,20 @@ class ProductResp(BaseModel):
     name: str
     sku: str
     quantity: int
+    type_stock: str
 
-class ProductReq(BaseModel):
+class ProductCreateReq(BaseModel):
     institution_id: int
     name: str
     sku: str
     quantity: int
+
+class ProductReq(BaseModel):
+    sku: str
+    quantity: int
+
+class BasketReq(BaseModel):
+    institution_id: int
+    family_id: int
+    products: List[ProductReq]
     

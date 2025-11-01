@@ -26,14 +26,19 @@ if TYPE_CHECKING:
     from .Institutions import Institution
 
 
+class StockType(PyEnum):
+    FAMILY = "FAMILY"
+    INSTITUTION = "INSTITUTION"
+
 class StockItem(BaseModel):
     __tablename__ = "stock_items"
 
     institution_id: Mapped[int] = mapped_column(ForeignKey("institutions.id"))
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     sku : Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
-    
-    
+    type_stock: Mapped[str] = mapped_column(
+        Enum(StockType), nullable=False, default=StockType.INSTITUTION
+    )
     quantity: Mapped[int] = mapped_column(default=0)
     institution: Mapped["Institution"] = relationship(
         "Institution", back_populates="stock_items"
