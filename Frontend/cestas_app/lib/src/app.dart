@@ -1,17 +1,4 @@
-import 'package:cestas_app/src/pages/basket/basket_page.dart';
-import 'package:cestas_app/src/pages/delivery/delivery_page.dart';
-import 'package:cestas_app/src/pages/delivery/new_delivery_page.dart';
-import 'package:cestas_app/src/pages/family/family_page.dart';
-import 'package:cestas_app/src/pages/family/edit_family_page.dart';
-import 'package:cestas_app/src/pages/family/new_family_page.dart';
-import 'package:cestas_app/src/pages/forgot_password_page.dart';
-import 'package:cestas_app/src/pages/home_page.dart';
-import 'package:cestas_app/src/pages/login_page.dart';
-import 'package:cestas_app/src/pages/new_password_page.dart';
-import 'package:cestas_app/src/pages/register_page.dart';
-import 'package:cestas_app/src/pages/stock/stock_page.dart';
-import 'package:cestas_app/src/pages/team_page.dart';
-import 'package:cestas_app/src/pages/visits_page.dart';
+import 'package:cestas_app/src/routes/router.dart';
 import 'package:core/ui/theme.dart';
 import 'package:core/ui/util.dart';
 import 'package:flutter/material.dart';
@@ -24,14 +11,18 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     final brightness = View.of(context).platformDispatcher.platformBrightness;
     TextTheme textTheme = createTextTheme(context, "Outfit", "Outfit");
-    
+
     MaterialTheme theme = MaterialTheme(textTheme);
-    return MaterialApp(
+    return MaterialApp.router(
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       title: 'Cestas App',
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
+      routerDelegate: routes.routerDelegate,
+      routeInformationParser: routes.routeInformationParser,
+      routeInformationProvider: routes.routeInformationProvider,
+
       // theme: brightness == Brightness.light ? theme.dark() : theme.light(),
       // theme: ThemeData(
       //   scaffoldBackgroundColor: Color(0xFFF7F9FA),
@@ -50,33 +41,32 @@ class App extends StatelessWidget {
       //   splashFactory: NoSplash.splashFactory,
       //   highlightColor: Colors.transparent,
       // ),
-      builder: (context, child) {
-        return Container(
-          child: SafeArea(child: child!),
-          color: Color(0xFFF7F9FA),
-        );
-      },
-      initialRoute: '/',
-      routes: {
-        '/': (context) => HomePage(),
-        '/dasboard': (context) => Scaffold(
-          appBar: AppBar(title: Text('Dashboard')),
-          body: Placeholder(),
-        ),
-        '/family': (context) => FamilyPage(),
-        '/family/new_family': (context) => NewFamilyPage(),
-        '/family/edit_family': (context) => EditFamilyPage(),
-        '/stock': (context) => StockPage(),
-        '/delivery': (context) => DeliveryPage(),
-        '/delivery/new_delivery': (context) => NewDeliveryPage(),
-        '/visits': (context) => VisitsPage(),
-        '/basket': (context) => BasketPage(),
-        '/login': (context) => LoginPage(),
-        '/register': (context) => RegisterPage(),
-        '/forgot_password': (context) => ForgotPasswordPage(),
-        '/new_password': (context) => NewPasswordPage(),
-        '/team': (context) => TeamPage(),
-      },
+      // builder: (context, child) {
+      //   return Container(
+      //     child: SafeArea(child: child!),
+      //     color: Color(0xFFF7F9FA),
+      //   );
+      // },
+      // initialRoute: '/',
+      // routes: {
+      //   '/': (context) => HomePage(),
+      //   '/dasboard': (context) => Scaffold(
+      //     appBar: AppBar(title: Text('Dashboard')),
+      //     body: Placeholder(),
+      //   ),
+      //   '/family': (context) => FamilyPage(),
+      //   '/family/new_family': (context) => NewFamilyPage(),
+      //   '/family/edit_family': (context) => EditFamilyPage(),
+      //   '/stock': (context) => StockPage(),
+      //   '/delivery': (context) => DeliveryPage(),
+      //   '/delivery/new_delivery': (context) => NewDeliveryPage(),
+      //   '/visits': (context) => VisitsPage(),
+      //   '/basket': (context) => BasketPage(),
+      //   '/login': (context) => LoginPage(),
+      //   '/register': (context) => RegisterPage(),
+      //   '/forgot_password': (context) => ForgotPasswordPage(),
+      //   '/new_password': (context) => NewPasswordPage(),
+      // },
     );
   }
 }

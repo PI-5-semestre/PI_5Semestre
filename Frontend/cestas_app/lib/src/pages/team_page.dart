@@ -1,3 +1,4 @@
+import 'package:cestas_app/src/app.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:core/widgets2/team_card.dart';
@@ -38,7 +39,12 @@ class TeamPage extends StatelessWidget {
       ),
     ];
 
-    final iconCards = [Icons.person, Icons.sports_motorsports, Icons.content_paste, Icons.soup_kitchen];
+    final iconCards = [
+      Icons.person,
+      Icons.sports_motorsports,
+      Icons.content_paste,
+      Icons.soup_kitchen,
+    ];
 
     final equipes = [
       TeamCardModal(
@@ -76,6 +82,7 @@ class TeamPage extends StatelessWidget {
     ];
 
     return Scaffold(
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
         child: ListView(

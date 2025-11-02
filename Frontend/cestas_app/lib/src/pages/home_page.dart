@@ -16,63 +16,63 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  //int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     var message =
         "Bem-vindo ao sistema de gestão de cestas básicas da nossa comunidade. Aqui você pode acompanhar todas as atividades e ajudar quem mais precisa.";
 
-    var pages = [
-      _buildDashboard(message),
-      const FamilyPage(),
-      const DeliveryPage(),
-      const MorePage(),
-    ];
+    // var pages = [
+    //   _buildDashboard(message),
+    //   const FamilyPage(),
+    //   const DeliveryPage(),
+    //   const MorePage(),
+    // ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text("")),
-      body: pages[_selectedIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        backgroundColor: Colors.white.withOpacity(0.8),
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        indicatorColor: Colors.blue.withOpacity(0.9),
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined, color: Colors.blue),
-            selectedIcon: Icon(Icons.home, color: Colors.white),
-            label: 'Dashboard',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.group_outlined, color: Colors.blue),
-            selectedIcon: Icon(Icons.group, color: Colors.white),
-            label: 'Famílias',
-          ),
-          // NavigationDestination(
-          //   icon: Icon(Icons.shopping_basket_outlined, color: Colors.blue),
-          //   selectedIcon: Icon(Icons.shopping_basket, color: Colors.white),
-          //   label: 'Cestas',
-          // ),
-          NavigationDestination(
-            icon: Icon(Icons.local_shipping_outlined, color: Colors.blue),
-            selectedIcon: Icon(Icons.local_shipping, color: Colors.white),
-            label: 'Entregas',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.menu_outlined, color: Colors.blue),
-            selectedIcon: Icon(Icons.menu_outlined, color: Colors.white),
-            label: 'Mais',
-          ),
-        ],
-      ),
+      //appBar: AppBar(title: const Text("")),
+      body: _buildDashboard(message),
+      // bottomNavigationBar: NavigationBar(
+      //   selectedIndex: _selectedIndex,
+      //   onDestinationSelected: (index) {
+      //     setState(() {
+      //       _selectedIndex = index;
+      //     });
+      //   },
+      //   backgroundColor: Colors.white.withOpacity(0.8),
+      //   elevation: 0,
+      //   surfaceTintColor: Colors.transparent,
+      //   indicatorColor: Colors.blue.withOpacity(0.9),
+      //   labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      //   destinations: const [
+      //     NavigationDestination(
+      //       icon: Icon(Icons.home_outlined, color: Colors.blue),
+      //       selectedIcon: Icon(Icons.home, color: Colors.white),
+      //       label: 'Dashboard',
+      //     ),
+      //     NavigationDestination(
+      //       icon: Icon(Icons.group_outlined, color: Colors.blue),
+      //       selectedIcon: Icon(Icons.group, color: Colors.white),
+      //       label: 'Famílias',
+      //     ),
+      //     // NavigationDestination(
+      //     //   icon: Icon(Icons.shopping_basket_outlined, color: Colors.blue),
+      //     //   selectedIcon: Icon(Icons.shopping_basket, color: Colors.white),
+      //     //   label: 'Cestas',
+      //     // ),
+      //     NavigationDestination(
+      //       icon: Icon(Icons.local_shipping_outlined, color: Colors.blue),
+      //       selectedIcon: Icon(Icons.local_shipping, color: Colors.white),
+      //       label: 'Entregas',
+      //     ),
+      //     NavigationDestination(
+      //       icon: Icon(Icons.menu_outlined, color: Colors.blue),
+      //       selectedIcon: Icon(Icons.menu_outlined, color: Colors.white),
+      //       label: 'Mais',
+      //     ),
+      //   ],
+      // ),
     );
   }
 
