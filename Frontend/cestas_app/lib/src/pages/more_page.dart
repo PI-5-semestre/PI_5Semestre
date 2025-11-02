@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -101,31 +102,31 @@ class MorePage extends StatelessWidget {
             color: const Color(0xFF64B5F6),
             icon: FontAwesomeIcons.boxesStacked,
             title: 'Gerenciar Cestas',
-            onTap: () => Navigator.pushNamed(context, '/basket'),
+            onTap: () => context.go('/more/basket'),
           ),
           _OptionTile(
             color: const Color(0xFF4FC3F7),
             icon: FontAwesomeIcons.peopleGroup,
             title: 'Visitas',
-            onTap: () => Navigator.pushNamed(context, '/visits'),
+            onTap: () => context.go('/more/visits'),
           ),
           _OptionTile(
             color: const Color(0xFF9575CD),
             icon: FontAwesomeIcons.boxArchive,
             title: 'Gerenciar o estoque',
-            onTap: () => Navigator.pushNamed(context, '/stock'),
+            onTap: () => context.go('/more/stock'),
           ),
           _OptionTile(
             color: const Color(0xFF81C784),
-            icon: FontAwesomeIcons.userShield,
-            title: 'Configurações',
-            onTap: () => Navigator.pushNamed(context, '/config'),
+            icon: FontAwesomeIcons.userLock,
+            title: 'Funcionários cadastrados',
+            onTap: () => context.go('/more/team'),
           ),
           _OptionTile(
             color: const Color(0xFFE57373),
             icon: FontAwesomeIcons.rightFromBracket,
             title: 'Sair da Conta',
-            onTap: () {},
+            onTap: () => context.go('/more/login'),
           ),
           const SizedBox(height: 24),
           const Center(

@@ -3,6 +3,7 @@ import 'package:core/widgets/statCard.dart';
 import 'package:core/widgets2/family_card.dart';
 import 'package:core/widgets2/segmented_card_switcher.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class FamilyPage extends StatelessWidget {
   const FamilyPage({super.key});
@@ -146,10 +147,7 @@ class FamilyPage extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
 
-                SegmentedCardSwitcher(
-                  options: cards,
-                  icons: iconCards,
-                ),
+                SegmentedCardSwitcher(options: cards, icons: iconCards),
 
                 SizedBox(height: 20),
 
@@ -159,7 +157,11 @@ class FamilyPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
                       "Famílias",
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: theme.colorScheme.outline),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.outline,
+                      ),
                     ),
                   ),
                 ),
@@ -183,12 +185,11 @@ class FamilyPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/family/new_family');
+          context.go('/family/new_family');
         },
         child: Icon(Icons.add),
       ),
     );
-  
   }
 
   Widget _buildCardHeader() {
