@@ -14,8 +14,10 @@ import asyncio
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
+
 from app.models.users import Account, AccountType
 from app.models.Institutions import Institution, InstitutionType
+from app.models.families import Family
 from app.core.database import engine
 
 async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
@@ -30,6 +32,7 @@ async def _create_owner_and_institution(
             email=email,
             senha=senha,
             account_type=AccountType.ADMINISTRATIVE,
+            family_id=None,
         )
         session.add(account)
         await session.commit()
