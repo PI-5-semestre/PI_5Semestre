@@ -34,7 +34,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('cpf')
     )
-    op.create_index('accounts_login_idx', 'profiles', ['cpf'], unique=False)
+    # op.create_index('accounts_login_idx', 'profiles', ['cpf'], unique=False)
     op.create_table('stock_items',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
@@ -163,6 +163,6 @@ def downgrade() -> None:
     op.create_index(op.f('family_auth_accounts_account_id_idx'), 'family_authorized_accounts', ['account_id'], unique=False)
     op.drop_table('stock_history')
     op.drop_table('stock_items')
-    op.drop_index('accounts_login_idx', table_name='profiles')
+    # op.drop_index('accounts_login_idx', table_name='profiles')
     op.drop_table('profiles')
     # ### end Alembic commands ###
