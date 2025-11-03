@@ -10,6 +10,7 @@ class NavigatorShellRouteWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: shell,
+      backgroundColor: Colors.white,
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           indicatorColor: Colors.blue,

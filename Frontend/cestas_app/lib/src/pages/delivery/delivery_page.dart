@@ -1,10 +1,11 @@
-import 'package:cestas_app/src/pages/delivery/new_delivery_page.dart';
-import 'package:cestas_app/src/widgets/app_drawer.dart';
+import 'package:intl/intl.dart';
 import 'package:core/services/state/delivery_provider.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/delivery_card.dart';
 import 'package:core/widgets/statCard.dart';
+import 'package:core/widgets2/segmented_card_switcher.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class DeliveryPage extends StatelessWidget {
@@ -35,11 +36,6 @@ class _DeliveryViewState extends State<_DeliveryView> {
   String searchQuery = "";
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final provider = Provider.of<DeliveryProvider>(context);
     final deliveries = provider.data ?? [];
@@ -47,9 +43,9 @@ class _DeliveryViewState extends State<_DeliveryView> {
         ? provider.counts
         : {"Pendente": 0, "Entregue": 0, "Não Entregue": 0, "Total": 0};
 
-    const statusOptions = ["Todos", "Pendente", "Entregue", "Não Entregue"];
+    final icons = [Icons.access_time, Icons.check, Icons.close, Icons.list_alt];
 
-    final filteredDeliveries = (deliveries ?? []).where((d) {
+    final filteredDeliveries = deliveries.where((d) {
       final matchesStatus = selectedStatus == "Todos"
           ? true
           : d.status == selectedStatus;
@@ -69,19 +65,14 @@ class _DeliveryViewState extends State<_DeliveryView> {
               children: [
                 _buildCardHeader(),
                 const SizedBox(height: 16),
-                _buildButton(context),
-                const SizedBox(height: 16),
-                _buildTodayLabel(),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _buildStatusCards(counts),
-                ),
-                const SizedBox(height: 16),
                 _buildSearchField(),
                 const SizedBox(height: 16),
-                _buildStatusDropdown(statusOptions),
+                _buildTodayLabel(context),
+                const SizedBox(height: 16),
+                SegmentedCardSwitcher(
+                  options: _buildStatusCards(counts),
+                  icons: icons,
+                ),
                 const SizedBox(height: 16),
                 filteredDeliveries.isNotEmpty
                     ? Column(
@@ -94,7 +85,7 @@ class _DeliveryViewState extends State<_DeliveryView> {
                             deliveryStatus: delivery.status,
                             onStatusChanged: (newStatus) {
                               provider.updateStatusObject(delivery, newStatus);
-                              setState(() {}); // Atualiza cards e lista
+                              setState(() {});
                             },
                           );
                         }).toList(),
@@ -110,27 +101,47 @@ class _DeliveryViewState extends State<_DeliveryView> {
                       ),
               ],
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.go('/delivery/new_delivery');
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
-  Widget _buildTodayLabel() {
-    final now = DateTime.now();
-    final today =
-        "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          const Icon(Icons.calendar_today, color: Colors.black54, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            "Entregas do dia $today",
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
+  Widget _buildTodayLabel(BuildContext context) {
+    final now = DateTime.now().toUtc().subtract(const Duration(hours: 3));
+    final formattedDate = DateFormat("EEEE, dd/MM/yyyy", "pt_BR").format(now);
+    final capitalizedDate =
+        formattedDate[0].toUpperCase() + formattedDate.substring(1);
+
+    return Card(
+      elevation: 0,
+      color: const Color(0xFFF8FAFF),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.calendar_today,
+              color: Color(0xFF2B7FFF),
+              size: 22,
             ),
-          ),
-        ],
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                "Entregas de hoje • $capitalizedDate",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -145,6 +156,7 @@ class _DeliveryViewState extends State<_DeliveryView> {
         colors: [const Color(0xFFF0B100), const Color(0xFFD08700)],
         title: "Pendentes",
         value: (safeCounts["Pendente"] ?? 0).toString(),
+        backgroundColor: Colors.white,
       ),
       StatCard(
         icon: Icons.check,
@@ -159,7 +171,7 @@ class _DeliveryViewState extends State<_DeliveryView> {
         value: (safeCounts["Não Entregue"] ?? 0).toString(),
       ),
       StatCard(
-        icon: Icons.send,
+        icon: Icons.list_alt,
         colors: [const Color(0xFF46B4FF), const Color(0xFF1075FA)],
         title: "Total",
         value: (safeCounts["Total"] ?? 0).toString(),
@@ -170,7 +182,7 @@ class _DeliveryViewState extends State<_DeliveryView> {
   Widget _buildSearchField() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(4),
         child: TextField(
           onChanged: (value) => setState(() => searchQuery = value),
           decoration: const InputDecoration(
@@ -183,53 +195,12 @@ class _DeliveryViewState extends State<_DeliveryView> {
     );
   }
 
-  Widget _buildStatusDropdown(List<String> options) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: DropdownButtonFormField<String>(
-          value: selectedStatus,
-          items: options
-              .map(
-                (status) =>
-                    DropdownMenuItem(value: status, child: Text(status)),
-              )
-              .toList(),
-          onChanged: (value) {
-            if (value != null) setState(() => selectedStatus = value);
-          },
-          decoration: const InputDecoration(border: InputBorder.none),
-        ),
-      ),
-    );
-  }
-
   Widget _buildCardHeader() {
     return const CardHeader(
       title: 'Lista de entregas',
       subtitle: 'Confirme as entregas realizadas',
       colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
       icon: Icons.check_box,
-    );
-  }
-
-  Widget _buildButton(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: () {
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const NewDeliveryPage()));
-      },
-      icon: const Icon(Icons.add, color: Colors.white),
-      label: const Text(
-        'Adicionar entregas',
-        style: TextStyle(color: Colors.white),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF155DFC),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
     );
   }
 }
