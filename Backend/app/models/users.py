@@ -69,7 +69,7 @@ class Account(BaseModel):
         foreign_keys=[institution_id]
     )
 
-    __table_args__ = (Index("accounts_login_idx", "cpf"),)
+    __table_args__ = (Index("accounts_login_idx", "login"),)
 
     def __str__(self):
         return f"<Account(id={self.id}, login='{self.login}')>"
