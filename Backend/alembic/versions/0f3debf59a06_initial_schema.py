@@ -37,7 +37,7 @@ def upgrade() -> None:
     op.create_index('accounts_account_type_idx', 'accounts', ['account_type'], unique=False)
     op.create_index('accounts_active_idx', 'accounts', ['active'], unique=False)
     op.create_index('accounts_family_id_idx', 'accounts', ['family_id'], unique=False)
-    op.create_index('accounts_login_idx', 'accounts', ['login'], unique=False)
+    # op.create_index('accounts_login_idx', 'accounts', ['login'], unique=False)
     op.create_table('institutions',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
@@ -136,7 +136,7 @@ def downgrade() -> None:
     op.drop_index('institutions_name_idx', table_name='institutions')
     op.drop_index('institutions_active_idx', table_name='institutions')
     op.drop_table('institutions')
-    op.drop_index('accounts_login_idx', table_name='accounts')
+    # op.drop_index('accounts_login_idx', table_name='accounts')
     op.drop_index('accounts_family_id_idx', table_name='accounts')
     op.drop_index('accounts_active_idx', table_name='accounts')
     op.drop_index('accounts_account_type_idx', table_name='accounts')
