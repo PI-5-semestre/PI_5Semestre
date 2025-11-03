@@ -8,6 +8,7 @@ class StatCard extends StatelessWidget {
     required this.title,
     required this.value,
     this.onTap,
+    this.backgroundColor,
   });
 
   final IconData icon;
@@ -15,12 +16,14 @@ class StatCard extends StatelessWidget {
   final String title;
   final String value;
   final VoidCallback? onTap;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Card(
+        color: backgroundColor ?? Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -40,7 +43,6 @@ class StatCard extends StatelessWidget {
                 child: Icon(icon, color: Colors.white, size: 28),
               ),
               const SizedBox(width: 16),
-              // Faz a coluna ocupar o espaço restante sem Expanded
               Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +54,7 @@ class StatCard extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
-                      overflow: TextOverflow.ellipsis, // evita overflow
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
