@@ -8,6 +8,7 @@ class NavigatorShellRouteWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: shell,
       backgroundColor: Colors.white,
@@ -26,6 +27,7 @@ class NavigatorShellRouteWidget extends StatelessWidget {
           }),
         ),
         child: NavigationBar(
+          // backgroundColor: theme.colorScheme.secondaryFixed,
           //animationDuration: const Duration(milliseconds: 400),
           selectedIndex: shell.currentIndex,
           onDestinationSelected: (index) => shell.goBranch(

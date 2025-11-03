@@ -4,6 +4,7 @@ import 'package:core/widgets/statCard.dart';
 import 'package:core/widgets2/team_card.dart';
 import 'package:core/widgets2/segmented_card_switcher.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class TeamPage extends StatelessWidget {
   const TeamPage({super.key});
@@ -151,7 +152,7 @@ class TeamPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/family/new_family');
+          context.go('/more/visits/new_servant');
         },
         child: Icon(Icons.add),
       ),
