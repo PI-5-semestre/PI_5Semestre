@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class TeamCardModal extends StatelessWidget {
   final String name;
@@ -20,13 +21,13 @@ class TeamCardModal extends StatelessWidget {
 
   Color _getStatusColor(String tipofunc) {
     switch (tipofunc) {
-      case "Coordenadores":
+      case "Coordenador":
         return Colors.purple;
-      case "Entregadores":
+      case "Entregador":
         return Colors.blue;
-      case "Assistentes Sociais":
+      case "Assistente Social":
         return Colors.green;
-      case "Voluntários":
+      case "Voluntário":
         return Colors.orange;
       default:
         return Colors.grey;
@@ -138,7 +139,7 @@ class TeamCardModal extends StatelessWidget {
                                     ),
                                   ),
                                   ListTile(
-                                    leading: Icon(Icons.credit_card_rounded),
+                                    leading: Icon(Icons.badge),
                                     title: Text(
                                       'CPF',
                                       style: TextStyle(
@@ -148,6 +149,23 @@ class TeamCardModal extends StatelessWidget {
                                     ),
                                     subtitle: Text(
                                       cpf,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                  ListTile(
+                                    leading: Icon(Icons.work),
+                                    title: Text(
+                                      'Atividade',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: theme.colorScheme.outline,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      tipofunc,
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -183,7 +201,8 @@ class TeamCardModal extends StatelessWidget {
                         right: 16,
                         child: FloatingActionButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/family/edit_family');
+                            context.go('/more/team/edit_servant');
+                            Navigator.pop(context);
                           },
                           child: Icon(Icons.edit),
                         ),
