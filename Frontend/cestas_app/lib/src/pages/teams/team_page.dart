@@ -1,4 +1,3 @@
-import 'package:cestas_app/src/app.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:core/widgets2/team_card.dart';
@@ -53,7 +52,7 @@ class TeamPage extends StatelessWidget {
         phone: "(11) 99999-0001",
         cpf: "123.456.789-00",
         email: "maria@gmail.com",
-        tipofunc: "Coordenadores",
+        tipofunc: "Coordenador",
         inicio: '31/05/2023',
       ),
       TeamCardModal(
@@ -61,7 +60,7 @@ class TeamPage extends StatelessWidget {
         phone: "(11) 99999-0002",
         cpf: "987.654.321-00",
         email: "joao@gmail.com",
-        tipofunc: "Voluntários",
+        tipofunc: "Voluntário",
         inicio: '20/06/2024',
       ),
       TeamCardModal(
@@ -69,7 +68,7 @@ class TeamPage extends StatelessWidget {
         phone: "(11) 98888-0002",
         cpf: "555.666.777-88",
         email: "ana@gmail.com",
-        tipofunc: "Assistentes Sociais",
+        tipofunc: "Assistente Social",
         inicio: '20/06/2024',
       ),
       TeamCardModal(
@@ -77,7 +76,7 @@ class TeamPage extends StatelessWidget {
         phone: "(11) 98888-0003",
         cpf: "999.888.777-66",
         email: "carlos@gmail.com",
-        tipofunc: "Entregadores",
+        tipofunc: "Entregador",
         inicio: '10/07/2025',
       ),
     ];
@@ -152,7 +151,7 @@ class TeamPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go('/more/visits/new_servant');
+          context.go('/more/team/new_servant');
         },
         child: Icon(Icons.add),
       ),

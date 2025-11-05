@@ -1,5 +1,4 @@
 import 'package:core/widgets/card_header.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 class NewServantPage extends StatefulWidget {
@@ -10,24 +9,9 @@ class NewServantPage extends StatefulWidget {
 }
 
 class _NewServantPageState extends State<NewServantPage> {
-  final TextEditingController comprovanteController = TextEditingController();
-
-  Future<void> _pickComprovante() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'png'],
-    );
-
-    if (result != null && result.files.isNotEmpty) {
-      setState(() {
-        comprovanteController.text = result.files.single.name;
-      });
-    }
-  }
 
   @override
   void dispose() {
-    comprovanteController.dispose();
     super.dispose();
   }
 
@@ -42,42 +26,22 @@ class _NewServantPageState extends State<NewServantPage> {
             _buildCardHeader(),
 
             _buildSection(
+              title: "Informações de Acesso",
+              icon: Icons.login,
+              children: [
+                _buildTextField("E-mail *"),
+                _buildTextField("Senha *"),
+                _buildTextField("Confirme sua senha *"),
+              ],
+            ),
+
+            _buildSection(
               title: "Informações Pessoais",
               icon: Icons.person,
               children: [
-                _buildTextField("Nome do Responsável *"),
+                _buildTextField("Nome *"),
                 _buildTextField("CPF *"),
-                _buildTextField("Telefone"),
-              ],
-            ),
-            
-            // membros da família
-            _buildSection(
-              title: "Endereço",
-              icon: Icons.location_on,
-              children: [
-                _buildTextField("CEP"),
-                _buildTextField("Rua *"),
-                _buildTextField("Número *"),
-                _buildTextField("Bairro *"),
-                _buildTextField("Estado *"),
-            
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: comprovanteController,
-                  readOnly: true,
-                  onTap:
-                      _pickComprovante, // <-- agora o campo todo abre o seletor
-                  decoration: InputDecoration(
-                    labelText: "Comprovante de Endereço *",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    suffixIcon: const Icon(
-                      Icons.upload_file,
-                    ), // ícone fica só visual
-                  ),
-                ),
+                _buildTextField("Telefone *"),
               ],
             ),
             const SizedBox(height: 20),

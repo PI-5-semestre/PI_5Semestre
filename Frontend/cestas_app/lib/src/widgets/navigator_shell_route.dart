@@ -27,7 +27,7 @@ class NavigatorShellRouteWidget extends StatelessWidget {
           }),
         ),
         child: NavigationBar(
-          // backgroundColor: theme.colorScheme.secondaryFixed,
+          backgroundColor: theme.colorScheme.surfaceContainerLow,
           //animationDuration: const Duration(milliseconds: 400),
           selectedIndex: shell.currentIndex,
           onDestinationSelected: (index) => shell.goBranch(
