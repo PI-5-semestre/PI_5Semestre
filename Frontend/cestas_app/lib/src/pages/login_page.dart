@@ -1,6 +1,7 @@
 import 'package:core/widgets/button_widget.dart';
 import 'package:core/widgets/input_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -72,7 +73,7 @@ class LoginPage extends StatelessWidget {
               const SizedBox(height: 10),
               GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, '/register');
+                  context.go('/more/register');
                 },
                 child: const Text(
                   "Não tem conta? Cadastre-se",

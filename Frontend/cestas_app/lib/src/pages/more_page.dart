@@ -8,7 +8,6 @@ class MorePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F6FB),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -93,7 +92,6 @@ class MorePage extends StatelessWidget {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1E2A46),
               fontFamily: 'Poppins',
             ),
           ),
@@ -211,7 +209,6 @@ class _OptionTile extends StatelessWidget {
           style: const TextStyle(
             fontSize: 16,
             fontFamily: 'Poppins',
-            color: Color(0xFF1E2A46),
           ),
         ),
         trailing: const Icon(
