@@ -11,7 +11,9 @@ import 'package:cestas_app/src/pages/more_page.dart';
 import 'package:cestas_app/src/pages/new_password_page.dart';
 import 'package:cestas_app/src/pages/register_page.dart';
 import 'package:cestas_app/src/pages/stock/stock_page.dart';
-import 'package:cestas_app/src/pages/team_page.dart';
+import 'package:cestas_app/src/pages/teams/edit_servant_page.dart';
+import 'package:cestas_app/src/pages/teams/new_servant_page.dart';
+import 'package:cestas_app/src/pages/teams/team_page.dart';
 import 'package:cestas_app/src/pages/visits_page.dart';
 import 'package:cestas_app/src/widgets/navigator_shell_route.dart';
 import 'package:go_router/go_router.dart';
@@ -101,7 +103,24 @@ final routes = GoRouter(
                   path: 'new_password',
                   builder: (context, state) => NewPasswordPage(),
                 ),
-                GoRoute(path: 'team', builder: (context, state) => TeamPage()),
+                GoRoute(
+                  path: 'team',
+                  builder: (context, state) => TeamPage(),
+                  routes: [
+                    GoRoute(
+                      path: 'new_servant',
+                      builder: (context, state) => NewServantPage(),
+                    ),
+                    GoRoute(
+                      path: 'edit_servant',
+                      builder: (context, state) => EditServantPage(),
+                    ),
+                    GoRoute(
+                      path: 'edit_servant/:id',
+                      builder: (context, state) => VisitsPage(),
+                    ),
+                  ],
+                ),
               ],
             ),
           ],
