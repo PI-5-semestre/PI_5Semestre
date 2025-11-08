@@ -5,7 +5,7 @@ from app.schemas.users import UserResp
 class AuthReq(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    login: str
+    email: str
     password: str
     
 

@@ -1,33 +1,23 @@
 from sqlalchemy import (
-    Column,
-    Integer,
     String,
-    Boolean,
-    DateTime,
     ForeignKey,
     Index,
     Enum,
     DECIMAL,
-    Table,
     CheckConstraint,
-    select,
+    LargeBinary,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
-from sqlalchemy.sql import func
-from sqlalchemy.dialects.postgresql import JSONB
-from datetime import datetime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from enum import Enum as PyEnum
 from typing import TYPE_CHECKING, Optional, List
 from decimal import Decimal
 from .base_modal import BaseModel
-from dateutil.relativedelta import relativedelta
 
 if TYPE_CHECKING:
-    from models.users import Account
-    from models.Institutions import Institution
+    from .Institutions import Institution
 
 
-class SituationType(PyEnum):
+class SituationType(str, PyEnum):
     PENDING = "PENDING"
     ACTIVE = "ACTIVE"
     INACTIVE = "INACTIVE"
@@ -35,87 +25,116 @@ class SituationType(PyEnum):
 
 
 class Family(BaseModel):
-    __tablename__ = "families"
+    __tablename__ = "account_families"
 
-    owner_id: Mapped[int] = mapped_column(
-        ForeignKey("accounts.id"), nullable=False, unique=True
+    name: Mapped[str] = mapped_column(
+        String(100), nullable=False, comment="Nome do responsável pela família"
     )
-    family_size: Mapped[int] = mapped_column(nullable=False)
-
-    address: Mapped[str] = mapped_column(String(300), nullable=False)
-    number: Mapped[str] = mapped_column(String(10), nullable=False)
-    complement: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    zipcode: Mapped[str] = mapped_column(String(9), nullable=False)
-    district: Mapped[str] = mapped_column(String(100), nullable=False)
-    city: Mapped[str] = mapped_column(String(100), nullable=False)
-    state: Mapped[str] = mapped_column(String(2), nullable=False)
-
-    proof_address: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
-    proof_address_verificed: Mapped[bool] = mapped_column(Boolean, default=False)
-
-    monthly_income: Mapped[Decimal] = mapped_column(DECIMAL(10, 2), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    situation_type: Mapped[SituationType] = mapped_column(
-        Enum(SituationType), nullable=False, default=SituationType.PENDING
+    cpf: Mapped[str] = mapped_column(
+        String(11),
+        nullable=False,
+        unique=True,
+        index=True,
+        comment="CPF do responsável",
     )
-    membership_id: Mapped[int] = mapped_column(
-        ForeignKey("institutions.id"), nullable=False
+    mobile_phone: Mapped[str] = mapped_column(
+        String(15), nullable=False, comment="Telefone celular para contato"
     )
 
-    benefit_expiration_date: Mapped[Optional[datetime]] = mapped_column(
-        nullable=True
+    zip_code: Mapped[str] = mapped_column(
+        String(9), nullable=False, comment="CEP do endereço"
+    )
+    street: Mapped[str] = mapped_column(String(100), nullable=False, comment="Nome da rua")
+    number: Mapped[str] = mapped_column(
+        String(10), nullable=False, comment="Número do endereço"
+    )
+    neighborhood: Mapped[str] = mapped_column(
+        String(100), nullable=False, comment="Nome do bairro"
+    )
+    state: Mapped[str] = mapped_column(
+        String(2), nullable=False, comment="UF do estado"
     )
 
+    situation: Mapped[SituationType] = mapped_column(
+        Enum(SituationType, native_enum=False),
+        nullable=False,
+        default=SituationType.PENDING,
+        index=True,
+        comment="Situação atual da família no programa",
+    )
+    income: Mapped[Decimal] = mapped_column(
+        DECIMAL(10, 2),
+        nullable=False,
+        default=Decimal("0.00"),
+        comment="Renda mensal da família",
+    )
+    description: Mapped[Optional[str]] = mapped_column(
+        String(500), nullable=True, comment="Observações adicionais sobre a família"
+    )
+
+    institution_id: Mapped[int] = mapped_column(
+        ForeignKey("institutions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+        comment="Instituição responsável pela família",
+    )
     membership: Mapped["Institution"] = relationship(
-        "Institution", back_populates="families"
+        "Institution", back_populates="families", lazy="joined"
     )
-    owner: Mapped["Account"] = relationship(
-        "Account",
-        back_populates="owned_family",
-        foreign_keys=[owner_id],
-        primaryjoin="Family.owner_id == Account.id",
+    documents: Mapped[List["DocFamily"]] = relationship(
+        "DocFamily",
+        back_populates="family",
+        cascade="all, delete-orphan",
+        lazy="selectin",
     )
-    members: Mapped[List["Account"]] = relationship(
-        "Account", back_populates="family", primaryjoin="Family.id == Account.family_id"
+
+    __table_args__ = (
+        CheckConstraint("length(cpf) = 11", name="check_cpf_length"),
+        CheckConstraint("length(state) = 2", name="check_state_length"),
+        CheckConstraint("income >= 0", name="check_income_positive"),
+        Index("idx_family_cpf", "cpf"),
+        Index("idx_family_situation", "situation"),
+        Index("idx_family_institution", "institution_id"),
+        Index("idx_family_name", "name"),
     )
-    
-    visits: Mapped[List["VisitFamily"]] = relationship(
-        "VisitFamily", back_populates="family", primaryjoin="Family.id == VisitFamily.family_id"
+
+    def __repr__(self) -> str:
+        return f"<Family(id={self.id}, name='{self.name}', cpf='{self.cpf}', situation='{self.situation.value}')>"
+
+
+class DocFamily(BaseModel):
+    __tablename__ = "doc_families"
+
+    doc_type: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        index=True,
+        comment="Tipo do documento (ex: RG, comprovante de residência, etc.)",
     )
-    def add_benefit(self):
-            if self.benefit_expiration_date:
-                self.benefit_expiration_date += relativedelta(months=3)
-            else:
-                self.benefit_expiration_date = datetime.now() + relativedelta(months=3)
-            return self.benefit_expiration_date
+    doc_file: Mapped[bytes] = mapped_column(
+        LargeBinary, nullable=False, comment="Arquivo do documento em formato binário"
+    )
+    file_name: Mapped[Optional[str]] = mapped_column(
+        String(255), nullable=True, comment="Nome original do arquivo"
+    )
+    mime_type: Mapped[Optional[str]] = mapped_column(
+        String(100), nullable=True, comment="Tipo MIME do arquivo"
+    )
 
-    def has_necessity(self):
-            if self.benefit_expiration_date:
-                self.benefit_expiration_date += relativedelta(months=1)
-            return self.benefit_expiration_date
-        
-    def remove_benefit(self):
-            self.benefit_expiration_date = None
-            return self.benefit_expiration_date
+    family_id: Mapped[int] = mapped_column(
+        ForeignKey("account_families.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+        comment="Família à qual o documento pertence",
+    )
+    family: Mapped["Family"] = relationship(
+        "Family", back_populates="documents", lazy="joined"
+    )
 
+    __table_args__ = (
+        Index("idx_doc_family_id", "family_id"),
+        Index("idx_doc_type", "doc_type"),
+    )
 
-class VisitFamily(BaseModel):
-    __tablename__ = "visitfamilies"
-
-    family_id: Mapped[int] = mapped_column(ForeignKey("families.id"), nullable=False)
-    visit_date: Mapped[datetime] = mapped_column(nullable=False)  
-    attempt_count: Mapped[int] = mapped_column(default=0)
-    success: Mapped[bool] = mapped_column(default=False)
-    description: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-
-    family: Mapped["Family"] = relationship("Family", back_populates="visits")
-
-    def reschedule(self, new_date: datetime):
-        self.attempt_count += 1
-        if self.attempt_count >= 3:
-            self.success = False
-            self.description = "Maximum reschedule attempts reached"
-            raise Exception("Maximum reschedule attempts reached")
-        else:
-            self.visit_date = new_date
-
+    def __repr__(self) -> str:
+        return f"<DocFamily(id={self.id}, doc_type='{self.doc_type}', family_id={self.family_id})>"
