@@ -22,3 +22,11 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     SECRET_KEY: str
     ALGORITHM: str
+
+    DEFAULT_PAGE_SIZE: int = 20
+    MAX_PAGE_SIZE: int = 100
+    MIN_PAGE_SIZE: int = 1
+    DEFAULT_SKIP: int = 0
+
+    ALLOWED_MIME_TYPES: str = "application/pdf,image/png,image/jpeg,image/jpg"
+    MAX_FILE_SIZE_MB: int = 5

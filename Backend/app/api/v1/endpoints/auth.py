@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 router = APIRouter(prefix="/auth", tags=["auth"])
 Session = Annotated[AsyncSession, Depends(get_session)]
 
+# TODO ajustar
+
 
 @router.post("/login", response_model=AuthResp)
 async def login(
