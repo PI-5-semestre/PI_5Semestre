@@ -10,12 +10,9 @@ class FamilyCard extends StatelessWidget {
   final String observations;
   final String status; // ativo | pendente
   final String deliveryStatus; // recebendo | aguardando
-  final String recommended;
+  final String recommended; //Pequena | Media | Grande
   final bool? selected;
   final ValueChanged<bool?>? onSelected;
-  
-
-
 
   const FamilyCard({
     super.key,
@@ -62,7 +59,7 @@ class FamilyCard extends StatelessWidget {
       case "Recomendado Média":
         return Colors.orange;
       case "Recomendado Grande":
-        return Colors.blue;  
+        return Colors.blue;
       default:
         return Colors.grey;
     }
@@ -70,139 +67,179 @@ class FamilyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 4,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🔹 Nome + chips de status
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Row(
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        onTap: () {
+          showDialog<void>(
+            context: context,
+            builder: (BuildContext context) {
+              return Material(
+                type: MaterialType.transparency,
+                child: Center(
+                  child: Stack(
                     children: [
-                      if(selected != null && onSelected != null)
-                        Checkbox(
-                          value: selected,
-                          onChanged: onSelected,
-                        )else
-                          const SizedBox.shrink(),
-                      Expanded(
-                        child: Text(
-                          name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).canvasColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Detalhes da Família',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.close),
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Divider(),
+
+                            Expanded(
+                              child: ListView(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                                children: [
+                                  ListTile(
+                                    leading: const Icon(Icons.phone),
+                                    title: const Text('Telefone'),
+                                    subtitle: Text(phone),
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.group),
+                                    title: const Text('Membros'),
+                                    subtitle: Text('$members pessoas'),
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.attach_money),
+                                    title: const Text('Renda'),
+                                    subtitle: Text(
+                                      'R\$ ${income.toStringAsFixed(2)}',
+                                    ),
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(
+                                      Icons.credit_card_rounded,
+                                    ),
+                                    title: const Text('CPF'),
+                                    subtitle: Text(cpf),
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.location_on),
+                                    title: const Text('Endereço'),
+                                    subtitle: Text(address),
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.article),
+                                    title: const Text('Observações'),
+                                    subtitle: Text(observations),
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.star),
+                                    title: const Text('Recomendação'),
+                                    subtitle: Text(recommended),
+                                  ),
+                                  const SizedBox(height: 80),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Positioned(
+                        bottom: 16,
+                        right: 16,
+                        child: FloatingActionButton(
+                          onPressed: () {
+                            // Por enquanto não faz nada
+                          },
+                          child: const Icon(Icons.edit),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                //mudei aqui
-              ],
-            ),
-
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              runSpacing: -6,
-              children: [
-                _buildChip(recommended, _getBasketColor(recommended)),
-                _buildChip(status, _getStatusColor(status)),
-                _buildChip(deliveryStatus, _getDeliveryColor(deliveryStatus)),                
-              ],
-            ),
-            const SizedBox(height: 8),
-            // 🔹 Linha com telefone, membros, renda e cpf
-            Wrap(
-              spacing: 16,
-              runSpacing: 8,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.phone, size: 16),
-                    const SizedBox(width: 4),
-                    Text(phone),
-                  ],
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.group, size: 16),
-                    const SizedBox(width: 4),
-                    Text("$members pessoas"),
-                  ],
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.attach_money, size: 16,),
-                    Text("Renda: R\$ ${income.toStringAsFixed(2)}"),
-                    Text("CPF: $cpf"),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // 🔹 Endereço
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.location_on, size: 16),
-                const SizedBox(width: 4),
-                Expanded(child: Text(address)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // 🔹 Observações Color(0xFFFBF9FA),
-            Container(
-              decoration: BoxDecoration(
-                color: Color.fromARGB(17, 171, 171, 171),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              padding: const EdgeInsets.all(12),
-              child: Text.rich(
-                TextSpan(
-                  text: "Observações: ",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                  children: [
-                    TextSpan(
-                      text: observations,
-                      style: const TextStyle(fontWeight: FontWeight.normal),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // 🔹 Botões
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(icon: const Icon(Icons.edit), onPressed: () {}),
-                if (status == "pendente")
-                  ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.calendar_today),
-                    label: const Text("Solicitar Visita"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                    ),
+              );
+            },
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              if (selected != null && onSelected != null)
+                Checkbox(value: selected, onChanged: onSelected)
+              else
+                const SizedBox.shrink(),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SizedBox(
+                  width: 300,
+                  height: 100,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        alignment: WrapAlignment.start,
+                        children: [
+                          _buildChip(recommended, _getBasketColor(recommended)),
+                          _buildChip(status, _getStatusColor(status)),
+                          _buildChip(
+                            deliveryStatus,
+                            _getDeliveryColor(deliveryStatus),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-              ],
-            ),
-          ],
+                ),
+              ),
+              if (status == "pendente")
+                FloatingActionButton.small(
+                  onPressed: () {},
+                  elevation: 1,
+                  child: const Icon(Icons.calendar_today),
+                ),
+            ],
+          ),
         ),
       ),
     );
