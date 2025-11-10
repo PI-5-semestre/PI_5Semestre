@@ -1,26 +1,7 @@
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Boolean,
-    DateTime,
-    ForeignKey,
-    Index,
-    Enum,
-    DECIMAL,
-    Table,
-    CheckConstraint,
-    select,
-)
-from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
-from sqlalchemy.sql import func
-from sqlalchemy.dialects.postgresql import JSONB
-from datetime import datetime
+from sqlalchemy import String, Index, Enum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from enum import Enum as PyEnum
-from typing import Optional, List, TYPE_CHECKING
-from decimal import Decimal
-
-from app.models.products import StockItem
+from typing import List, TYPE_CHECKING, Any
 from .base_modal import BaseModel
 
 if TYPE_CHECKING:
@@ -36,33 +17,27 @@ class InstitutionType(PyEnum):
 class Institution(BaseModel):
     __tablename__ = "institutions"
 
-    name: Mapped[str] = mapped_column(String(200), nullable=False)
-    institutions_type: Mapped[InstitutionType] = mapped_column(
-        Enum(InstitutionType), nullable=False
-    )
-    owner_id: Mapped[int] = mapped_column(
-        ForeignKey("accounts.id"), nullable=False, unique=True
+    name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    institution_type: Mapped[InstitutionType] = mapped_column(
+        Enum(InstitutionType, native_enum=False), nullable=False
     )
 
-    __table_args__ = (Index("institutions_name_idx", name),)
-
-    owner: Mapped["Account"] = relationship(foreign_keys=[owner_id])
+    accounts: Mapped[List["Account"]] = relationship(
+        "Account", back_populates="institution"
+    )
 
     families: Mapped[List["Family"]] = relationship(
-        "Family", back_populates="membership"
-    )
-    stock_items: Mapped[List["StockItem"]] = relationship(
-        "StockItem", back_populates="institution"
+        "Family", back_populates="membership", cascade="all, delete-orphan"
     )
 
-    members: Mapped[List["Account"]] = relationship(
-        "Account",
-        back_populates="institution_membership",
-        foreign_keys="[Account.institution_id]"
+    stock_items: Mapped[List[Any]] = relationship(
+        "StockItem", back_populates="institution", cascade="all, delete-orphan"
     )
 
-    def __str__(self):
-        return f"<Institution(id={self.id}, name='{self.name}', type='{self.institutions_type.value}')>"
+    __table_args__ = (
+        Index("idx_institutions_name", "name"),
+        Index("idx_institutions_type", "institution_type"),
+    )
 
-    def affiliation(self):
-        return f"https://www.google.com/?affiliation={self.id}"
+    def __repr__(self):
+        return f"<Institution(id={self.id}, name='{self.name}', type='{self.institution_type.value}')>"

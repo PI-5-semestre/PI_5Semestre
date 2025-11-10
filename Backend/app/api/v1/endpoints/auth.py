@@ -1,23 +1,37 @@
 from http import HTTPStatus
-from typing import TYPE_CHECKING, Annotated, List, Any, Optional
+from typing import Annotated
+from datetime import datetime, timedelta
 
-from pathlib import Path
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.database import get_session
-from app.core.exceptions import DuplicatedError, NotFoundError
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
+import jwt
 
-from app.core.security import AuthBearer
+from app.core.database import get_session
+from app.core.exceptions import NotFoundError
+from app.core.settings import Settings
+from app.core.security import get_current_account
 from app.schemas.auth import AuthResp, AuthReq
-
-if TYPE_CHECKING:
-    from models.users import Account
+from app.schemas.users import UserResp
+from app.models.users import Account
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 Session = Annotated[AsyncSession, Depends(get_session)]
+settings = Settings()
+
+
+def create_access_token(account_id: int, expires_delta: timedelta = None) -> str:
+    if expires_delta is None:
+        expires_delta = timedelta(hours=24)
+
+    expire = datetime.utcnow() + expires_delta
+    to_encode = {"id": account_id, "exp": expire, "iat": datetime.utcnow()}
+
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
+    return encoded_jwt
 
 
 @router.post("/login", response_model=AuthResp)
@@ -25,22 +39,23 @@ async def login(
     session: Session,
     payload: AuthReq,
 ):
-
-    try:
-        result = await session.execute(
-            select(Account).where(
-                Account.login == payload.login, Account.senha == payload.password
-            )
+    result = await session.execute(
+        select(Account)
+        .options(selectinload(Account.profile))
+        .where(
+            Account.email == payload.email.lower().strip(),
+            Account.password == payload.password,
+            Account.active == True,
         )
-        auth = result.scalar_one_or_none()
-        return AuthResp.model_validate(auth)
-    except:
-        return HTTPStatus.NOT_FOUND, {"message": "Conta não encontrado"}
+    )
+    account = result.scalar_one_or_none()
 
+    if not account:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail="Invalid credentials or inactive account",
+        )
 
-# exemplo auxiliar ao auth
+    token = create_access_token(account.id)
 
-# async def get_current_user(
-#     session: Session,
-#     user_id: int = Depends(AuthBearer().authenticate)
-# ):
+    return AuthResp(account=UserResp.model_validate(account), token=token)
