@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 class FamilyCardModal extends StatelessWidget {
   final String name;
   final String phone;
@@ -239,7 +240,8 @@ class FamilyCardModal extends StatelessWidget {
                         right: 16,
                         child: FloatingActionButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/family/edit_family');
+                            context.go('/family/edit_family');
+                            Navigator.pop(context);
                           },
                           child: Icon(Icons.edit),
                         ),
