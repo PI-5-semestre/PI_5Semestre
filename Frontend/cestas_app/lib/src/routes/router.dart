@@ -19,7 +19,7 @@ import 'package:cestas_app/src/widgets/navigator_shell_route.dart';
 import 'package:go_router/go_router.dart';
 
 final routes = GoRouter(
-  initialLocation: '/dashboard',
+  initialLocation: '/login',
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
@@ -88,22 +88,6 @@ final routes = GoRouter(
                   builder: (context, state) => BasketPage(),
                 ),
                 GoRoute(
-                  path: 'login',
-                  builder: (context, state) => LoginPage(),
-                ),
-                GoRoute(
-                  path: 'register',
-                  builder: (context, state) => RegisterPage(),
-                ),
-                GoRoute(
-                  path: 'forgot_password',
-                  builder: (context, state) => ForgotPasswordPage(),
-                ),
-                GoRoute(
-                  path: 'new_password',
-                  builder: (context, state) => NewPasswordPage(),
-                ),
-                GoRoute(
                   path: 'team',
                   builder: (context, state) => TeamPage(),
                   routes: [
@@ -124,6 +108,21 @@ final routes = GoRouter(
               ],
             ),
           ],
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => LoginPage(),
+      routes: [
+        GoRoute(path: 'register', builder: (context, state) => RegisterPage()),
+        GoRoute(
+          path: 'forgot_password',
+          builder: (context, state) => ForgotPasswordPage(),
+        ),
+        GoRoute(
+          path: 'new_password',
+          builder: (context, state) => NewPasswordPage(),
         ),
       ],
     ),

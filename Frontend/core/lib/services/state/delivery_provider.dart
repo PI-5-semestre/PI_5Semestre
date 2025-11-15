@@ -1,4 +1,4 @@
-import 'package:core/Models/delivery.dart';
+import 'package:core/models/delivery.dart';
 import 'package:core/services/state/base_provider.dart';
 
 class DeliveryProvider extends BaseProvider<List<Delivery>> {

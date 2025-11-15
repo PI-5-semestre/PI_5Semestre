@@ -1,0 +1,16 @@
+import 'package:core/models/Family/family_model.dart';
+import 'package:core/repositories/family/family_repository_impl.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'family_view_model.g.dart';
+
+@riverpod
+class FamilyViewModel extends _$FamilyViewModel {
+  
+  @override
+  Future<List<FamilyModel>> build() async{
+    return await ref.watch(familyRepositoryProvider).findAll();
+  }
+
+  
+}

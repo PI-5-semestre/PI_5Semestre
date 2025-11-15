@@ -19,6 +19,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   String? _errorMessage;
   bool _isRedirecting = false;
 
+ 
+
   @override
   void dispose() {
     userController.dispose();
@@ -29,12 +31,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _login() async {
     final email = userController.text.trim();
     final password = passController.text.trim();
-    
+
     // Limpa erro anterior
     setState(() {
       _errorMessage = null;
     });
-    
+
     // Validação manual
     if (email.isEmpty) {
       setState(() {
@@ -42,28 +44,28 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       });
       return;
     }
-    
+
     if (!email.contains('@')) {
       setState(() {
         _errorMessage = 'Por favor, digite um e-mail válido';
       });
       return;
     }
-    
+
     if (password.isEmpty) {
       setState(() {
         _errorMessage = 'Por favor, digite sua senha';
       });
       return;
     }
-    
+
     if (password.length < 6) {
       setState(() {
         _errorMessage = 'A senha deve ter pelo menos 6 caracteres';
       });
       return;
     }
-    
+
     await ref.read(authProvider.notifier).login(email, password);
   }
 
@@ -77,6 +79,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final vm = ref.read(authProvider.notifier);
 
     ref.listen<AsyncValue<User?>>(authProvider, (previous, next) {
       next.whenData((user) {
@@ -173,7 +176,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   width: 50,
                   height: 50,
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Colors.blueAccent,
+                    ),
                   ),
                 )
               else
@@ -227,7 +232,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (error == null) {
       return 'Ocorreu um erro desconhecido';
     }
-    
+
     final errorString = error.toString();
     if (errorString.contains('Exception: ')) {
       return errorString.replaceFirst('Exception: ', '');
