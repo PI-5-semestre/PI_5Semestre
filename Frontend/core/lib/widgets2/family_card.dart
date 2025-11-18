@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 class FamilyCardModal extends StatelessWidget {
   final String name;
   final String phone;
   final int members;
-  final double income;
+  final String income;
   final String cpf;
   final String address;
   final String observations;

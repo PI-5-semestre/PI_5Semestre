@@ -1,3 +1,4 @@
+import 'package:core/features/family/domain/family_view_model.dart';
 import 'package:core/models/Family/family_model.dart';
 import 'package:core/features/family/domain/new_family_view_model.dart';
 import 'package:core/widgets/card_header.dart';
@@ -5,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 class NewFamilyPage extends ConsumerStatefulWidget {
   const NewFamilyPage({super.key});
@@ -24,6 +26,38 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
   final numberController = TextEditingController();
   final neighborhoodController = TextEditingController();
   final stateController = TextEditingController();
+
+  final estados = [
+    'AC',
+    'AL',
+    'AP',
+    'AM',
+    'BA',
+    'CE',
+    'DF',
+    'ES',
+    'GO',
+    'MA',
+    'MT',
+    'MS',
+    'MG',
+    'PA',
+    'PB',
+    'PR',
+    'PE',
+    'PI',
+    'RJ',
+    'RN',
+    'RS',
+    'RO',
+    'RR',
+    'SC',
+    'SP',
+    'SE',
+    'TO',
+  ];
+
+  String? selectedEstado;
 
   Future<void> _pickComprovante() async {
     final result = await FilePicker.platform.pickFiles(
@@ -78,7 +112,8 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
                 _buildTextField("Rua *", controller: streetController),
                 _buildTextField("Número *", controller: numberController),
                 _buildTextField("Bairro *", controller: neighborhoodController),
-                _buildTextField("Estado *", controller: stateController),
+                // _buildTextField("Estado *", controller: stateController),
+                _buildEstadoDropdown(),
 
                 const SizedBox(height: 12),
                 TextFormField(
@@ -119,8 +154,37 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
             institution_id: 1,
           );
 
-          await familyVm.create(family);
+          final ok = await familyVm.create(family);
+
+          if (ok) {
+
+            ref.invalidate(familyViewModelProvider);
+
+            if (!mounted) return;
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.white),
+                    SizedBox(width: 12),
+                    Text("Família cadastrada com sucesso!"),
+                  ],
+                ),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
+
+            await Future.delayed(const Duration(milliseconds: 700));
+
+            if (!mounted) return;
+
+            context.go('/family');
+          }
         },
+
         child: const Icon(Icons.check),
       ),
     );
@@ -183,6 +247,25 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEstadoDropdown() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: DropdownButtonFormField<String>(
+        items: estados.map((e) {
+          return DropdownMenuItem(value: e, child: Text(e));
+        }).toList(),
+        onChanged: (value) {
+          stateController.text = value ?? '';
+        },
+        value: stateController.text.isEmpty ? null : stateController.text,
+        decoration: InputDecoration(
+          labelText: "Estado *",
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
