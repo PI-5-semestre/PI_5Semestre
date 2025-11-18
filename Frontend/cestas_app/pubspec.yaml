@@ -53,6 +53,7 @@ dependencies:
   shared_preferences: ^2.5.3
   url_launcher: ^6.3.2
   validatorless: ^1.2.5
+  shimmer: ^3.0.0
 
 
 dev_dependencies:

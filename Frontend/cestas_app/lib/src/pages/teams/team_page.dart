@@ -1,41 +1,79 @@
+import 'package:core/features/user/providers/user_provider.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/statCard.dart';
+import 'package:core/widgets2/skeleton/stat_card_skeleton.dart';
 import 'package:core/widgets2/team_card.dart';
 import 'package:core/widgets2/segmented_card_switcher.dart';
+import 'package:core/widgets2/skeleton/team_card_skeleton.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class TeamPage extends StatelessWidget {
+class TeamPage extends ConsumerWidget {
   const TeamPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+
+    final userState = ref.watch(userControllerProvider);
+    final controller = ref.read(userControllerProvider.notifier);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (userState.users.isEmpty && !userState.isLoading) {
+        controller.fetchUsers();
+      }
+    });
+
+    if (userState.error != null) {
+      return Scaffold(
+        body: Center(
+          child: Text(
+            "Erro: ${userState.error!}",
+            style: const TextStyle(color: Colors.red),
+          ),
+        ),
+      );
+    }
+
+    /// Dados convertidos para TeamCardModal
+    final equipes = userState.users.map((account) {
+      final profile = account.profile;
+
+      return TeamCardModal(
+        name: profile?.name ?? 'Sem nome',
+        phone: profile?.mobile ?? '',
+        cpf: profile?.cpf ?? '',
+        email: account.email,
+        tipofunc: account.roleName,
+        inicio: account.created.substring(0, 10),
+      );
+    }).toList();
 
     final cards = [
       StatCard(
         icon: Icons.person,
         colors: [Color(0xFFAD46FF), Color(0xFF9810FA)],
         title: "Coordenadores",
-        value: "3",
+        value: equipes.where((e) => e.tipofunc == "Coordenador").length.toString(),
       ),
       StatCard(
         icon: Icons.sports_motorsports,
         colors: [Color(0xFF3d89ff), Color(0xFF165ffc)],
         title: "Entregadores",
-        value: "2",
+        value: equipes.where((e) => e.tipofunc == "Entregador").length.toString(),
       ),
       StatCard(
         icon: Icons.content_paste,
         colors: [Color(0xFF00C951), Color(0xFF00A63E)],
         title: "Assistentes Sociais",
-        value: "1",
+        value: equipes.where((e) => e.tipofunc == "Assistente Social").length.toString(),
       ),
       StatCard(
         icon: Icons.soup_kitchen,
         colors: [Color(0xFFF0B100), Color(0xFFD08700)],
         title: "Voluntários",
-        value: "1",
+        value: equipes.where((e) => e.tipofunc == "Voluntário").length.toString(),
       ),
     ];
 
@@ -46,41 +84,6 @@ class TeamPage extends StatelessWidget {
       Icons.soup_kitchen,
     ];
 
-    final equipes = [
-      TeamCardModal(
-        name: "Maria da Silva Santos",
-        phone: "(11) 99999-0001",
-        cpf: "123.456.789-00",
-        email: "maria@gmail.com",
-        tipofunc: "Coordenador",
-        inicio: '31/05/2023',
-      ),
-      TeamCardModal(
-        name: "João Carlos Santos",
-        phone: "(11) 99999-0002",
-        cpf: "987.654.321-00",
-        email: "joao@gmail.com",
-        tipofunc: "Voluntário",
-        inicio: '20/06/2024',
-      ),
-      TeamCardModal(
-        name: "Ana Oliveira",
-        phone: "(11) 98888-0002",
-        cpf: "555.666.777-88",
-        email: "ana@gmail.com",
-        tipofunc: "Assistente Social",
-        inicio: '20/06/2024',
-      ),
-      TeamCardModal(
-        name: "Carlos Mendes",
-        phone: "(11) 98888-0003",
-        cpf: "999.888.777-66",
-        email: "carlos@gmail.com",
-        tipofunc: "Entregador",
-        inicio: '10/07/2025',
-      ),
-    ];
-
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
@@ -88,62 +91,48 @@ class TeamPage extends StatelessWidget {
         child: ListView(
           children: [
             Column(
-              mainAxisSize: MainAxisSize.max,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [_buildCardHeader(), const SizedBox(height: 16)],
-                ),
-                SizedBox(height: 8),
-                // Search
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: "Nome, celular ou cpf...",
-                        prefixIcon: Icon(Icons.search),
-                        border: InputBorder.none,
+                _buildCardHeader(),
+                const SizedBox(height: 16),
+                _buildSearchField(),
+                const SizedBox(height: 8),
+                if (userState.isLoading)
+                  Row(
+                    children: const [
+                      Expanded(child: StatCardSkeleton()),
+                    ],
+                  )
+                else
+                  SegmentedCardSwitcher(options: cards, icons: iconCards),
+                const SizedBox(height: 20),
+                _buildEquipesHeader(theme),
+
+                if (userState.isLoading && userState.users.isEmpty)
+                  Column(
+                    children: List.generate(
+                      4,
+                      (_) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: const TeamCardSkeleton(),
                       ),
                     ),
+                  )
+                else
+                  // Lista real
+                  Column(
+                    children: equipes.map((team) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 4,
+                        ),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: team,
+                        ),
+                      );
+                    }).toList(),
                   ),
-                ),
-                SizedBox(height: 8),
-
-                SegmentedCardSwitcher(options: cards, icons: iconCards),
-
-                SizedBox(height: 20),
-
-                Align(
-                  alignment: AlignmentGeometry.topLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      "Equipes",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.outline,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Lista de famílias
-                Column(
-                  children: equipes.map((team) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8.0,
-                        horizontal: 4.0,
-                      ), // horizontal agora
-                      child: SizedBox(width: double.infinity, child: team),
-                    );
-                  }).toList(),
-                ),
               ],
             ),
           ],
@@ -153,7 +142,42 @@ class TeamPage extends StatelessWidget {
         onPressed: () {
           context.go('/more/team/new_servant');
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.all(4),
+        child: TextField(
+          decoration: InputDecoration(
+            hintText: "Nome, celular ou cpf...",
+            prefixIcon: Icon(Icons.search),
+            border: InputBorder.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEquipesHeader(ThemeData theme) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Text(
+          "Equipes",
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.outline,
+          ),
+        ),
       ),
     );
   }
@@ -162,7 +186,7 @@ class TeamPage extends StatelessWidget {
     return CardHeader(
       title: 'Funcionários Cadastrados',
       subtitle: 'Gerencie sua equipe',
-      colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
+      colors: const [Color(0xFF2B7FFF), Color(0xFF155DFC)],
       icon: Icons.group,
     );
   }
