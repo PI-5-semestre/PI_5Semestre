@@ -42,3 +42,27 @@ class InstitutionResp(BaseModel):
     active: bool
     name: str
     institution_type: str
+
+
+class DeliveryCreate(BaseModel):
+    family_id: int
+    date: datetime
+    account_id: int
+    description: Optional[str] = None
+
+class DeliveryPut(BaseModel):
+    date: datetime
+    account_id: int
+    description: Optional[str] = None
+
+class DeliveryResp(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    active: bool
+    created: datetime
+    institution_id: int
+    family_id: int
+    delivery_date: str
+    account_id: int
+    description: Optional[str] = None
