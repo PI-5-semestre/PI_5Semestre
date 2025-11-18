@@ -33,7 +33,7 @@ final class FamilyViewModelProvider
   FamilyViewModel create() => FamilyViewModel();
 }
 
-String _$familyViewModelHash() => r'258125eefffa9741a0ad117a1ef24e63d1531125';
+String _$familyViewModelHash() => r'6040dd25bf6b5ba6d3d02b256e4422a9d2e563ff';
 
 abstract class _$FamilyViewModel extends $AsyncNotifier<List<FamilyModel>> {
   FutureOr<List<FamilyModel>> build();
