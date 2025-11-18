@@ -15,6 +15,7 @@ from .base_modal import BaseModel
 
 if TYPE_CHECKING:
     from .Institutions import Institution
+    from .users import Account
 
 
 class SituationType(str, PyEnum):
@@ -78,11 +79,25 @@ class Family(BaseModel):
         index=True,
         comment="Instituição responsável pela família",
     )
+    
+    size: Mapped[int] = mapped_column(
+        default=1,
+        nullable=False,
+        comment="Número de membros na família"
+    )
+    
     membership: Mapped["Institution"] = relationship(
         "Institution", back_populates="families", lazy="joined"
     )
     documents: Mapped[List["DocFamily"]] = relationship(
         "DocFamily",
+        back_populates="family",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    deliveries: Mapped[List["FamilyDelivery"]] = relationship(
+        "FamilyDelivery",
         back_populates="family",
         cascade="all, delete-orphan",
         lazy="selectin",
@@ -138,3 +153,55 @@ class DocFamily(BaseModel):
 
     def __repr__(self) -> str:
         return f"<DocFamily(id={self.id}, doc_type='{self.doc_type}', family_id={self.family_id})>"
+
+
+class FamilyDelivery(BaseModel):
+    __tablename__ = "family_deliveries"
+    
+    institution_id: Mapped[int] = mapped_column(
+        ForeignKey("institutions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+        comment="ID da instituição que realizou a entrega",
+    )
+    
+    family_id: Mapped[int] = mapped_column(
+        ForeignKey("account_families.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+        comment="ID da família que recebeu a entrega",
+    )
+    
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("accounts.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    
+    delivery_date: Mapped[str] = mapped_column(
+        String(25), nullable=False, comment="Data e hora da entrega"
+    )
+    
+    description: Mapped[Optional[str]] = mapped_column(
+        String(500), nullable=True, comment="Descrição da entrega realizada"
+    )
+    
+    institution: Mapped["Institution"] = relationship(
+        "Institution", back_populates="deliveries", lazy="joined"
+    )
+    
+    family: Mapped["Family"] = relationship(
+        "Family", back_populates="deliveries", lazy="joined"
+    )
+
+    account: Mapped[Optional["Account"]] = relationship(
+        "Account", back_populates="deliveries", lazy="joined"
+    )
+
+    __table_args__ = (
+        Index("idx_family_delivery_family_id", "family_id"),
+        Index("idx_family_delivery_date", "delivery_date"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<FamilyDelivery(id={self.id}, family_id={self.family_id}, delivery_date='{self.delivery_date}')>"
