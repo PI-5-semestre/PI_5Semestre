@@ -1,5 +1,5 @@
-import 'package:core/Models/delivery.dart';
-import 'package:core/Models/stock.dart';
+import 'package:core/models/delivery.dart';
+import 'package:core/models/stock.dart';
 import 'package:core/services/state/base_provider.dart';
 
 class StockProvider extends BaseProvider<List<Stock>> {

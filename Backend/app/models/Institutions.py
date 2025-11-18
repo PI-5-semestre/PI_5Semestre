@@ -6,7 +6,7 @@ from .base_modal import BaseModel
 
 if TYPE_CHECKING:
     from .users import Account
-    from .families import Family
+    from .families import Family, FamilyDelivery
 
 
 class InstitutionType(PyEnum):
@@ -32,6 +32,10 @@ class Institution(BaseModel):
 
     stock_items: Mapped[List[Any]] = relationship(
         "StockItem", back_populates="institution", cascade="all, delete-orphan"
+    )
+    
+    deliveries: Mapped[List[Any]] = relationship(
+        "FamilyDelivery", back_populates="institution", cascade="all, delete-orphan"
     )
 
     __table_args__ = (

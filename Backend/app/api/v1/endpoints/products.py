@@ -6,8 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
 from app.core.settings import Settings
+from app.core.security import get_current_account
 from app.api.v1.dependencies import PaginationParams
 from app.models.products import StockItem, StockHistory
+from app.models.users import Account
 from app.schemas.products import StockItemResp, StockHistoryResp
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -19,6 +21,7 @@ settings = Settings()
 @router.get("/", response_model=list[StockItemResp])
 async def list_all_products(
     session: Session,
+    current_account: Annotated[Account, Depends(get_current_account)],
     pagination: dict = Depends(PaginationParams),
     active: Optional[bool] = Query(None),
     institution_id: Optional[int] = Query(None, gt=0),
@@ -46,6 +49,7 @@ async def list_all_products(
 @router.get("/history", response_model=list[StockHistoryResp])
 async def list_all_stock_history(
     session: Session,
+    current_account: Annotated[Account, Depends(get_current_account)],
     pagination: dict = Depends(PaginationParams),
 ):
     query = (

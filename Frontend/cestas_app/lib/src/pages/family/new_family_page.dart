@@ -1,17 +1,29 @@
+import 'package:core/models/Family/family_model.dart';
+import 'package:core/features/family/domain/new_family_view_model.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class NewFamilyPage extends StatefulWidget {
+class NewFamilyPage extends ConsumerStatefulWidget {
   const NewFamilyPage({super.key});
 
   @override
-  State<NewFamilyPage> createState() => _NewFamilyPageState();
+  ConsumerState<NewFamilyPage> createState() => _NewFamilyPageState();
 }
 
-class _NewFamilyPageState extends State<NewFamilyPage> {
+class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
   final TextEditingController comprovanteController = TextEditingController();
+  final nameController = TextEditingController();
+  final cpfController = TextEditingController();
+  final phoneController = TextEditingController();
+
+  final cepController = TextEditingController();
+  final streetController = TextEditingController();
+  final numberController = TextEditingController();
+  final neighborhoodController = TextEditingController();
+  final stateController = TextEditingController();
 
   Future<void> _pickComprovante() async {
     final result = await FilePicker.platform.pickFiles(
@@ -34,6 +46,8 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
 
   @override
   Widget build(BuildContext context) {
+    var familyVm = ref.watch(newFamilyViewModelProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
@@ -46,23 +60,26 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
               title: "Informações Pessoais",
               icon: Icons.person,
               children: [
-                _buildTextField("Nome do Responsável *"),
-                _buildTextField("CPF *"),
-                _buildTextField("Telefone"),
+                _buildTextField(
+                  "Nome do Responsável *",
+                  controller: nameController,
+                ),
+                _buildTextField("CPF *", controller: cpfController),
+                _buildTextField("Telefone", controller: phoneController),
               ],
             ),
-            
+
             // membros da família
             _buildSection(
               title: "Endereço",
               icon: Icons.location_on,
               children: [
-                _buildTextField("CEP"),
-                _buildTextField("Rua *"),
-                _buildTextField("Número *"),
-                _buildTextField("Bairro *"),
-                _buildTextField("Estado *"),
-            
+                _buildTextField("CEP", controller: cepController),
+                _buildTextField("Rua *", controller: streetController),
+                _buildTextField("Número *", controller: numberController),
+                _buildTextField("Bairro *", controller: neighborhoodController),
+                _buildTextField("Estado *", controller: stateController),
+
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: comprovanteController,
@@ -86,7 +103,24 @@ class _NewFamilyPageState extends State<NewFamilyPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () async {
+          var family = FamilyModel(
+            name: nameController.text,
+            cpf: cpfController.text,
+            mobile_phone: phoneController.text,
+            zip_code: cepController.text,
+            street: streetController.text,
+            number: numberController.text,
+            neighborhood: neighborhoodController.text,
+            state: stateController.text,
+            situation: "pendente",
+            income: "0",
+            description: "",
+            institution_id: 1,
+          );
+
+          await familyVm.create(family);
+        },
         child: const Icon(Icons.check),
       ),
     );

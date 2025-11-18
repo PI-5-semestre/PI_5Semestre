@@ -1,11 +1,6 @@
-import 'package:cestas_app/src/pages/basket/basket_page.dart';
-import 'package:cestas_app/src/pages/delivery/delivery_page.dart';
-import 'package:cestas_app/src/pages/family/family_page.dart';
-import 'package:cestas_app/src/pages/more_page.dart';
-import 'package:cestas_app/src/widgets/app_drawer.dart';
+import 'package:core/widgets2/segmented_card_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:core/widgets/card_info.dart';
 import 'package:core/widgets/statCard.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,64 +11,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //int _selectedIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     var message =
         "Bem-vindo ao sistema de gestão de cestas básicas da nossa comunidade. Aqui você pode acompanhar todas as atividades e ajudar quem mais precisa.";
 
-    // var pages = [
-    //   _buildDashboard(message),
-    //   const FamilyPage(),
-    //   const DeliveryPage(),
-    //   const MorePage(),
-    // ];
-
-    return Scaffold(
-      //appBar: AppBar(title: const Text("")),
-      body: _buildDashboard(message),
-      // bottomNavigationBar: NavigationBar(
-      //   selectedIndex: _selectedIndex,
-      //   onDestinationSelected: (index) {
-      //     setState(() {
-      //       _selectedIndex = index;
-      //     });
-      //   },
-      //   backgroundColor: Colors.white.withOpacity(0.8),
-      //   elevation: 0,
-      //   surfaceTintColor: Colors.transparent,
-      //   indicatorColor: Colors.blue.withOpacity(0.9),
-      //   labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-      //   destinations: const [
-      //     NavigationDestination(
-      //       icon: Icon(Icons.home_outlined, color: Colors.blue),
-      //       selectedIcon: Icon(Icons.home, color: Colors.white),
-      //       label: 'Dashboard',
-      //     ),
-      //     NavigationDestination(
-      //       icon: Icon(Icons.group_outlined, color: Colors.blue),
-      //       selectedIcon: Icon(Icons.group, color: Colors.white),
-      //       label: 'Famílias',
-      //     ),
-      //     // NavigationDestination(
-      //     //   icon: Icon(Icons.shopping_basket_outlined, color: Colors.blue),
-      //     //   selectedIcon: Icon(Icons.shopping_basket, color: Colors.white),
-      //     //   label: 'Cestas',
-      //     // ),
-      //     NavigationDestination(
-      //       icon: Icon(Icons.local_shipping_outlined, color: Colors.blue),
-      //       selectedIcon: Icon(Icons.local_shipping, color: Colors.white),
-      //       label: 'Entregas',
-      //     ),
-      //     NavigationDestination(
-      //       icon: Icon(Icons.menu_outlined, color: Colors.blue),
-      //       selectedIcon: Icon(Icons.menu_outlined, color: Colors.white),
-      //       label: 'Mais',
-      //     ),
-      //   ],
-      // ),
-    );
+    return Scaffold(body: _buildDashboard(message));
   }
 
   Widget _buildDashboard(String message) {
@@ -139,6 +82,12 @@ class _HomePageState extends State<HomePage> {
         value: "342",
       ),
     ];
+    final iconCards = [
+      Icons.groups,
+      Icons.shopping_basket,
+      Icons.local_shipping,
+      Icons.inventory,
+    ];
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -152,18 +101,19 @@ class _HomePageState extends State<HomePage> {
                 child: Center(child: msg),
               ),
             ),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 3.5,
-              ),
-              itemCount: cards.length,
-              itemBuilder: (context, index) => cards[index],
-            ),
+            SegmentedCardSwitcher(options: cards, icons: iconCards),
+            // GridView.builder(
+            //   shrinkWrap: true,
+            //   physics: const NeverScrollableScrollPhysics(),
+            //   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            //     crossAxisCount: 1,
+            //     mainAxisSpacing: 16,
+            //     crossAxisSpacing: 16,
+            //     childAspectRatio: 3.5,
+            //   ),
+            //   itemCount: cards.length,
+            //   itemBuilder: (context, index) => cards[index],
+            // ),
           ],
         ),
       ),
