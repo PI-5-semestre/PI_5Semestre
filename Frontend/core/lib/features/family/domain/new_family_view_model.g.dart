@@ -42,7 +42,7 @@ final class NewFamilyViewModelProvider
 }
 
 String _$newFamilyViewModelHash() =>
-    r'021e2eabb8cc4f5653536ff7e0f7945de84fe461';
+    r'97c44bb4c21a234fe58de3949d1b2fa820ecae4c';
 
 abstract class _$NewFamilyViewModel extends $Notifier<void> {
   void build();

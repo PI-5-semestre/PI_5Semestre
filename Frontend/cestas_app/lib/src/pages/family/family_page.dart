@@ -1,120 +1,52 @@
+import 'package:core/features/family/domain/family_view_model.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:core/widgets2/family_card.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:core/widgets2/segmented_card_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class FamilyPage extends StatelessWidget {
+class FamilyPage extends ConsumerWidget {
   const FamilyPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final familiesVm = ref.watch(familyViewModelProvider);
     final theme = Theme.of(context);
+
+    final total = familiesVm.maybeWhen(
+      data: (families) => families.length,
+      orElse: () => 0,
+    );
+
+    final ativas = familiesVm.maybeWhen(
+      data: (families) => families.where((f) => f.active == true).length,
+      orElse: () => 0,
+    );
 
     final cards = [
       StatCard(
         icon: Icons.groups,
         colors: [Color(0xFFAD46FF), Color(0xFF9810FA)],
         title: "Total Cadastradas",
-        value: "3",
+        value: total.toString(),
       ),
       StatCard(
         icon: Icons.check,
         colors: [Color(0xFF00C951), Color(0xFF00A63E)],
         title: "Famílias Ativas",
-        value: "2",
+        value: ativas.toString(),
       ),
       StatCard(
         icon: Icons.event,
         colors: [Color(0xFFF0B100), Color(0xFFD08700)],
         title: "Aguardando Visita",
-        value: "1",
+        value: total.toString(),
       ),
     ];
 
     final iconCards = [Icons.groups, Icons.check, Icons.event];
-
-    final families = [
-      FamilyCardModal(
-        name: "Maria da Silva Santos",
-        phone: "(11) 99999-0001",
-        members: 4,
-        income: 800,
-        cpf: "123.456.789-00",
-        address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
-        observations:
-            "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
-        status: "ativa",
-        deliveryStatus: "recebendo",
-        recommended: "Pequena",
-      ),
-      FamilyCardModal(
-        name: "João Carlos Santos",
-        phone: "(11) 99999-0002",
-        members: 3,
-        income: 600,
-        cpf: "987.654.321-00",
-        address: "Av. Central, 456 - Centro, São Paulo - SP",
-        observations:
-            "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
-        status: "pendente",
-        deliveryStatus: "aguardando",
-        recommended: "Grande",
-      ),
-      FamilyCardModal(
-        name: "Maria da Silva Santos",
-        phone: "(11) 99999-0001",
-        members: 4,
-        income: 800,
-        cpf: "123.456.789-00",
-        address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
-        observations:
-            "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
-        status: "ativa",
-        deliveryStatus: "recebendo",
-        recommended: "Média",
-      ),
-      FamilyCardModal(
-        name: "João Carlos Santos",
-        phone: "(11) 99999-0002",
-        members: 3,
-        income: 600,
-        cpf: "987.654.321-00",
-        address: "Av. Central, 456 - Centro, São Paulo - SP",
-        observations:
-            "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
-        status: "pendente",
-        deliveryStatus: "aguardando",
-        recommended: "Pequena",
-      ),
-      FamilyCardModal(
-        name: "Maria da Silva Santos",
-        phone: "(11) 99999-0001",
-        members: 4,
-        income: 800,
-        cpf: "123.456.789-00",
-        address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
-        observations:
-            "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
-        status: "ativa",
-        deliveryStatus: "recebendo",
-        recommended: "Grande",
-      ),
-      FamilyCardModal(
-        name: "João Carlos Santos",
-        phone: "(11) 99999-0002",
-        members: 3,
-        income: 600,
-        cpf: "987.654.321-00",
-        address: "Av. Central, 456 - Centro, São Paulo - SP",
-        observations:
-            "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
-        status: "pendente",
-        deliveryStatus: "aguardando",
-        recommended: "Média",
-      ),
-    ];
 
     return Scaffold(
       body: Padding(
@@ -129,7 +61,6 @@ class FamilyPage extends StatelessWidget {
                   children: [_buildCardHeader(), const SizedBox(height: 16)],
                 ),
                 SizedBox(height: 8),
-                // Search
                 Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -146,11 +77,8 @@ class FamilyPage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 8),
-
                 SegmentedCardSwitcher(options: cards, icons: iconCards),
-
                 SizedBox(height: 20),
-
                 Align(
                   alignment: AlignmentGeometry.topLeft,
                   child: Padding(
@@ -166,17 +94,42 @@ class FamilyPage extends StatelessWidget {
                   ),
                 ),
 
-                // Lista de famílias
-                Column(
-                  children: families.map((family) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8.0,
-                        horizontal: 4.0,
-                      ), // horizontal agora
-                      child: SizedBox(width: double.infinity, child: family),
-                    );
-                  }).toList(),
+                familiesVm.when(
+                  loading: () => Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (err, _) => Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Text(
+                      err.toString(),
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                  data: (families) => Column(
+                    children: families.map((family) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 4.0,
+                        ),
+                        child: FamilyCardModal(
+                          name: family.name,
+                          phone: family.mobile_phone ?? "",
+                          members: 1,
+                          income: family.income,
+                          cpf: family.cpf,
+                          address: family.street,
+                          observations: family.description,
+                          status: (family.active ?? false)
+                              ? "Ativo"
+                              : "Pendente",
+                          deliveryStatus: "Aguardando",
+                          recommended: "",
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ],
             ),
