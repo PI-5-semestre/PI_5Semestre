@@ -1,6 +1,6 @@
-import 'package:core/features/family/domain/family_view_model.dart';
-import 'package:core/models/Family/family_model.dart';
-import 'package:core/features/family/domain/new_family_view_model.dart';
+import 'package:core/features/family/data/models/family_model.dart';
+import 'package:core/features/family/providers/family_view_model.dart';
+import 'package:core/features/family/providers/new_family_view_model.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';

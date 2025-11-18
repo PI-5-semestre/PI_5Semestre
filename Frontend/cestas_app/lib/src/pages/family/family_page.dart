@@ -1,4 +1,4 @@
-import 'package:core/features/family/domain/family_view_model.dart';
+import 'package:core/features/family/providers/family_view_model.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:core/widgets2/family_card.dart';

@@ -1,4 +1,4 @@
-import 'package:core/models/Family/family_model.dart';
+import 'package:core/features/family/data/models/family_model.dart';
 
 abstract interface class FamilyRepository {
   Future<List<FamilyModel>> findAll();
