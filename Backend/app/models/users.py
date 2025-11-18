@@ -1,11 +1,12 @@
 from sqlalchemy import String, ForeignKey, Index, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from enum import Enum as PyEnum
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, List
 from .base_modal import BaseModel
 
 if TYPE_CHECKING:
     from .Institutions import Institution
+    from .families import FamilyDelivery
 
 
 class AccountType(PyEnum):
@@ -41,6 +42,10 @@ class Account(BaseModel):
 
     institution: Mapped[Optional["Institution"]] = relationship(
         "Institution", back_populates="accounts"
+    )
+
+    deliveries: Mapped[List["FamilyDelivery"]] = relationship(
+        "FamilyDelivery", back_populates="account"
     )
 
     __table_args__ = (

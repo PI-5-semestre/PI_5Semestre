@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Annotated, Optional, List
+from typing import Annotated, Optional, List, Union
 from io import BytesIO
 
 from fastapi import APIRouter, Depends, Query, UploadFile, File, Form
@@ -10,11 +10,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.database import get_session
+from app.core.security import get_current_account
 from app.core.settings import Settings
 from app.core.exceptions import DuplicatedError, NotFoundError, AlreadyExistsError
 from app.api.v1.dependencies import PaginationParams
+from app.models.users import Account, AccountType
 from app.util.file_validation import validate_file_upload
 from app.schemas.Institutions import (
+    DeliveryCreate,
+    DeliveryPut,
+    DeliveryResp,
     InstitutionUpdate,
     InstitutionResp,
 )
@@ -32,7 +37,7 @@ from app.schemas.families import (
 )
 from app.models.Institutions import Institution, InstitutionType
 from app.models.products import StockItem, StockHistory
-from app.models.families import Family, DocFamily, SituationType
+from app.models.families import Family, DocFamily, FamilyDelivery, SituationType
 
 router = APIRouter(prefix="/institutions", tags=["institutions"])
 Session = Annotated[AsyncSession, Depends(get_session)]
@@ -55,23 +60,40 @@ async def get_institution_or_404(
 
 
 async def get_family_or_404(
-    session: AsyncSession, cpf: str, institution_id: int
+    session: AsyncSession, identifier: Union[int, str], institution_id: int
 ) -> Family:
-    normalized_cpf = cpf.replace(".", "").replace("-", "")
-
-    result = await session.execute(
-        select(Family).where(
+    if isinstance(identifier, int):
+        query = select(Family).where(
+            Family.id == identifier, Family.institution_id == institution_id
+        )
+    else:
+        normalized_cpf = identifier.replace(".", "").replace("-", "")
+        query = select(Family).where(
             Family.cpf == normalized_cpf, Family.institution_id == institution_id
         )
-    )
+    
+    result = await session.execute(query)
     family = result.scalar_one_or_none()
 
     if family is None:
         raise NotFoundError(
-            detail=f"Family with CPF '{cpf}' not found in this institution"
+            detail=f"Family with identifier '{identifier}' not found in this institution"
         )
 
     return family
+
+async def get_account_or_404(
+    session: AsyncSession, account_id: int
+) -> Account:
+    result = await session.execute(
+        select(Account).where(Account.id == account_id)
+    )
+    account = result.scalar_one_or_none()
+
+    if account is None:
+        raise NotFoundError(detail=f"Account with id {account_id} not found")
+
+    return account
 
 
 async def get_stock_item_or_404(
@@ -588,3 +610,145 @@ async def delete_family_document(
 
     await session.delete(document)
     await session.commit()
+
+
+@router.get("/{institution_id}/deliveries", response_model=List[DeliveryResp])
+async def list_family_deliveries(
+    institution_id: int,
+    current_account: Annotated[Account, Depends(get_current_account)],
+    session: Session,
+    pagination: dict = Depends(PaginationParams),
+):
+    await get_institution_or_404(session, institution_id)
+
+    if current_account.account_type not in [
+        AccountType.ADMINISTRATIVE,
+        AccountType.OWNER,
+    ]:
+        raise NotFoundError(detail="Unauthorized to create deliveries")
+
+    query = select(FamilyDelivery).where(
+        FamilyDelivery.institution_id == institution_id
+    )
+
+    query = (
+        query.order_by(FamilyDelivery.delivery_date.desc())
+        .offset(pagination["skip"])
+        .limit(pagination["limit"])
+    )
+
+    result = await session.execute(query)
+    deliveries = result.scalars().all()
+
+    return [DeliveryResp.model_validate(d) for d in deliveries]
+
+
+@router.post(
+    "/{institution_id}/deliveries",
+    response_model=DeliveryResp,
+    status_code=201,
+)
+async def create_family_delivery(
+    institution_id: int,
+    payload: DeliveryCreate,
+    session: Session,
+    current_account: Annotated[Account, Depends(get_current_account)],
+):
+    institution = await get_institution_or_404(session, institution_id)
+    family = await get_family_or_404(session, payload.family_id, institution_id)
+    account = await get_account_or_404(session, payload.account_id)
+
+    if current_account.account_type not in [
+        AccountType.ADMINISTRATIVE,
+        AccountType.OWNER,
+    ]:
+        raise NotFoundError(detail="Unauthorized to create deliveries")
+
+    fd = FamilyDelivery(
+        institution_id=institution.id,
+        family_id=family.id,
+        delivery_date=payload.date.isoformat(),
+        account_id=account.id,
+        description=payload.description,
+    )
+    session.add(fd)
+    await session.commit()
+    await session.refresh(fd)
+
+    return DeliveryResp.model_validate(fd)
+
+
+@router.put("/{institution_id}/deliveries/{delivery_id}", response_model=DeliveryResp)
+async def update_family_delivery(
+    institution_id: int,
+    current_account: Annotated[Account, Depends(get_current_account)],
+    delivery_id: int,
+    payload: DeliveryPut,
+    session: Session,
+):
+    await get_institution_or_404(session, institution_id)
+    account = await get_account_or_404(session, payload.account_id)
+
+    if current_account.account_type not in [
+        AccountType.ADMINISTRATIVE,
+        AccountType.OWNER,
+    ]:
+        raise NotFoundError(detail="Unauthorized to create deliveries")
+
+    result = await session.execute(
+        select(FamilyDelivery).where(
+            FamilyDelivery.id == delivery_id,
+            FamilyDelivery.institution_id == institution_id,
+        )
+    )
+    delivery = result.scalar_one_or_none()
+
+    if delivery is None:
+        raise NotFoundError(
+            detail=f"Delivery with id {delivery_id} not found in this institution"
+        )
+
+    delivery.delivery_date = payload.date.isoformat()
+    delivery.account_id = account.id
+    delivery.description = payload.description
+
+    await session.commit()
+    await session.refresh(delivery)
+
+    return DeliveryResp.model_validate(delivery)
+
+
+@router.delete("/{institution_id}/deliveries/{delivery_id}", status_code=204)
+async def delete_family_delivery(
+    institution_id: int,
+    current_account: Annotated[Account, Depends(get_current_account)],
+    delivery_id: int,
+    session: Session,
+):
+    await get_institution_or_404(session, institution_id)
+
+    if current_account.account_type not in [
+        AccountType.ADMINISTRATIVE,
+        AccountType.OWNER,
+    ]:
+        raise NotFoundError(detail="Unauthorized to create deliveries")
+
+    result = await session.execute(
+        select(FamilyDelivery).where(
+            FamilyDelivery.id == delivery_id,
+            FamilyDelivery.institution_id == institution_id,
+        )
+    )
+    delivery = result.scalar_one_or_none()
+
+    if delivery is None:
+        raise NotFoundError(
+            detail=f"Delivery with id {delivery_id} not found in this institution"
+        )
+
+    delivery.active = False
+
+    await session.flush()
+    await session.commit()
+
+    return None
