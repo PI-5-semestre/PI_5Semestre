@@ -1,5 +1,5 @@
-import 'package:core/features/auth/data/auth_repository_impl.dart';
-import 'package:core/features/auth/domain/user.dart';
+import 'package:core/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:core/features/auth/data/models/user.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_provider.g.dart';

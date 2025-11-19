@@ -1,5 +1,5 @@
-import 'package:core/models/Family/family_model.dart';
-import 'package:core/features/family/data/family_repository_impl.dart';
+import 'package:core/features/family/data/models/family_model.dart';
+import 'package:core/features/family/data/repositories/family_repository_impl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'new_family_view_model.g.dart';

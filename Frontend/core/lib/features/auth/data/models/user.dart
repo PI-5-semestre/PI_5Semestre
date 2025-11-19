@@ -15,6 +15,8 @@ abstract class User with _$User {
 
 @freezed
 abstract class Account with _$Account {
+  const Account._();
+  
   factory Account({
     required int id,
     required String created,
@@ -25,10 +27,25 @@ abstract class Account with _$Account {
     required String account_type,
     // ignore: non_constant_identifier_names
     required int institution_id,
-    required Profile profile,
+    Profile? profile,
   }) = _Account;
 
   factory Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
+
+    String get roleName {
+    switch (account_type) {
+      case "OWNER":
+        return "Coordenador";
+      case "DELIVERY_MAN":
+        return "Entregador";
+      case "ASSISTANT":
+        return "Assistente Social";
+      case "VOLUNTEER":
+        return "Voluntário";
+      default:
+        return "Desconhecido";
+    }
+  }
 }
 
 @freezed

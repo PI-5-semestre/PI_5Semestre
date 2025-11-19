@@ -301,7 +301,7 @@ mixin _$Account {
 
  int get id; String get created; String get modified; bool get active; String get email;// ignore: non_constant_identifier_names
  String get account_type;// ignore: non_constant_identifier_names
- int get institution_id; Profile get profile;
+ int get institution_id; Profile? get profile;
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -334,11 +334,11 @@ abstract mixin class $AccountCopyWith<$Res>  {
   factory $AccountCopyWith(Account value, $Res Function(Account) _then) = _$AccountCopyWithImpl;
 @useResult
 $Res call({
- int id, String created, String modified, bool active, String email, String account_type, int institution_id, Profile profile
+ int id, String created, String modified, bool active, String email, String account_type, int institution_id, Profile? profile
 });
 
 
-$ProfileCopyWith<$Res> get profile;
+$ProfileCopyWith<$Res>? get profile;
 
 }
 /// @nodoc
@@ -351,7 +351,7 @@ class _$AccountCopyWithImpl<$Res>
 
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? created = null,Object? modified = null,Object? active = null,Object? email = null,Object? account_type = null,Object? institution_id = null,Object? profile = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? created = null,Object? modified = null,Object? active = null,Object? email = null,Object? account_type = null,Object? institution_id = null,Object? profile = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,created: null == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
@@ -360,17 +360,20 @@ as String,active: null == active ? _self.active : active // ignore: cast_nullabl
 as bool,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,account_type: null == account_type ? _self.account_type : account_type // ignore: cast_nullable_to_non_nullable
 as String,institution_id: null == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
-as int,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as Profile,
+as int,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
+as Profile?,
   ));
 }
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$ProfileCopyWith<$Res> get profile {
-  
-  return $ProfileCopyWith<$Res>(_self.profile, (value) {
+$ProfileCopyWith<$Res>? get profile {
+    if (_self.profile == null) {
+    return null;
+  }
+
+  return $ProfileCopyWith<$Res>(_self.profile!, (value) {
     return _then(_self.copyWith(profile: value));
   });
 }
@@ -455,7 +458,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String created,  String modified,  bool active,  String email,  String account_type,  int institution_id,  Profile profile)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String created,  String modified,  bool active,  String email,  String account_type,  int institution_id,  Profile? profile)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Account() when $default != null:
 return $default(_that.id,_that.created,_that.modified,_that.active,_that.email,_that.account_type,_that.institution_id,_that.profile);case _:
@@ -476,7 +479,7 @@ return $default(_that.id,_that.created,_that.modified,_that.active,_that.email,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String created,  String modified,  bool active,  String email,  String account_type,  int institution_id,  Profile profile)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String created,  String modified,  bool active,  String email,  String account_type,  int institution_id,  Profile? profile)  $default,) {final _that = this;
 switch (_that) {
 case _Account():
 return $default(_that.id,_that.created,_that.modified,_that.active,_that.email,_that.account_type,_that.institution_id,_that.profile);case _:
@@ -496,7 +499,7 @@ return $default(_that.id,_that.created,_that.modified,_that.active,_that.email,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String created,  String modified,  bool active,  String email,  String account_type,  int institution_id,  Profile profile)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String created,  String modified,  bool active,  String email,  String account_type,  int institution_id,  Profile? profile)?  $default,) {final _that = this;
 switch (_that) {
 case _Account() when $default != null:
 return $default(_that.id,_that.created,_that.modified,_that.active,_that.email,_that.account_type,_that.institution_id,_that.profile);case _:
@@ -510,8 +513,8 @@ return $default(_that.id,_that.created,_that.modified,_that.active,_that.email,_
 /// @nodoc
 @JsonSerializable()
 
-class _Account implements Account {
-   _Account({required this.id, required this.created, required this.modified, required this.active, required this.email, required this.account_type, required this.institution_id, required this.profile});
+class _Account extends Account {
+   _Account({required this.id, required this.created, required this.modified, required this.active, required this.email, required this.account_type, required this.institution_id, this.profile}): super._();
   factory _Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
 
 @override final  int id;
@@ -523,7 +526,7 @@ class _Account implements Account {
 @override final  String account_type;
 // ignore: non_constant_identifier_names
 @override final  int institution_id;
-@override final  Profile profile;
+@override final  Profile? profile;
 
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
@@ -558,11 +561,11 @@ abstract mixin class _$AccountCopyWith<$Res> implements $AccountCopyWith<$Res> {
   factory _$AccountCopyWith(_Account value, $Res Function(_Account) _then) = __$AccountCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String created, String modified, bool active, String email, String account_type, int institution_id, Profile profile
+ int id, String created, String modified, bool active, String email, String account_type, int institution_id, Profile? profile
 });
 
 
-@override $ProfileCopyWith<$Res> get profile;
+@override $ProfileCopyWith<$Res>? get profile;
 
 }
 /// @nodoc
@@ -575,7 +578,7 @@ class __$AccountCopyWithImpl<$Res>
 
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? created = null,Object? modified = null,Object? active = null,Object? email = null,Object? account_type = null,Object? institution_id = null,Object? profile = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? created = null,Object? modified = null,Object? active = null,Object? email = null,Object? account_type = null,Object? institution_id = null,Object? profile = freezed,}) {
   return _then(_Account(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,created: null == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
@@ -584,8 +587,8 @@ as String,active: null == active ? _self.active : active // ignore: cast_nullabl
 as bool,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,account_type: null == account_type ? _self.account_type : account_type // ignore: cast_nullable_to_non_nullable
 as String,institution_id: null == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
-as int,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as Profile,
+as int,profile: freezed == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
+as Profile?,
   ));
 }
 
@@ -593,9 +596,12 @@ as Profile,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$ProfileCopyWith<$Res> get profile {
-  
-  return $ProfileCopyWith<$Res>(_self.profile, (value) {
+$ProfileCopyWith<$Res>? get profile {
+    if (_self.profile == null) {
+    return null;
+  }
+
+  return $ProfileCopyWith<$Res>(_self.profile!, (value) {
     return _then(_self.copyWith(profile: value));
   });
 }

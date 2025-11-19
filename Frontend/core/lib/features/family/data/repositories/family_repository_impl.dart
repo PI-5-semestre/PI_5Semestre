@@ -1,8 +1,6 @@
-import 'dart:convert';
-
-import 'package:core/models/Family/family_model.dart';
-import 'package:core/features/family/data/family_repository.dart';
-import 'package:core/features/auth/presentation/dio_provider.dart';
+import 'package:core/features/family/data/models/family_model.dart';
+import 'package:core/features/family/interface/family_repository.dart';
+import 'package:core/services/dio/dio_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
