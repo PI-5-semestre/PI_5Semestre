@@ -8,7 +8,6 @@ import 'package:core/widgets2/skeleton/team_card_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 class TeamPage extends ConsumerWidget {
   const TeamPage({super.key});
@@ -26,15 +25,8 @@ class TeamPage extends ConsumerWidget {
       }
     });
 
-    if (userState.error != null) {
-      return Scaffold(
-        body: Center(
-          child: Text(
-            "Erro: ${userState.error!}",
-            style: const TextStyle(color: Colors.red),
-          ),
-        ),
-      );
+    if (userState.error != null && userState.users.isEmpty) {
+      return Center(child: Text("Não foi possível carregar os usuários"));
     }
 
     final cards = [

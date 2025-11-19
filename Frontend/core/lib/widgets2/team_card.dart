@@ -1,4 +1,5 @@
 import 'package:core/features/auth/data/models/user.dart';
+import 'package:core/features/user/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -194,13 +195,68 @@ class TeamCardModal extends ConsumerWidget {
                           Positioned(
                             bottom: 16,
                             left: 16,
-                            child: FloatingActionButton(
-                              onPressed: () {
-                                
-                                Navigator.pop(context);
+                            child: Consumer(
+                              builder: (context, ref, _) {
+                                final isLoading = ref.watch(userControllerProvider).isLoading;
+                                final theme = Theme.of(context);
+
+                                return FloatingActionButton(
+                                  onPressed: isLoading
+                                      ? null
+                                      : () async {
+                                          final confirm = await showDialog<bool>(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                title: const Text('Excluir Funcionário'),
+                                                content: Text(
+                                                  'Tem certeza que deseja excluir '
+                                                  '${account.profile?.name ?? ''}?',
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, false),
+                                                    child: const Text('Cancelar'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, true),
+                                                    child: const Text(
+                                                      'Excluir',
+                                                      style: TextStyle(color: Colors.red),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                          if (confirm != true) return;
+                                          await ref
+                                              .read(userControllerProvider.notifier)
+                                              .deleteUser(account.email);
+                                          final error = ref.read(userControllerProvider).error;
+                                          if (error == null) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text("Usuário excluído com sucesso!"),
+                                              ),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text(error)),
+                                            );
+                                          }
+                                          Navigator.pop(context);
+                                        },
+                                  backgroundColor: theme.colorScheme.surfaceContainerLow,
+                                  child: isLoading
+                                      ? const SizedBox(
+                                          width: 22,
+                                          height: 22,
+                                          child: CircularProgressIndicator(strokeWidth: 3),
+                                        )
+                                      : const Icon(Icons.delete),
+                                );
                               },
-                              backgroundColor: theme.colorScheme.surfaceContainerLow,
-                              child: Icon(Icons.delete),
                             ),
                           ),
                           Positioned(

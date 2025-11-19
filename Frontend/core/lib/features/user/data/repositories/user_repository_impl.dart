@@ -48,6 +48,16 @@ class UserRepositoryImpl implements UserRepository {
       throw Exception(message);
     }
   }
+
+  @override
+  Future<void> deleteUser(String email) async {
+    try {
+      await dio.delete('$route/$email');
+    } on DioException catch (e) {
+      final message = e.response?.data['detail']?.toString() ?? 'Erro Inesperado';
+      throw Exception(message);
+    }
+  }
 }
 
 @riverpod

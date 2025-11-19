@@ -69,4 +69,24 @@ class UserController extends _$UserController {
       state = state.copyWith(isLoading: false);
     }
   }
+
+  Future<void> deleteUser(String email) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await ref.read(userRepositoryProvider).deleteUser(email);
+      await fetchUsers();
+    } catch (e) {
+      final msg = e.toString().replaceFirst("Exception: ", "");
+      String translated = switch (msg) {
+        final String text when text.contains("not found") => "Usuário não encontrado",
+        _ => msg,
+      };
+      state = state.copyWith(
+        error: translated,
+      );
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
 }
