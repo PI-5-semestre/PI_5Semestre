@@ -37,44 +37,30 @@ class TeamPage extends ConsumerWidget {
       );
     }
 
-    /// Dados convertidos para TeamCardModal
-    final equipes = userState.users.map((account) {
-      final profile = account.profile;
-
-      return TeamCardModal(
-        name: profile?.name ?? 'Sem nome',
-        phone: profile?.mobile ?? '',
-        cpf: profile?.cpf ?? '',
-        email: account.email,
-        tipofunc: account.roleName,
-        inicio: DateFormat('dd/MM/yyyy').format(DateTime.parse(account.created)),
-      );
-    }).toList();
-
     final cards = [
       StatCard(
         icon: Icons.person,
         colors: [Color(0xFFAD46FF), Color(0xFF9810FA)],
         title: "Coordenadores",
-        value: equipes.where((e) => e.tipofunc == "Coordenador").length.toString(),
+        value: userState.users.where((u) => u.roleName == "Coordenador").length.toString(),
       ),
       StatCard(
         icon: Icons.sports_motorsports,
         colors: [Color(0xFF3d89ff), Color(0xFF165ffc)],
         title: "Entregadores",
-        value: equipes.where((e) => e.tipofunc == "Entregador").length.toString(),
+        value: userState.users.where((u) => u.roleName == "Entregador").length.toString(),
       ),
       StatCard(
         icon: Icons.content_paste,
         colors: [Color(0xFF00C951), Color(0xFF00A63E)],
         title: "Assistentes Sociais",
-        value: equipes.where((e) => e.tipofunc == "Assistente Social").length.toString(),
+        value: userState.users.where((u) => u.roleName == "Assistente Social").length.toString(),
       ),
       StatCard(
         icon: Icons.soup_kitchen,
         colors: [Color(0xFFF0B100), Color(0xFFD08700)],
         title: "Voluntários",
-        value: equipes.where((e) => e.tipofunc == "Voluntário").length.toString(),
+        value: userState.users.where((u) => u.roleName == "Voluntário").length.toString(),
       ),
     ];
 
@@ -121,16 +107,10 @@ class TeamPage extends ConsumerWidget {
                 else
                   // Lista real
                   Column(
-                    children: equipes.map((team) {
+                    children: userState.users.map((account) {
                       return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 4,
-                        ),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: team,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: TeamCardModal(account: account),
                       );
                     }).toList(),
                   ),

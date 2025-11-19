@@ -16,6 +16,7 @@ import 'package:cestas_app/src/pages/teams/new_servant_page.dart';
 import 'package:cestas_app/src/pages/teams/team_page.dart';
 import 'package:cestas_app/src/pages/visits_page.dart';
 import 'package:cestas_app/src/widgets/navigator_shell_route.dart';
+import 'package:core/features/auth/data/models/user.dart';
 import 'package:go_router/go_router.dart';
 
 final routes = GoRouter(
@@ -97,7 +98,10 @@ final routes = GoRouter(
                     ),
                     GoRoute(
                       path: 'edit_servant',
-                      builder: (context, state) => EditServantPage(),
+                      builder: (context, state) {
+                        final account = state.extra as Account;
+                        return EditServantPage(account: account);
+                      },
                     ),
                     GoRoute(
                       path: 'edit_servant/:id',

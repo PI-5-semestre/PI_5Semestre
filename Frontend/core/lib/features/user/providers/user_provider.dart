@@ -48,4 +48,25 @@ class UserController extends _$UserController {
       state = state.copyWith(isLoading: false);
     }
   }
+
+  Future<void> updateUser(String email, CreateUser user) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await ref.read(userRepositoryProvider).updateUser(email, user);
+      await fetchUsers();
+    } catch (e) {
+      final msg = e.toString().replaceFirst("Exception: ", "");
+      String translated = switch (msg) {
+        "Email already in use" => "Já existe uma conta com este e-mail",
+        "CPF already in use" => "Já existe um cadastro com este CPF",
+        _ => msg,
+      };
+      state = state.copyWith(
+        error: translated,
+      );
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
 }
