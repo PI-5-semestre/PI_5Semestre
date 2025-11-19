@@ -24,7 +24,9 @@ _Account _$AccountFromJson(Map<String, dynamic> json) => _Account(
   email: json['email'] as String,
   account_type: json['account_type'] as String,
   institution_id: (json['institution_id'] as num).toInt(),
-  profile: Profile.fromJson(json['profile'] as Map<String, dynamic>),
+  profile: json['profile'] == null
+      ? null
+      : Profile.fromJson(json['profile'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$AccountToJson(_Account instance) => <String, dynamic>{
