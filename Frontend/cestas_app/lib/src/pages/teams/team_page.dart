@@ -31,7 +31,13 @@ class TeamPage extends ConsumerWidget {
 
     final cards = [
       StatCard(
-        icon: Icons.person,
+        icon: Icons.group,
+        colors: [Color(0xFFFF4646), Color(0xFFFA6210)],
+        title: "Todos",
+        value: userState.users.length.toString(),
+      ),
+      StatCard(
+        icon: Icons.key,
         colors: [Color(0xFFAD46FF), Color(0xFF9810FA)],
         title: "Coordenadores",
         value: userState.users.where((u) => u.roleName == "Coordenador").length.toString(),
@@ -57,7 +63,8 @@ class TeamPage extends ConsumerWidget {
     ];
 
     final iconCards = [
-      Icons.person,
+      Icons.group,
+      Icons.key,
       Icons.sports_motorsports,
       Icons.content_paste,
       Icons.soup_kitchen,
@@ -73,7 +80,7 @@ class TeamPage extends ConsumerWidget {
               children: [
                 _buildCardHeader(),
                 const SizedBox(height: 16),
-                _buildSearchField(),
+                _buildSearchField(ref),
                 const SizedBox(height: 8),
                 if (userState.isLoading)
                   Row(
@@ -82,7 +89,31 @@ class TeamPage extends ConsumerWidget {
                     ],
                   )
                 else
-                  SegmentedCardSwitcher(options: cards, icons: iconCards),
+                  SegmentedCardSwitcher(
+                    options: cards,
+                    icons: iconCards,
+                    onTap: (index) {
+                      final controller = ref.read(userControllerProvider.notifier);
+
+                      switch (index) {
+                        case 0:
+                          controller.filterByRole(null);
+                          break;
+                        case 1:
+                          controller.filterByRole("Coordenador");
+                          break;
+                        case 2:
+                          controller.filterByRole("Entregador");
+                          break;
+                        case 3:
+                          controller.filterByRole("Assistente Social");
+                          break;
+                        case 4:
+                          controller.filterByRole("Voluntário");
+                          break;
+                      }
+                    },
+                  ),
                 const SizedBox(height: 20),
                 _buildEquipesHeader(theme),
 
@@ -99,7 +130,7 @@ class TeamPage extends ConsumerWidget {
                 else
                   // Lista real
                   Column(
-                    children: userState.users.map((account) {
+                    children: userState.filtered.map((account) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                         child: TeamCardModal(account: account),
@@ -120,16 +151,15 @@ class TeamPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSearchField() {
+  Widget _buildSearchField(WidgetRef ref) {
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.all(4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
         child: TextField(
-          decoration: InputDecoration(
-            hintText: "Nome, celular ou cpf...",
+          onChanged: (v) => ref.read(userControllerProvider.notifier).search(v),
+          decoration: const InputDecoration(
+            hintText: "Nome, e-mail, celular ou CPF...",
             prefixIcon: Icon(Icons.search),
             border: InputBorder.none,
           ),

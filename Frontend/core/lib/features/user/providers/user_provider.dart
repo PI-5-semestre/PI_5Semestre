@@ -12,20 +12,37 @@ class UserController extends _$UserController {
 
   Future<void> fetchUsers() async {
     state = state.copyWith(isLoading: true, error: null);
-
     try {
-      final list = await ref.read(userRepositoryProvider).fetchUsers();
-      
+      final data = await ref.read(userRepositoryProvider).fetchUsers();
       state = state.copyWith(
-        users: list,
+        users: data,
+        filtered: data,
         isLoading: false,
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: "Erro ao buscar usuários");
     }
+  }
+
+  void search(String text) {
+    text = text.toLowerCase();
+    final list = state.users.where((u) {
+      final p = u.profile;
+      return u.email.toLowerCase().contains(text) ||
+            p?.name.toLowerCase().contains(text) == true ||
+            p?.cpf.contains(text) == true ||
+            p?.mobile.contains(text) == true;
+    }).toList();
+    state = state.copyWith(filtered: list);
+  }
+
+  void filterByRole(String? role) {
+    if (role == null) {
+      state = state.copyWith(filtered: state.users, filterRole: null);
+      return;
+    }
+    final list = state.users.where((u) => u.roleName == role).toList();
+    state = state.copyWith(filtered: list, filterRole: role);
   }
 
   Future<void> createUser(CreateUser user) async {
