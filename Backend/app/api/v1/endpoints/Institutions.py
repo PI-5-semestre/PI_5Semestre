@@ -37,7 +37,7 @@ from app.schemas.families import (
 )
 from app.models.Institutions import Institution, InstitutionType
 from app.models.products import StockItem, StockHistory
-from app.models.families import Family, DocFamily, FamilyDelivery, SituationType
+from app.models.families import AuthorizedPersonsFamily, Family, DocFamily, FamilyDelivery, SituationType
 
 router = APIRouter(prefix="/institutions", tags=["institutions"])
 Session = Annotated[AsyncSession, Depends(get_session)]
@@ -408,7 +408,7 @@ async def get_institution_stock_item_history(
 
 @router.post("/{institution_id}/families", response_model=FamilyResp, status_code=201)
 async def create_family_for_institution(
-    institution_id: int, family_data: FamilyCreateForInstitution, session: Session
+    institution_id: int, family_data: FamilyCreateForInstitution, session: Session, current_account: Annotated[Account, Depends(get_current_account)],
 ):
     await get_institution_or_404(session, institution_id)
 
@@ -436,7 +436,7 @@ async def list_families_from_institution(
     pagination: dict = Depends(PaginationParams),
     active: bool | None = None,
     situation: SituationType | None = None,
-):
+): 
     await get_institution_or_404(session, institution_id)
 
     query = (
@@ -459,7 +459,7 @@ async def list_families_from_institution(
 
 
 @router.get("/{institution_id}/families/{cpf}", response_model=FamilyResp)
-async def get_family_from_institution(institution_id: int, cpf: str, session: Session):
+async def get_family_from_institution(institution_id: int, cpf: str, session: Session, current_account: Annotated[Account, Depends(get_current_account)]):
     await get_institution_or_404(session, institution_id)
 
     normalized_cpf = cpf.replace(".", "").replace("-", "")
@@ -482,23 +482,35 @@ async def get_family_from_institution(institution_id: int, cpf: str, session: Se
 
 @router.put("/{institution_id}/families/{cpf}", response_model=FamilyResp)
 async def update_family_from_institution(
-    institution_id: int, cpf: str, family_data: FamilyUpdate, session: Session
+    institution_id: int, cpf: str, family_data: FamilyUpdate, session: Session, current_account: Annotated[Account, Depends(get_current_account)]
 ):
     await get_institution_or_404(session, institution_id)
     family = await get_family_or_404(session, cpf, institution_id)
 
     for field, value in family_data.model_dump(exclude_unset=True).items():
         setattr(family, field, value)
-
+    
+    if "persons" in family_data.model_dump(exclude_unset=True):
+        family.persons.clear()
+        for person_data in family_data.persons:
+            authorized_person = AuthorizedPersonsFamily(
+                name=person_data.name,
+                cpf=person_data.cpf,
+                kinship=person_data.kinship,
+                family_id=family.id,
+            )
+            family.persons.append(authorized_person)
     await session.commit()
     await session.refresh(family)
 
+    
+    
     return FamilyResp.model_validate(family)
 
 
 @router.delete("/{institution_id}/families/{cpf}", status_code=204)
 async def delete_family_from_institution(
-    institution_id: int, cpf: str, session: Session
+    institution_id: int, cpf: str, session: Session, current_account: Annotated[Account, Depends(get_current_account)]
 ):
     await get_institution_or_404(session, institution_id)
     family = await get_family_or_404(session, cpf, institution_id)
