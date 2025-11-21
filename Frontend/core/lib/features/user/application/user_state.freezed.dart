@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserState {
 
- List<Account> get users; bool get isLoading; String? get error;
+ List<Account> get users; List<Account> get filtered; String? get filterRole; bool get isLoading; String? get error;
 /// Create a copy of UserState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $UserStateCopyWith<UserState> get copyWith => _$UserStateCopyWithImpl<UserState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserState&&const DeepCollectionEquality().equals(other.users, users)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserState&&const DeepCollectionEquality().equals(other.users, users)&&const DeepCollectionEquality().equals(other.filtered, filtered)&&(identical(other.filterRole, filterRole) || other.filterRole == filterRole)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(users),isLoading,error);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(users),const DeepCollectionEquality().hash(filtered),filterRole,isLoading,error);
 
 @override
 String toString() {
-  return 'UserState(users: $users, isLoading: $isLoading, error: $error)';
+  return 'UserState(users: $users, filtered: $filtered, filterRole: $filterRole, isLoading: $isLoading, error: $error)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $UserStateCopyWith<$Res>  {
   factory $UserStateCopyWith(UserState value, $Res Function(UserState) _then) = _$UserStateCopyWithImpl;
 @useResult
 $Res call({
- List<Account> users, bool isLoading, String? error
+ List<Account> users, List<Account> filtered, String? filterRole, bool isLoading, String? error
 });
 
 
@@ -62,10 +62,12 @@ class _$UserStateCopyWithImpl<$Res>
 
 /// Create a copy of UserState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? users = null,Object? isLoading = null,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? users = null,Object? filtered = null,Object? filterRole = freezed,Object? isLoading = null,Object? error = freezed,}) {
   return _then(_self.copyWith(
 users: null == users ? _self.users : users // ignore: cast_nullable_to_non_nullable
-as List<Account>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as List<Account>,filtered: null == filtered ? _self.filtered : filtered // ignore: cast_nullable_to_non_nullable
+as List<Account>,filterRole: freezed == filterRole ? _self.filterRole : filterRole // ignore: cast_nullable_to_non_nullable
+as String?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -152,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Account> users,  bool isLoading,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Account> users,  List<Account> filtered,  String? filterRole,  bool isLoading,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserState() when $default != null:
-return $default(_that.users,_that.isLoading,_that.error);case _:
+return $default(_that.users,_that.filtered,_that.filterRole,_that.isLoading,_that.error);case _:
   return orElse();
 
 }
@@ -173,10 +175,10 @@ return $default(_that.users,_that.isLoading,_that.error);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Account> users,  bool isLoading,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Account> users,  List<Account> filtered,  String? filterRole,  bool isLoading,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _UserState():
-return $default(_that.users,_that.isLoading,_that.error);case _:
+return $default(_that.users,_that.filtered,_that.filterRole,_that.isLoading,_that.error);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -193,10 +195,10 @@ return $default(_that.users,_that.isLoading,_that.error);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Account> users,  bool isLoading,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Account> users,  List<Account> filtered,  String? filterRole,  bool isLoading,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _UserState() when $default != null:
-return $default(_that.users,_that.isLoading,_that.error);case _:
+return $default(_that.users,_that.filtered,_that.filterRole,_that.isLoading,_that.error);case _:
   return null;
 
 }
@@ -208,7 +210,7 @@ return $default(_that.users,_that.isLoading,_that.error);case _:
 
 
 class _UserState implements UserState {
-  const _UserState({final  List<Account> users = const [], this.isLoading = false, this.error}): _users = users;
+  const _UserState({final  List<Account> users = const [], final  List<Account> filtered = const [], this.filterRole = null, this.isLoading = false, this.error}): _users = users,_filtered = filtered;
   
 
  final  List<Account> _users;
@@ -218,6 +220,14 @@ class _UserState implements UserState {
   return EqualUnmodifiableListView(_users);
 }
 
+ final  List<Account> _filtered;
+@override@JsonKey() List<Account> get filtered {
+  if (_filtered is EqualUnmodifiableListView) return _filtered;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_filtered);
+}
+
+@override@JsonKey() final  String? filterRole;
 @override@JsonKey() final  bool isLoading;
 @override final  String? error;
 
@@ -231,16 +241,16 @@ _$UserStateCopyWith<_UserState> get copyWith => __$UserStateCopyWithImpl<_UserSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserState&&const DeepCollectionEquality().equals(other._users, _users)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserState&&const DeepCollectionEquality().equals(other._users, _users)&&const DeepCollectionEquality().equals(other._filtered, _filtered)&&(identical(other.filterRole, filterRole) || other.filterRole == filterRole)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_users),isLoading,error);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_users),const DeepCollectionEquality().hash(_filtered),filterRole,isLoading,error);
 
 @override
 String toString() {
-  return 'UserState(users: $users, isLoading: $isLoading, error: $error)';
+  return 'UserState(users: $users, filtered: $filtered, filterRole: $filterRole, isLoading: $isLoading, error: $error)';
 }
 
 
@@ -251,7 +261,7 @@ abstract mixin class _$UserStateCopyWith<$Res> implements $UserStateCopyWith<$Re
   factory _$UserStateCopyWith(_UserState value, $Res Function(_UserState) _then) = __$UserStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<Account> users, bool isLoading, String? error
+ List<Account> users, List<Account> filtered, String? filterRole, bool isLoading, String? error
 });
 
 
@@ -268,10 +278,12 @@ class __$UserStateCopyWithImpl<$Res>
 
 /// Create a copy of UserState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? users = null,Object? isLoading = null,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? users = null,Object? filtered = null,Object? filterRole = freezed,Object? isLoading = null,Object? error = freezed,}) {
   return _then(_UserState(
 users: null == users ? _self._users : users // ignore: cast_nullable_to_non_nullable
-as List<Account>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as List<Account>,filtered: null == filtered ? _self._filtered : filtered // ignore: cast_nullable_to_non_nullable
+as List<Account>,filterRole: freezed == filterRole ? _self.filterRole : filterRole // ignore: cast_nullable_to_non_nullable
+as String?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

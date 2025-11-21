@@ -7,6 +7,8 @@ part 'user_state.freezed.dart';
 abstract class UserState with _$UserState {
   const factory UserState({
     @Default([]) List<Account> users,
+    @Default([]) List<Account> filtered,
+    @Default(null) String? filterRole,
     @Default(false) bool isLoading,
     String? error,
   }) = _UserState;
