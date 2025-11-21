@@ -482,29 +482,33 @@ async def get_family_from_institution(institution_id: int, cpf: str, session: Se
 
 @router.put("/{institution_id}/families/{cpf}", response_model=FamilyResp)
 async def update_family_from_institution(
-    institution_id: int, cpf: str, family_data: FamilyUpdate, session: Session, current_account: Annotated[Account, Depends(get_current_account)]
+    institution_id: int,
+    cpf: str,
+    family_data: FamilyUpdate,
+    session: Session,
+    current_account: Annotated[Account, Depends(get_current_account)],
 ):
     await get_institution_or_404(session, institution_id)
     family = await get_family_or_404(session, cpf, institution_id)
 
     for field, value in family_data.model_dump(exclude_unset=True).items():
-        setattr(family, field, value)
-    
-    if "persons" in family_data.model_dump(exclude_unset=True):
-        family.persons.clear()
-        for person_data in family_data.persons:
-            authorized_person = AuthorizedPersonsFamily(
-                name=person_data.name,
-                cpf=person_data.cpf,
-                kinship=person_data.kinship,
-                family_id=family.id,
-            )
-            family.persons.append(authorized_person)
-    await session.commit()
-    await session.refresh(family)
+        if field == "persons":
+            family.persons.clear()
+            for person_data in value:
+                person = AuthorizedPersonsFamily(
+                    name=person_data['name'],
+                    cpf=person_data.get('cpf'),
+                    kinship=person_data['kinship'],
+                    family_id=family.id
+                )
+                family.persons.append(person)
+        else:
+            setattr(family, field, value)
 
-    
-    
+    session.add(family)
+    await session.commit()
+    await session.refresh(family, ["persons"])
+
     return FamilyResp.model_validate(family)
 
 
