@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CreateUser {
 
- String get email; String get name; String get cpf; String get mobile; String get password;// ignore: non_constant_identifier_names
+ String get email; String get name; String get cpf; String get mobile; String? get password;// ignore: non_constant_identifier_names
  String? get account_type;// ignore: non_constant_identifier_names
  int get institution_id;
 /// Create a copy of CreateUser
@@ -50,7 +50,7 @@ abstract mixin class $CreateUserCopyWith<$Res>  {
   factory $CreateUserCopyWith(CreateUser value, $Res Function(CreateUser) _then) = _$CreateUserCopyWithImpl;
 @useResult
 $Res call({
- String email, String name, String cpf, String mobile, String password, String? account_type, int institution_id
+ String email, String name, String cpf, String mobile, String? password, String? account_type, int institution_id
 });
 
 
@@ -67,14 +67,14 @@ class _$CreateUserCopyWithImpl<$Res>
 
 /// Create a copy of CreateUser
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? name = null,Object? cpf = null,Object? mobile = null,Object? password = null,Object? account_type = freezed,Object? institution_id = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? name = null,Object? cpf = null,Object? mobile = null,Object? password = freezed,Object? account_type = freezed,Object? institution_id = null,}) {
   return _then(_self.copyWith(
 email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,cpf: null == cpf ? _self.cpf : cpf // ignore: cast_nullable_to_non_nullable
 as String,mobile: null == mobile ? _self.mobile : mobile // ignore: cast_nullable_to_non_nullable
-as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
-as String,account_type: freezed == account_type ? _self.account_type : account_type // ignore: cast_nullable_to_non_nullable
+as String,password: freezed == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
+as String?,account_type: freezed == account_type ? _self.account_type : account_type // ignore: cast_nullable_to_non_nullable
 as String?,institution_id: null == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -161,7 +161,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String email,  String name,  String cpf,  String mobile,  String password,  String? account_type,  int institution_id)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String email,  String name,  String cpf,  String mobile,  String? password,  String? account_type,  int institution_id)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateUser() when $default != null:
 return $default(_that.email,_that.name,_that.cpf,_that.mobile,_that.password,_that.account_type,_that.institution_id);case _:
@@ -182,7 +182,7 @@ return $default(_that.email,_that.name,_that.cpf,_that.mobile,_that.password,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String email,  String name,  String cpf,  String mobile,  String password,  String? account_type,  int institution_id)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String email,  String name,  String cpf,  String mobile,  String? password,  String? account_type,  int institution_id)  $default,) {final _that = this;
 switch (_that) {
 case _CreateUser():
 return $default(_that.email,_that.name,_that.cpf,_that.mobile,_that.password,_that.account_type,_that.institution_id);case _:
@@ -202,7 +202,7 @@ return $default(_that.email,_that.name,_that.cpf,_that.mobile,_that.password,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String email,  String name,  String cpf,  String mobile,  String password,  String? account_type,  int institution_id)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String email,  String name,  String cpf,  String mobile,  String? password,  String? account_type,  int institution_id)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateUser() when $default != null:
 return $default(_that.email,_that.name,_that.cpf,_that.mobile,_that.password,_that.account_type,_that.institution_id);case _:
@@ -217,14 +217,14 @@ return $default(_that.email,_that.name,_that.cpf,_that.mobile,_that.password,_th
 @JsonSerializable()
 
 class _CreateUser implements CreateUser {
-   _CreateUser({required this.email, required this.name, required this.cpf, required this.mobile, required this.password, this.account_type, required this.institution_id});
+   _CreateUser({required this.email, required this.name, required this.cpf, required this.mobile, this.password, this.account_type, required this.institution_id});
   factory _CreateUser.fromJson(Map<String, dynamic> json) => _$CreateUserFromJson(json);
 
 @override final  String email;
 @override final  String name;
 @override final  String cpf;
 @override final  String mobile;
-@override final  String password;
+@override final  String? password;
 // ignore: non_constant_identifier_names
 @override final  String? account_type;
 // ignore: non_constant_identifier_names
@@ -263,7 +263,7 @@ abstract mixin class _$CreateUserCopyWith<$Res> implements $CreateUserCopyWith<$
   factory _$CreateUserCopyWith(_CreateUser value, $Res Function(_CreateUser) _then) = __$CreateUserCopyWithImpl;
 @override @useResult
 $Res call({
- String email, String name, String cpf, String mobile, String password, String? account_type, int institution_id
+ String email, String name, String cpf, String mobile, String? password, String? account_type, int institution_id
 });
 
 
@@ -280,14 +280,14 @@ class __$CreateUserCopyWithImpl<$Res>
 
 /// Create a copy of CreateUser
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? name = null,Object? cpf = null,Object? mobile = null,Object? password = null,Object? account_type = freezed,Object? institution_id = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? name = null,Object? cpf = null,Object? mobile = null,Object? password = freezed,Object? account_type = freezed,Object? institution_id = null,}) {
   return _then(_CreateUser(
 email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,cpf: null == cpf ? _self.cpf : cpf // ignore: cast_nullable_to_non_nullable
 as String,mobile: null == mobile ? _self.mobile : mobile // ignore: cast_nullable_to_non_nullable
-as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
-as String,account_type: freezed == account_type ? _self.account_type : account_type // ignore: cast_nullable_to_non_nullable
+as String,password: freezed == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
+as String?,account_type: freezed == account_type ? _self.account_type : account_type // ignore: cast_nullable_to_non_nullable
 as String?,institution_id: null == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
 as int,
   ));
