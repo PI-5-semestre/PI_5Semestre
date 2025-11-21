@@ -24,6 +24,12 @@ class SituationType(str, PyEnum):
     INACTIVE = "INACTIVE"
     SUSPENDED = "SUSPENDED"
 
+class DegreeOfKinship(str, PyEnum):
+    SON = "SON"
+    SPOUSE = "SPOUSE"
+    FATHER = "FATHER"
+    MOTHER = "MOTHER"
+    OTHER = "OTHER"
 
 class Family(BaseModel):
     __tablename__ = "account_families"
@@ -98,6 +104,13 @@ class Family(BaseModel):
 
     deliveries: Mapped[List["FamilyDelivery"]] = relationship(
         "FamilyDelivery",
+        back_populates="family",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    
+    persons: Mapped[List["AuthorizedPersonsFamily"]] = relationship(
+        "AuthorizedPersonsFamily",
         back_populates="family",
         cascade="all, delete-orphan",
         lazy="selectin",
@@ -205,3 +218,36 @@ class FamilyDelivery(BaseModel):
 
     def __repr__(self) -> str:
         return f"<FamilyDelivery(id={self.id}, family_id={self.family_id}, delivery_date='{self.delivery_date}')>"
+
+
+class AuthorizedPersonsFamily(BaseModel):
+    __tablename__ = "autihorized_persons_families"
+
+    name: Mapped[str] = mapped_column(
+        String(100), nullable=False, comment="Nome da pessoa autorizada"
+    )
+    cpf: Mapped[str] = mapped_column(
+        String(11),
+        nullable=True,
+        unique=True,
+        index=True,
+        comment="CPF da pessoa autorizada",
+    )
+    kinship: Mapped[DegreeOfKinship] = mapped_column(
+        Enum(DegreeOfKinship, native_enum=False), nullable=False, comment="Relação com a família"
+    )
+
+    family_id: Mapped[int] = mapped_column(
+        ForeignKey("account_families.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+        comment="Família à qual a pessoa está autorizada",
+    )
+    family: Mapped["Family"] = relationship(
+        "Family", back_populates="persons", lazy="joined"
+    )
+
+    __table_args__ = (
+        Index("idx_authorized_person_cpf", "cpf"),
+        Index("idx_authorized_person_family_id", "family_id"),
+    )

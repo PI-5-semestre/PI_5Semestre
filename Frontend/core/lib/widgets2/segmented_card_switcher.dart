@@ -4,12 +4,14 @@ class SegmentedCardSwitcher extends StatefulWidget {
   final List<Widget> options;
   final List<IconData> icons;
   final List<String>? labels;
+  final void Function(int index)? onTap;
 
   const SegmentedCardSwitcher({
     super.key,
     required this.options,
     required this.icons,
     this.labels,
+    this.onTap,
   }) : assert(
           options.length == icons.length,
           'options e icons devem ter o mesmo tamanho',
@@ -76,7 +78,10 @@ class _SegmentedCardSwitcherState extends State<SegmentedCardSwitcher> {
                       return Expanded(
                         child: InkWell(
                           borderRadius: BorderRadius.circular(10),
-                          onTap: () => setState(() => selectedIndex = index),
+                          onTap: () {
+                            setState(() => selectedIndex = index);
+                            widget.onTap?.call(index);
+                          },
                           splashColor: Colors.transparent,
                           highlightColor: Colors.transparent,
                           child: SizedBox(

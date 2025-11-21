@@ -8,7 +8,6 @@ import 'package:core/widgets2/skeleton/team_card_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 class TeamPage extends ConsumerWidget {
   const TeamPage({super.key});
@@ -26,60 +25,46 @@ class TeamPage extends ConsumerWidget {
       }
     });
 
-    if (userState.error != null) {
-      return Scaffold(
-        body: Center(
-          child: Text(
-            "Erro: ${userState.error!}",
-            style: const TextStyle(color: Colors.red),
-          ),
-        ),
-      );
+    if (userState.error != null && userState.users.isEmpty) {
+      return Center(child: Text("Não foi possível carregar os usuários"));
     }
-
-    /// Dados convertidos para TeamCardModal
-    final equipes = userState.users.map((account) {
-      final profile = account.profile;
-
-      return TeamCardModal(
-        name: profile?.name ?? 'Sem nome',
-        phone: profile?.mobile ?? '',
-        cpf: profile?.cpf ?? '',
-        email: account.email,
-        tipofunc: account.roleName,
-        inicio: DateFormat('dd/MM/yyyy').format(DateTime.parse(account.created)),
-      );
-    }).toList();
 
     final cards = [
       StatCard(
-        icon: Icons.person,
+        icon: Icons.group,
+        colors: [Color(0xFFFF4646), Color(0xFFFA6210)],
+        title: "Todos",
+        value: userState.users.length.toString(),
+      ),
+      StatCard(
+        icon: Icons.key,
         colors: [Color(0xFFAD46FF), Color(0xFF9810FA)],
         title: "Coordenadores",
-        value: equipes.where((e) => e.tipofunc == "Coordenador").length.toString(),
+        value: userState.users.where((u) => u.roleName == "Coordenador").length.toString(),
       ),
       StatCard(
         icon: Icons.sports_motorsports,
         colors: [Color(0xFF3d89ff), Color(0xFF165ffc)],
         title: "Entregadores",
-        value: equipes.where((e) => e.tipofunc == "Entregador").length.toString(),
+        value: userState.users.where((u) => u.roleName == "Entregador").length.toString(),
       ),
       StatCard(
         icon: Icons.content_paste,
         colors: [Color(0xFF00C951), Color(0xFF00A63E)],
         title: "Assistentes Sociais",
-        value: equipes.where((e) => e.tipofunc == "Assistente Social").length.toString(),
+        value: userState.users.where((u) => u.roleName == "Assistente Social").length.toString(),
       ),
       StatCard(
         icon: Icons.soup_kitchen,
         colors: [Color(0xFFF0B100), Color(0xFFD08700)],
         title: "Voluntários",
-        value: equipes.where((e) => e.tipofunc == "Voluntário").length.toString(),
+        value: userState.users.where((u) => u.roleName == "Voluntário").length.toString(),
       ),
     ];
 
     final iconCards = [
-      Icons.person,
+      Icons.group,
+      Icons.key,
       Icons.sports_motorsports,
       Icons.content_paste,
       Icons.soup_kitchen,
@@ -95,7 +80,7 @@ class TeamPage extends ConsumerWidget {
               children: [
                 _buildCardHeader(),
                 const SizedBox(height: 16),
-                _buildSearchField(),
+                _buildSearchField(ref),
                 const SizedBox(height: 8),
                 if (userState.isLoading)
                   Row(
@@ -104,7 +89,31 @@ class TeamPage extends ConsumerWidget {
                     ],
                   )
                 else
-                  SegmentedCardSwitcher(options: cards, icons: iconCards),
+                  SegmentedCardSwitcher(
+                    options: cards,
+                    icons: iconCards,
+                    onTap: (index) {
+                      final controller = ref.read(userControllerProvider.notifier);
+
+                      switch (index) {
+                        case 0:
+                          controller.filterByRole(null);
+                          break;
+                        case 1:
+                          controller.filterByRole("Coordenador");
+                          break;
+                        case 2:
+                          controller.filterByRole("Entregador");
+                          break;
+                        case 3:
+                          controller.filterByRole("Assistente Social");
+                          break;
+                        case 4:
+                          controller.filterByRole("Voluntário");
+                          break;
+                      }
+                    },
+                  ),
                 const SizedBox(height: 20),
                 _buildEquipesHeader(theme),
 
@@ -121,16 +130,10 @@ class TeamPage extends ConsumerWidget {
                 else
                   // Lista real
                   Column(
-                    children: equipes.map((team) {
+                    children: userState.filtered.map((account) {
                       return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 4,
-                        ),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: team,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: TeamCardModal(account: account),
                       );
                     }).toList(),
                   ),
@@ -148,16 +151,15 @@ class TeamPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSearchField() {
+  Widget _buildSearchField(WidgetRef ref) {
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.all(4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
         child: TextField(
-          decoration: InputDecoration(
-            hintText: "Nome, celular ou cpf...",
+          onChanged: (v) => ref.read(userControllerProvider.notifier).search(v),
+          decoration: const InputDecoration(
+            hintText: "Nome, e-mail, celular ou CPF...",
             prefixIcon: Icon(Icons.search),
             border: InputBorder.none,
           ),

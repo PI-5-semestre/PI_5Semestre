@@ -1,26 +1,20 @@
+import 'package:core/features/auth/data/models/user.dart';
+import 'package:core/features/user/providers/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
-class TeamCardModal extends StatelessWidget {
-  final String name;
-  final String phone;
-  final String email;
-  final String cpf;
-  final String tipofunc;
-  final String inicio;
+class TeamCardModal extends ConsumerWidget {
+  final Account account;
 
   const TeamCardModal({
     super.key,
-    required this.name,
-    required this.phone,
-    required this.email,
-    required this.cpf,
-    required this.tipofunc,
-    required this.inicio,
+    required this.account,
   });
 
   Color _getStatusColor(String tipofunc) {
-    switch (tipofunc) {
+    switch (account.roleName) {
       case "Coordenador":
         return Colors.purple;
       case "Entregador":
@@ -35,7 +29,7 @@ class TeamCardModal extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Card(
@@ -97,7 +91,7 @@ class TeamCardModal extends StatelessWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      name,
+                                      account.profile?.name ?? '',
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -114,7 +108,7 @@ class TeamCardModal extends StatelessWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      phone,
+                                      account.profile?.mobile ?? '',
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -131,7 +125,7 @@ class TeamCardModal extends StatelessWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      email,
+                                      account.email,
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -148,7 +142,7 @@ class TeamCardModal extends StatelessWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      cpf,
+                                      account.profile?.cpf ?? '',
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -165,7 +159,7 @@ class TeamCardModal extends StatelessWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      tipofunc,
+                                      account.roleName,
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -182,7 +176,7 @@ class TeamCardModal extends StatelessWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      inicio,
+                                      DateFormat('dd/MM/yyyy').format(DateTime.parse(account.created)),
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -196,16 +190,90 @@ class TeamCardModal extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Positioned(
-                        bottom: 16,
-                        right: 16,
-                        child: FloatingActionButton(
-                          onPressed: () {
-                            context.go('/more/team/edit_servant');
-                            Navigator.pop(context);
-                          },
-                          child: Icon(Icons.edit),
-                        ),
+                      Stack(
+                        children: [
+                          Positioned(
+                            bottom: 16,
+                            left: 16,
+                            child: Consumer(
+                              builder: (context, ref, _) {
+                                final isLoading = ref.watch(userControllerProvider).isLoading;
+                                final theme = Theme.of(context);
+
+                                return FloatingActionButton(
+                                  onPressed: isLoading
+                                      ? null
+                                      : () async {
+                                          final confirm = await showDialog<bool>(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                title: const Text('Excluir Funcionário'),
+                                                content: Text(
+                                                  'Tem certeza que deseja excluir '
+                                                  '${account.profile?.name ?? ''}?',
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, false),
+                                                    child: const Text('Cancelar'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, true),
+                                                    child: const Text(
+                                                      'Excluir',
+                                                      style: TextStyle(color: Colors.red),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                          if (confirm != true) return;
+                                          await ref
+                                              .read(userControllerProvider.notifier)
+                                              .deleteUser(account.email);
+                                          final error = ref.read(userControllerProvider).error;
+                                          if (error == null) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text("Usuário excluído com sucesso!"),
+                                              ),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text(error)),
+                                            );
+                                          }
+                                          Navigator.pop(context);
+                                        },
+                                  backgroundColor: theme.colorScheme.surfaceContainerLow,
+                                  child: isLoading
+                                      ? const SizedBox(
+                                          width: 22,
+                                          height: 22,
+                                          child: CircularProgressIndicator(strokeWidth: 3),
+                                        )
+                                      : const Icon(Icons.delete),
+                                );
+                              },
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 16,
+                            right: 16,
+                            child: FloatingActionButton(
+                              onPressed: () {
+                                context.go(
+                                  '/more/team/edit_servant',
+                                  extra: account,
+                                );
+                                Navigator.pop(context);
+                              },
+                              child: Icon(Icons.edit),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -215,7 +283,6 @@ class TeamCardModal extends StatelessWidget {
           );
         },
         child: SizedBox(
-          width: 300,
           height: 100,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -223,7 +290,7 @@ class TeamCardModal extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  name,
+                  account.profile?.name ?? '',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -233,7 +300,7 @@ class TeamCardModal extends StatelessWidget {
                 Wrap(
                   spacing: 6,
                   runSpacing: -6,
-                  children: [_buildChip(tipofunc, _getStatusColor(tipofunc))],
+                  children: [_buildChip(account.roleName, _getStatusColor(account.roleName))],
                 ),
               ],
             ),
