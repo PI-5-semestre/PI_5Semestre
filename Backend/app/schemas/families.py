@@ -50,15 +50,17 @@ class FamilyCreateForInstitution(BaseModel):
         return v.strip().upper()
 
 
-class AuthorizedPersonsFamilyCreate(BaseModel):
-    name: str
+class FamilyMemberCreate(BaseModel):
+    id: Optional[int] = None
+    name: Optional[str]
     cpf: Optional[str] = Field(None, min_length=11, max_length=11)
-    kinship: DegreeOfKinship
+    kinship: Optional[DegreeOfKinship] = None
+    can_receive: Optional[bool] = False
 
     @field_validator("name")
     @classmethod
-    def normalize_name(cls, v: str) -> str:
-        return v.strip().upper()
+    def normalize_name(cls, v: Optional[str]) -> Optional[str]:
+        return v.strip().upper() if v else None
 
     @field_validator("cpf")
     @classmethod
@@ -66,7 +68,8 @@ class AuthorizedPersonsFamilyCreate(BaseModel):
         return v.strip().replace(".", "").replace("-", "") if v else None
 
 
-class AuthorizedPersonsFamilyResp(BaseModel):
+
+class FamilyMemberResp(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -77,7 +80,7 @@ class AuthorizedPersonsFamilyResp(BaseModel):
     cpf: Optional[str]
     kinship: DegreeOfKinship
     family_id: int
-
+    can_receive: bool
 
 class FamilyUpdate(BaseModel):
     name: Optional[str] = None
@@ -91,8 +94,8 @@ class FamilyUpdate(BaseModel):
     income: Optional[Decimal] = Field(default=None, ge=0)
     description: Optional[str] = None
     situation: Optional[SituationType] = None
-    persons : Optional[List[AuthorizedPersonsFamilyCreate]] = None
-
+    members : Optional[List[FamilyMemberCreate]] = None
+    
     @field_validator("name")
     @classmethod
     def normalize_name(cls, v: Optional[str]) -> Optional[str]:
@@ -142,7 +145,7 @@ class FamilyResp(BaseModel):
     income: Decimal
     description: Optional[str]
     institution_id: int
-    persons: Optional[List[AuthorizedPersonsFamilyResp]] = None
+    members: Optional[List[FamilyMemberResp]] = None
 
 
 class DocFamilyCreate(BaseModel):

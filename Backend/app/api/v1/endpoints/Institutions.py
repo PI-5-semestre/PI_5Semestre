@@ -37,7 +37,7 @@ from app.schemas.families import (
 )
 from app.models.Institutions import Institution, InstitutionType
 from app.models.products import StockItem, StockHistory
-from app.models.families import AuthorizedPersonsFamily, Family, DocFamily, FamilyDelivery, SituationType
+from app.models.families import Family, DocFamily, FamilyDelivery, FamilyMember, SituationType
 
 router = APIRouter(prefix="/institutions", tags=["institutions"])
 Session = Annotated[AsyncSession, Depends(get_session)]
@@ -500,27 +500,51 @@ async def update_family_from_institution(
 
     try:
         for field, value in family_data.model_dump(exclude_unset=True).items():
-            if field == "persons":
-                # Check for duplicate CPFs in the incoming list
-                incoming_cpfs = [p['cpf'] for p in value if p.get('cpf')]
-                if len(incoming_cpfs) != len(set(incoming_cpfs)):
-                    raise DuplicatedError(detail="Duplicate CPFs in the persons list")
+            if field == "members":               
+                for member_data in value:
+                    if 'cpf' in member_data and member_data['cpf']:
+                        member_data['cpf'] = member_data['cpf'].replace(".", "").replace("-", "")
+                    
+                    member_id = member_data.get('id')
+                    cpf = member_data.get('cpf')
+                    existing_member = None
 
-                family.persons.clear()
-                for person_data in value:
-                    person = AuthorizedPersonsFamily(
-                        name=person_data['name'],
-                        cpf=person_data.get('cpf'),
-                        kinship=person_data['kinship'],
-                        family_id=family.id
-                    )
-                    family.persons.append(person)
+                    if member_id:
+                        for m in family.members:
+                            if m.id == member_id:
+                                existing_member = m
+                                break
+
+                    if not existing_member and cpf:
+                        for m in family.members:
+                            if m.cpf == cpf:
+                                existing_member = m
+                                break
+                    
+                    if existing_member:
+                        if 'cpf' in member_data:
+                            existing_member.cpf = member_data['cpf']
+                        if 'name' in member_data:
+                            existing_member.name = member_data['name']
+                        if 'kinship' in member_data:
+                            existing_member.kinship = member_data['kinship']
+                        if 'can_receive' in member_data:
+                            existing_member.can_receive = member_data['can_receive']
+                    else:
+                        member = FamilyMember(
+                            name=member_data.get('name'),
+                            cpf=cpf,
+                            kinship=member_data.get('kinship'),
+                            family_id=family.id,
+                            can_receive=member_data.get('can_receive', True)
+                        )
+                        family.members.append(member)
             else:
                 setattr(family, field, value)
 
         session.add(family)
         await session.commit()
-        await session.refresh(family, ["persons"])
+        await session.refresh(family, ["members"])
     except IntegrityError as e:
         await session.rollback()
         error_msg = str(e.orig).lower()
