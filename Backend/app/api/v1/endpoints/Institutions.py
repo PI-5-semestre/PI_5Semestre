@@ -536,7 +536,7 @@ async def update_family_from_institution(
                             cpf=cpf,
                             kinship=member_data.get('kinship'),
                             family_id=family.id,
-                            can_receive=member_data.get('can_receive', True)
+                            can_receive=member_data.get('can_receive', False),
                         )
                         family.members.append(member)
             else:
@@ -548,8 +548,8 @@ async def update_family_from_institution(
     except IntegrityError as e:
         await session.rollback()
         error_msg = str(e.orig).lower()
-        if "cpf" in error_msg and "autihorized_persons_families" in error_msg:
-             raise DuplicatedError(detail="One of the authorized persons has a CPF that is already registered.")
+        if "cpf" in error_msg and ("family_members" in error_msg or "account_families" in error_msg):
+             raise DuplicatedError(detail="One of the authorized persons (or the family head) has a CPF that is already registered.")
         raise
 
     return FamilyResp.model_validate(family)
