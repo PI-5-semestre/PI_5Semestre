@@ -62,15 +62,13 @@ class FamilyRepositoryImpl implements FamilyRepository {
   @override
   Future<bool> update(FamilyModel family, String token) async {
     try {
-      final familyJson = {
-        ...family.toJson(),
-        "persons": family.persons?.map((p) => {
-              "name": p.name,
-              "cpf": p.cpf,
-              "kinship": p.kinship,
-              "family_id": p.family_id,
-            }).toList(),
-      };
+      final familyJson = family.toJson();
+
+      if (family.persons != null && family.persons!.isNotEmpty) {
+        familyJson['persons'] = family.persons!.map((p) => p.toJson()).toList();
+      } else {
+        familyJson.remove('persons');
+      }
 
       final response = await dio.put(
         '/institutions/1/families/${family.cpf}',
@@ -85,6 +83,9 @@ class FamilyRepositoryImpl implements FamilyRepository {
 
       return response.statusCode == 200;
     } on DioException catch (e) {
+      if (e.response?.statusCode == 500 && family.persons != null && family.persons!.isNotEmpty) {
+        throw Exception("Membro de família já cadastrado");
+      }
       final message = e.response?.data['detail']?.toString() ?? 'Erro Inesperado';
       throw Exception(message);
     }

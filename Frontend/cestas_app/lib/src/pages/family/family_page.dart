@@ -6,20 +6,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class FamilyPage extends ConsumerWidget {
+class FamilyPage extends ConsumerStatefulWidget {
   const FamilyPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FamilyPage> createState() => _FamilyPageState();
+}
+
+class _FamilyPageState extends ConsumerState<FamilyPage>  {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = ref.read(familyControllerProvider);
+      if (state.families.isEmpty && !state.isLoading) {
+        ref.read(familyControllerProvider.notifier).fetchFamilies();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final familyState = ref.watch(familyControllerProvider);
     final controller = ref.watch(familyControllerProvider.notifier);
     final theme = Theme.of(context);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (familyState.families.isEmpty && !familyState.isLoading) {
-        controller.fetchFamilies();
-      }
-    });
 
     if (!familyState.isLoading &&
         familyState.error != null &&

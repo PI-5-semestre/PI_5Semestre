@@ -20,7 +20,6 @@ class EditFamilyPage extends ConsumerStatefulWidget {
 class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
   final formKey = GlobalKey<FormState>();
 
-  // Controllers
   final nameController = TextEditingController();
   final cpfController = TextEditingController();
   final phoneController = TextEditingController();
@@ -42,7 +41,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
   List<Map<String, dynamic>> familyMembers = [];
   List<Map<String, dynamic>> authorizedPeople = [];
 
-  // ---- Via CEP ----
   Future<void> _searchCep(String cep) async {
     if (cep.length == 8) {
       await ref.read(viaCepProvider.notifier).fetchCep(cep);
@@ -55,7 +53,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     }
   }
 
-  // ---- Aumenta/reduz membros ----
   void _updateFamilySize(String value) {
     int size = int.tryParse(value) ?? 0;
     if (size != familySize) {
@@ -74,7 +71,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     }
   }
 
-  // ---- Adicionar pessoa autorizada ----
   void _addAuthorizedPerson() {
     if (authorizedPeople.length < 2) {
       setState(() {
@@ -98,10 +94,14 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     }
   }
 
-  // ---- Preencher ao abrir ----
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(familyControllerProvider.notifier).fetchFamilies();
+    });
+
     final f = widget.family;
 
     nameController.text = f.name;
@@ -117,7 +117,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     situationController.text = f.situation ?? '';
     cityController.text = f.city ?? '';
 
-    // Carregar membros existentes
     if (f.persons != null && f.persons!.isNotEmpty) {
       familySize = f.persons!.length;
       familySizeController.text = familySize.toString();
@@ -133,7 +132,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     }
   }
 
-  // ---- Limpar controllers ----
   @override
   void dispose() {
     nameController.dispose();
@@ -163,7 +161,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     super.dispose();
   }
 
-  // ============================================================
   @override
   Widget build(BuildContext context) {
     final vm = ref.watch(familyControllerProvider.notifier);
@@ -179,7 +176,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
             children: [
               _buildCardHeader(),
 
-              // --- Dados pessoais ---
               _buildSection(
                 title: "Informações Pessoais",
                 icon: Icons.person,
@@ -202,7 +198,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                 ],
               ),
 
-              // --- Membros da Família ---
               if (familySize > 0)
                 _buildSection(
                   title: "Membros da Família",
@@ -246,7 +241,7 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                                 border: OutlineInputBorder(),
                               ),
                             ),
-                            if (member["kinship"] == "OTHER") ...[  // ← Use "OTHER" em vez de "Outro"
+                            if (member["kinship"] == "OTHER") ...[
                               const SizedBox(height: 6),
                               _buildTextField("Informe o grau *",
                                 controller: member["otherController"],
@@ -260,7 +255,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                   }).toList(),
                 ),
 
-              // ---- Autorizadas ---
               _buildSection(
                 title: "Pessoas Autorizadas",
                 icon: Icons.group_add,
@@ -337,7 +331,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                 ],
               ),
 
-              // ---- Endereço ----
               _buildSection(
                 title: "Endereço",
                 icon: Icons.location_on,
@@ -383,7 +376,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                 ],
               ),
 
-              // ---- Socioeconômico ----
               _buildSection(
                 title: "Informações Socioeconômicas",
                 icon: Icons.info,
@@ -479,8 +471,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     );
   }
 
-  // ============================================================
-  // ----------------- COMPONENTES REUTILIZADOS -----------------
   Widget _buildCardHeader() {
     return CardHeader(
       title: 'Editar Família',
