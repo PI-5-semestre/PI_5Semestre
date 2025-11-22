@@ -106,4 +106,26 @@ class FamilyController extends _$FamilyController {
       state = state.copyWith(isLoading: false);
     }
   }
+
+  Future<void> uploadDocument({
+    required String cpf,
+    required String docType,
+    required String filePath,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await ref.read(familyRepositoryProvider).uploadDocument(
+        cpf: cpf,
+        docType: docType,
+        filePath: filePath,
+      );
+      await fetchFamilies();
+    } catch (e) {
+      final msg = e.toString().replaceFirst("Exception: ", "");
+      state = state.copyWith(error: msg);
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
 }

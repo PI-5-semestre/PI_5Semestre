@@ -84,16 +84,21 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     }
   }
 
+  String? selectedFilePath;
+
   Future<void> _pickComprovante() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'jpg', 'png'],
     );
-    if (result != null) {
-      comprovanteController.text = result.files.single.name;
+
+    if (result != null && result.files.single.path != null) {
+      setState(() {
+        selectedFilePath = result.files.single.path!;
+        comprovanteController.text = result.files.single.name;
+      });
     }
   }
-
   @override
   void initState() {
     super.initState();
@@ -438,10 +443,10 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
             description: descriptionController.text.trim(),
             persons: familyMembers.map((member) {
               final kinshipValue = member["kinship"]?.toString() ?? "SON";
-              final finalKinship = kinshipValue == "OTHER" 
+              final finalKinship = kinshipValue == "OTHER"
                   ? member["otherController"]?.text.trim() ?? kinshipValue
                   : kinshipValue;
-              
+
               return Person(
                 name: member["name"]?.text.trim() ?? "",
                 cpf: member["cpf"]?.text.trim() ?? "",
@@ -453,16 +458,33 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
 
           await vm.updateFamily(updated);
 
-          if (ref.read(familyControllerProvider).error == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Família atualizada com sucesso!")),
-            );
-            context.pop();
-          } else {
+          if (ref.read(familyControllerProvider).error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(ref.read(familyControllerProvider).error!)),
             );
+            return;
           }
+
+          if (selectedFilePath != null) {
+            final ext = selectedFilePath!.split('.').last.toLowerCase();
+            await vm.uploadDocument(
+              cpf: widget.family.cpf,
+              docType: ext,
+              filePath: selectedFilePath!,
+            );
+
+            if (ref.read(familyControllerProvider).error != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(ref.read(familyControllerProvider).error!)),
+              );
+              return;
+            }
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Família atualizada com sucesso!")),
+          );
+          if (mounted) context.pop();
         },
         child: state.isLoading
             ? const CircularProgressIndicator(color: Colors.white)

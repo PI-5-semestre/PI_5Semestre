@@ -90,6 +90,41 @@ class FamilyRepositoryImpl implements FamilyRepository {
       throw Exception(message);
     }
   }
+
+  @override
+  Future<bool> uploadDocument({
+    required String cpf,
+    required String docType,
+    required String filePath,
+  }) async {
+    try {
+      final fileName = filePath.split('/').last;
+
+      final formData = FormData.fromMap({
+        "doc_type": docType,
+        "file": await MultipartFile.fromFile(
+          filePath,
+          filename: fileName,
+        ),
+      });
+
+      final response = await dio.post(
+        '/institutions/1/families/$cpf/documents',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+
+      return response.statusCode == 201 || response.statusCode == 200;
+    } on DioException catch (e) {
+      final msg = e.response?.data?['detail']?.toString() ??
+          'Erro ao enviar documento';
+      throw Exception(msg);
+    }
+  }
 }
 
 @riverpod

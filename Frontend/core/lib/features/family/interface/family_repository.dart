@@ -5,4 +5,9 @@ abstract interface class FamilyRepository {
   Future<bool> create(FamilyModel family, String token);
   Future<bool> update(FamilyModel family, String token);
   Future<bool> delete(String cpf, String token);
+  Future<bool> uploadDocument({
+    required String cpf,
+    required String docType,
+    required String filePath,
+  });
 }
