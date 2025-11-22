@@ -544,8 +544,12 @@ async def update_family_from_institution(
 
         session.add(family)
         await session.commit()
-        await session.refresh(family, ["members"])
+        
+        query = select(Family).options(selectinload(Family.members)).where(Family.id == family.id)
+        result = await session.execute(query)
+        family = result.scalar_one()
     except IntegrityError as e:
+        print(e)
         await session.rollback()
         error_msg = str(e.orig).lower()
         if "cpf" in error_msg and ("family_members" in error_msg or "account_families" in error_msg):
