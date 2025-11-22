@@ -1,12 +1,13 @@
 import 'package:core/features/family/data/models/family_model.dart';
-import 'package:core/features/family/providers/family_view_model.dart';
-import 'package:core/features/family/providers/new_family_view_model.dart';
+// import 'package:core/features/family/providers/family_view_model.dart';
+// import 'package:core/features/family/providers/new_family_view_model.dart';
+import 'package:core/features/viacep/providers/cep_provider.dart';
 import 'package:core/widgets/card_header.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:validatorless/validatorless.dart';
 
 class NewFamilyPage extends ConsumerStatefulWidget {
   const NewFamilyPage({super.key});
@@ -16,7 +17,8 @@ class NewFamilyPage extends ConsumerStatefulWidget {
 }
 
 class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
-  final TextEditingController comprovanteController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
   final nameController = TextEditingController();
   final cpfController = TextEditingController();
   final phoneController = TextEditingController();
@@ -27,223 +29,161 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
   final neighborhoodController = TextEditingController();
   final stateController = TextEditingController();
 
-  final estados = [
-    'AC',
-    'AL',
-    'AP',
-    'AM',
-    'BA',
-    'CE',
-    'DF',
-    'ES',
-    'GO',
-    'MA',
-    'MT',
-    'MS',
-    'MG',
-    'PA',
-    'PB',
-    'PR',
-    'PE',
-    'PI',
-    'RJ',
-    'RN',
-    'RS',
-    'RO',
-    'RR',
-    'SC',
-    'SP',
-    'SE',
-    'TO',
-  ];
-
-  String? selectedEstado;
-
-  Future<void> _pickComprovante() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'png'],
-    );
-
-    if (result != null && result.files.isNotEmpty) {
-      setState(() {
-        comprovanteController.text = result.files.single.name;
-      });
-    }
-  }
-
   @override
   void dispose() {
-    comprovanteController.dispose();
+    nameController.dispose();
+    cpfController.dispose();
+    phoneController.dispose();
+    cepController.dispose();
+    streetController.dispose();
+    numberController.dispose();
+    neighborhoodController.dispose();
+    stateController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    var familyVm = ref.watch(newFamilyViewModelProvider.notifier);
+    // final familyVm = ref.watch(newFamilyViewModelProvider.notifier);
+    final cepState = ref.watch(viaCepProvider);
+
+    /// Sempre atualiza os campos quando um CEP válido é carregado
+    cepState.when(
+      data: (cep) {
+        if (cep != null) {
+          streetController.text = cep.logradouro;
+          neighborhoodController.text = cep.bairro;
+          stateController.text = cep.uf;
+        }
+      },
+      loading: () {},
+      error: (_, __) {},
+    );
 
     return Scaffold(
       appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        child: ListView(
-          children: [
-            _buildCardHeader(),
+      body: Form(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          child: ListView(
+            children: [
+              _buildCardHeader(),
 
-            _buildSection(
-              title: "Informações Pessoais",
-              icon: Icons.person,
-              children: [
-                _buildTextField(
-                  "Nome do Responsável *",
-                  controller: nameController,
-                ),
-                _buildTextField("CPF *", controller: cpfController),
-                _buildTextField("Telefone", controller: phoneController),
-              ],
-            ),
-
-            // membros da família
-            _buildSection(
-              title: "Endereço",
-              icon: Icons.location_on,
-              children: [
-                _buildTextField("CEP", controller: cepController),
-                _buildTextField("Rua *", controller: streetController),
-                _buildTextField("Número *", controller: numberController),
-                _buildTextField("Bairro *", controller: neighborhoodController),
-                // _buildTextField("Estado *", controller: stateController),
-                _buildEstadoDropdown(),
-
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: comprovanteController,
-                  readOnly: true,
-                  onTap:
-                      _pickComprovante, // <-- agora o campo todo abre o seletor
-                  decoration: InputDecoration(
-                    labelText: "Comprovante de Endereço *",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    suffixIcon: const Icon(
-                      Icons.upload_file,
-                    ), // ícone fica só visual
+              _buildSection(
+                title: "Informações Pessoais",
+                icon: Icons.person,
+                children: [
+                  _buildTextField(
+                    "Nome do Responsável *",
+                    controller: nameController,
+                    validator: Validatorless.required("Campo obrigatório"),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-          ],
+                  _buildTextField(
+                    "CPF *",
+                    controller: cpfController,
+                    validator: Validatorless.multiple([
+                      Validatorless.required("Campo obrigatório"),
+                      Validatorless.min(11, "CPF deve ter 11 dígitos"),
+                      Validatorless.max(11, "CPF deve ter 11 dígitos"),
+                      Validatorless.regex(RegExp(r'^\d+$'), "Apenas números"),
+                    ]),
+                  ),
+                  _buildTextField(
+                    "Telefone",
+                    controller: phoneController,
+                    validator: Validatorless.multiple([
+                        Validatorless.required("Campo obrigatório"),
+                        Validatorless.min(10, "Mínimo 11 dígitos"),
+                        Validatorless.max(11, "Máximo 11 dígitos"),
+                        Validatorless.regex(RegExp(r'^\d+$'), "Apenas números"),
+                      ]),
+                  ),
+                ],
+              ),
+
+              _buildSection(
+                title: "Endereço",
+                icon: Icons.location_on,
+                children: [
+                  _buildTextField(
+                    "CEP",
+                    controller: cepController,
+                    validator: Validatorless.multiple([
+                      Validatorless.required("Campo obrigatório"),
+                      Validatorless.min(8, "CEP inválido"),
+                      Validatorless.regex(RegExp(r'^\d+$'), "Apenas números"),
+                    ]),
+                    onChanged: (value) {
+                      if (value.length == 8) {
+                        ref.read(viaCepProvider.notifier).fetchCep(value);
+                      }
+                    },
+                  ),
+                  _buildTextField("Rua *", controller: streetController,
+                      validator: Validatorless.required("Campo obrigatório")),
+                  _buildTextField("Número *", controller: numberController,
+                      validator: Validatorless.required("Campo obrigatório")),
+                  _buildTextField("Bairro *", controller: neighborhoodController,
+                      validator: Validatorless.required("Campo obrigatório")),
+                  _buildTextField("Estado *", controller: stateController,
+                      validator: Validatorless.required("Campo obrigatório")),
+                  const SizedBox(height: 12),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          var family = FamilyModel(
-            name: nameController.text,
-            cpf: cpfController.text,
-            mobile_phone: phoneController.text,
-            zip_code: cepController.text,
-            street: streetController.text,
-            number: numberController.text,
-            neighborhood: neighborhoodController.text,
-            state: stateController.text,
-            situation: "pendente",
-            income: "0",
-            description: "",
-            institution_id: 1,
-          );
+          if (!_formKey.currentState!.validate()) return;
 
-          final ok = await familyVm.create(family);
+          final family = '';
 
-          if (ok) {
+          // final ok = await familyVm.create(family);
 
-            ref.invalidate(familyViewModelProvider);
+          // if (ok) {
+          //   // ref.invalidate(familyViewModelProvider);
+          //   if (!mounted) return;
 
-            if (!mounted) return;
+          //   ScaffoldMessenger.of(context).showSnackBar(
+          //     const SnackBar(
+          //       content: Row(
+          //         children: [
+          //           Icon(Icons.check_circle, color: Colors.white),
+          //           SizedBox(width: 12),
+          //           Text("Família cadastrada com sucesso!"),
+          //         ],
+          //       ),
+          //       backgroundColor: Colors.green,
+          //       behavior: SnackBarBehavior.floating,
+          //     ),
+          //   );
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.white),
-                    SizedBox(width: 12),
-                    Text("Família cadastrada com sucesso!"),
-                  ],
-                ),
-                behavior: SnackBarBehavior.floating,
-                backgroundColor: Colors.green,
-                duration: Duration(seconds: 2),
-              ),
-            );
-
-            await Future.delayed(const Duration(milliseconds: 700));
-
-            if (!mounted) return;
-
-            context.go('/family');
-          }
+          //   await Future.delayed(const Duration(milliseconds: 700));
+          //   if (!mounted) return;
+          //   context.go('/family');
+          // }
         },
-
         child: const Icon(Icons.check),
       ),
     );
   }
 
-  Widget _buildCardHeader() {
-    return CardHeader(
-      title: 'Nova Família',
-      subtitle: 'Cadastro completo para recebimento de cestas básicas',
-      colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
-      icon: FontAwesomeIcons.heart,
-    );
-  }
-
-  Widget _buildSection({
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-  }) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: Colors.blue),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    String label, {
-    TextEditingController? controller,
-    Function(String)? onChanged,
-    int maxLines = 1,
-  }) {
+  // Reutilizável com validações
+  Widget _buildTextField(String label,
+      {required TextEditingController controller,
+      String? Function(String?)? validator,
+      void Function(String)? onChanged}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: TextFormField(
         controller: controller,
-        maxLines: maxLines,
+        validator: validator,
         onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
@@ -253,20 +193,34 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
     );
   }
 
-  Widget _buildEstadoDropdown() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: DropdownButtonFormField<String>(
-        items: estados.map((e) {
-          return DropdownMenuItem(value: e, child: Text(e));
-        }).toList(),
-        onChanged: (value) {
-          stateController.text = value ?? '';
-        },
-        value: stateController.text.isEmpty ? null : stateController.text,
-        decoration: InputDecoration(
-          labelText: "Estado *",
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+  Widget _buildCardHeader() => CardHeader(
+        title: 'Nova Família',
+        subtitle: 'Cadastro completo para recebimento de cestas básicas',
+        colors: const [Color(0xFF2B7FFF), Color(0xFF155DFC)],
+        icon: FontAwesomeIcons.heart,
+      );
+
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Icon(icon, color: Colors.blue),
+              const SizedBox(width: 8),
+              Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ]),
+            const SizedBox(height: 12),
+            ...children,
+          ],
         ),
       ),
     );

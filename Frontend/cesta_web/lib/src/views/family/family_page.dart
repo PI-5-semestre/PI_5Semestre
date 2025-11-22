@@ -36,84 +36,84 @@ class FamilyPage extends StatelessWidget {
     ];
 
     final families = [
-      FamilyCard(
-        name: "Maria da Silva Santos",
-        phone: "(11) 99999-0001",
-        members: 4,
-        income: 800,
-        cpf: "123.456.789-00",
-        address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
-        observations:
-            "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
-        status: "ativa",
-        deliveryStatus: "recebendo",
-        recommended: "teste"
-      ),
-      FamilyCard(
-        name: "João Carlos Santos",
-        phone: "(11) 99999-0002",
-        members: 3,
-        income: 600,
-        cpf: "987.654.321-00",
-        address: "Av. Central, 456 - Centro, São Paulo - SP",
-        observations:
-            "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
-        status: "pendente",
-        deliveryStatus: "aguardando",
-        recommended: "teste"
-      ),
-      FamilyCard(
-        name: "Maria da Silva Santos",
-        phone: "(11) 99999-0001",
-        members: 4,
-        income: 800,
-        cpf: "123.456.789-00",
-        address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
-        observations:
-            "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
-        status: "ativa",
-        deliveryStatus: "recebendo",
-        recommended: "teste"
-      ),
-      FamilyCard(
-        name: "João Carlos Santos",
-        phone: "(11) 99999-0002",
-        members: 3,
-        income: 600,
-        cpf: "987.654.321-00",
-        address: "Av. Central, 456 - Centro, São Paulo - SP",
-        observations:
-            "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
-        status: "pendente",
-        deliveryStatus: "aguardando",
-        recommended: "teste"
-      ),
-      FamilyCard(
-        name: "Maria da Silva Santos",
-        phone: "(11) 99999-0001",
-        members: 4,
-        income: 800,
-        cpf: "123.456.789-00",
-        address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
-        observations:
-            "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
-        status: "ativa",
-        deliveryStatus: "recebendo",
-        recommended: "teste"
-      ),
-      FamilyCard(
-        name: "João Carlos Santos",
-        phone: "(11) 99999-0002",
-        members: 3,
-        income: 600,
-        cpf: "987.654.321-00",
-        address: "Av. Central, 456 - Centro, São Paulo - SP",
-        observations:
-            "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
-        status: "pendente",
-        deliveryStatus: "aguardando",
-        recommended: "teste"
-      ),
+      // FamilyCard(
+      //   name: "Maria da Silva Santos",
+      //   phone: "(11) 99999-0001",
+      //   members: 4,
+      //   income: 800,
+      //   cpf: "123.456.789-00",
+      //   address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
+      //   observations:
+      //       "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
+      //   status: "ativa",
+      //   deliveryStatus: "recebendo",
+      //   recommended: "teste"
+      // ),
+      // FamilyCard(
+      //   name: "João Carlos Santos",
+      //   phone: "(11) 99999-0002",
+      //   members: 3,
+      //   income: 600,
+      //   cpf: "987.654.321-00",
+      //   address: "Av. Central, 456 - Centro, São Paulo - SP",
+      //   observations:
+      //       "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
+      //   status: "pendente",
+      //   deliveryStatus: "aguardando",
+      //   recommended: "teste"
+      // ),
+      // FamilyCard(
+      //   name: "Maria da Silva Santos",
+      //   phone: "(11) 99999-0001",
+      //   members: 4,
+      //   income: 800,
+      //   cpf: "123.456.789-00",
+      //   address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
+      //   observations:
+      //       "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
+      //   status: "ativa",
+      //   deliveryStatus: "recebendo",
+      //   recommended: "teste"
+      // ),
+      // FamilyCard(
+      //   name: "João Carlos Santos",
+      //   phone: "(11) 99999-0002",
+      //   members: 3,
+      //   income: 600,
+      //   cpf: "987.654.321-00",
+      //   address: "Av. Central, 456 - Centro, São Paulo - SP",
+      //   observations:
+      //       "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
+      //   status: "pendente",
+      //   deliveryStatus: "aguardando",
+      //   recommended: "teste"
+      // ),
+      // FamilyCard(
+      //   name: "Maria da Silva Santos",
+      //   phone: "(11) 99999-0001",
+      //   members: 4,
+      //   income: 800,
+      //   cpf: "123.456.789-00",
+      //   address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
+      //   observations:
+      //       "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
+      //   status: "ativa",
+      //   deliveryStatus: "recebendo",
+      //   recommended: "teste"
+      // ),
+      // FamilyCard(
+      //   name: "João Carlos Santos",
+      //   phone: "(11) 99999-0002",
+      //   members: 3,
+      //   income: 600,
+      //   cpf: "987.654.321-00",
+      //   address: "Av. Central, 456 - Centro, São Paulo - SP",
+      //   observations:
+      //       "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
+      //   status: "pendente",
+      //   deliveryStatus: "aguardando",
+      //   recommended: "teste"
+      // ),
     ];
 
     return Scaffold(

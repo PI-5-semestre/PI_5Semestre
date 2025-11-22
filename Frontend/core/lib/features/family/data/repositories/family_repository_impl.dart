@@ -20,12 +20,9 @@ class FamilyRepositoryImpl implements FamilyRepository {
       );
 
       return response.statusCode == 201;
-    } on DioException catch (e) {
-      final message =
-          e.response?.data['detail'] ??
-          e.response?.data['message'] ??
-          'Erro ao criar a família';
 
+    } on DioException catch (e) {
+      final message = e.response?.data['detail']?.toString() ?? 'Erro Inesperado';
       throw Exception(message);
     }
   }
@@ -38,10 +35,7 @@ class FamilyRepositoryImpl implements FamilyRepository {
       );
       return response.statusCode == 200;
     } on DioException catch (e) {
-      final message =
-          e.response?.data['detail'] ??
-          e.response?.data['message'] ??
-          'Falha ao deletar família';
+      final message = e.response?.data['detail']?.toString() ?? 'Erro Inesperado';
       throw Exception(message);
     }
   }
@@ -54,10 +48,7 @@ class FamilyRepositoryImpl implements FamilyRepository {
           .map((family) => FamilyModel.fromJson(family))
           .toList();
     } on DioException catch (e) {
-      final message =
-          e.response?.data['detail'] ??
-          e.response?.data['message'] ??
-          'Falha ao recuperar dados';
+      final message = e.response?.data['detail']?.toString() ?? 'Erro Inesperado';
       throw Exception(message);
     }
   }
@@ -71,10 +62,7 @@ class FamilyRepositoryImpl implements FamilyRepository {
       );
       return response.statusCode == 200;
     } on DioException catch (e) {
-      final message =
-          e.response?.data['detail'] ??
-          e.response?.data['message'] ??
-          'Falha ao atualizar família';
+      final message = e.response?.data['detail']?.toString() ?? 'Erro Inesperado';
       throw Exception(message);
     }
   }
