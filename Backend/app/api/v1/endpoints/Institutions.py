@@ -528,7 +528,7 @@ async def update_family_from_institution(
                             existing_member.name = member_data['name']
                         if 'kinship' in member_data:
                             existing_member.kinship = member_data['kinship']
-                        if 'can_receive' in member_data:
+                        if 'can_receive' in member_data and member_data['can_receive'] is not None:
                             existing_member.can_receive = member_data['can_receive']
                     else:
                         member = FamilyMember(
