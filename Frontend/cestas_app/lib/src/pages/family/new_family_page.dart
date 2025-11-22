@@ -25,7 +25,7 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
   final cepController = TextEditingController();
   final streetController = TextEditingController();
   final numberController = TextEditingController();
-  // final cityController = TextEditingController();
+  final cityController = TextEditingController();
   final neighborhoodController = TextEditingController();
   final stateController = TextEditingController();
 
@@ -37,7 +37,7 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
     cepController.dispose();
     streetController.dispose();
     numberController.dispose();
-    // cityController.dispose();
+    cityController.dispose();
     neighborhoodController.dispose();
     stateController.dispose();
     super.dispose();
@@ -56,6 +56,7 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
           streetController.text = cep.logradouro;
           neighborhoodController.text = cep.bairro;
           stateController.text = cep.uf;
+          cityController.text = cep.localidade;
         }
       },
       loading: () {},
@@ -128,6 +129,8 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
                       validator: Validatorless.required("Campo obrigatório")),
                   _buildTextField("Bairro *", controller: neighborhoodController,
                       validator: Validatorless.required("Campo obrigatório")),
+                  _buildTextField("Cidade *", controller: cityController,
+                      validator: Validatorless.required("Campo obrigatório")),
                   _buildTextField("Estado *", controller: stateController,
                       validator: Validatorless.required("Campo obrigatório")),
                   const SizedBox(height: 12),
@@ -156,7 +159,7 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
                         zip_code: cepController.text.trim(),
                         street: streetController.text.trim(),
                         number: numberController.text.trim(),
-                        // city: cityController.text.trim(),
+                        city: cityController.text.trim(),
                         neighborhood: neighborhoodController.text.trim(),
                         state: stateController.text.trim(),
                         income: "0",

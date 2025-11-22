@@ -67,6 +67,26 @@ class FamilyController extends _$FamilyController {
     }
   }
 
+  Future<void> updateFamily(FamilyModel user) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await ref.read(familyRepositoryProvider).update(user, await token);
+      await fetchFamilies();
+    } catch (e) {
+      final msg = e.toString().replaceFirst("Exception: ", "");
+      String translated = switch (msg) {
+        "CPF already in use" => "Já existe um cadastro com este CPF",
+        _ => msg,
+      };
+      state = state.copyWith(
+        error: translated,
+      );
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
   Future<void> deleteFamily(String cpf) async {
     state = state.copyWith(isLoading: true, error: null);
 

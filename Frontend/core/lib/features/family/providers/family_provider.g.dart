@@ -41,7 +41,7 @@ final class FamilyControllerProvider
   }
 }
 
-String _$familyControllerHash() => r'e57e6da4379446f26caf963085037a4dbb2124cb';
+String _$familyControllerHash() => r'884ab77d3aa466749570c704b19391a93d67e32b';
 
 abstract class _$FamilyController extends $Notifier<FamilyState> {
   FamilyState build();

@@ -60,12 +60,29 @@ class FamilyRepositoryImpl implements FamilyRepository {
   }
 
   @override
-  Future<bool> update(FamilyModel family) async {
+  Future<bool> update(FamilyModel family, String token) async {
     try {
+      final familyJson = {
+        ...family.toJson(),
+        "persons": family.persons?.map((p) => {
+              "name": p.name,
+              "cpf": p.cpf,
+              "kinship": p.kinship,
+              "family_id": p.family_id,
+            }).toList(),
+      };
+
       final response = await dio.put(
         '/institutions/1/families/${family.cpf}',
-        data: family,
+        data: familyJson,
+        options: Options(
+          headers: {
+            'content-type': 'application/json',
+            'Authorization': 'Bearer $token'
+          },
+        ),
       );
+
       return response.statusCode == 200;
     } on DioException catch (e) {
       final message = e.response?.data['detail']?.toString() ?? 'Erro Inesperado';
