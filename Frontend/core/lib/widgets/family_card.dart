@@ -1,6 +1,8 @@
 import 'package:core/features/family/data/models/family_model.dart';
+import 'package:core/features/family/providers/family_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class FamilyCard extends ConsumerWidget {
   final FamilyModel family;
@@ -233,16 +235,99 @@ class FamilyCard extends ConsumerWidget {
                         ),
                       ),
 
-                      Positioned(
-                        bottom: 16,
-                        right: 16,
-                        child: FloatingActionButton(
-                          heroTag: "edit_${family.id}",
-                          onPressed: () {
-                            // Por enquanto não faz nada
-                          },
-                          child: const Icon(Icons.edit),
-                        ),
+                      Stack(
+                        children: [
+                          Positioned(
+                            bottom: 16,
+                            left: 16,
+                            child: Consumer(
+                              builder: (context, ref, _) {
+                                final isLoading = ref.watch(familyControllerProvider).isLoading;
+                                final theme = Theme.of(context);
+
+                                return FloatingActionButton(
+                                  heroTag: "delete_${family.id}",
+                                  onPressed: isLoading
+                                      ? null
+                                      : () async {
+                                          final confirm = await showDialog<bool>(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                title: const Text('Excluir Funcionário'),
+                                                content: Text(
+                                                  'Tem certeza que deseja excluir '
+                                                  '${family.name}?',
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, false),
+                                                    child: const Text('Cancelar'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context, true),
+                                                    child: const Text(
+                                                      'Excluir',
+                                                      style: TextStyle(color: Colors.red),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                          if (confirm != true) return;
+                                          await ref.read(familyControllerProvider.notifier).deleteFamily(family.cpf);
+                                          final error = ref.read(familyControllerProvider).error;
+                                          if (error == null) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: const Text(
+                                                  "Família excluída com sucesso!",
+                                                  style: TextStyle(color: Colors.white),
+                                                ),
+                                                backgroundColor: theme.colorScheme.primary,
+                                              ),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text(
+                                                  error,
+                                                  style: TextStyle(color: theme.colorScheme.onError),
+                                                ),
+                                                backgroundColor: theme.colorScheme.error,
+                                              ),
+                                            );
+                                          }
+                                          Navigator.pop(context);
+                                        },
+                                  backgroundColor: theme.colorScheme.surfaceContainerLow,
+                                  child: isLoading
+                                      ? const SizedBox(
+                                          width: 22,
+                                          height: 22,
+                                          child: CircularProgressIndicator(strokeWidth: 3),
+                                        )
+                                      : const Icon(Icons.delete),
+                                );
+                              },
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 16,
+                            right: 16,
+                            child: FloatingActionButton(
+                              heroTag: "edit_${family.id}",
+                              onPressed: () {
+                                context.go(
+                                  '/family/edit_family',
+                                  extra: family,
+                                );
+                                Navigator.pop(context);
+                              },
+                              child: Icon(Icons.edit),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

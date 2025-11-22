@@ -31,10 +31,13 @@ class FamilyRepositoryImpl implements FamilyRepository {
   }
 
   @override
-  Future<bool> delete(FamilyModel family) async {
+  Future<bool> delete(String cpf, String token) async {
     try {
       final response = await dio.delete(
-        '/institutions/1/families/${family.cpf}',
+        '/institutions/1/families/$cpf',
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
       );
       return response.statusCode == 200;
     } on DioException catch (e) {

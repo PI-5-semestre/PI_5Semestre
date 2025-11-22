@@ -4,5 +4,5 @@ abstract interface class FamilyRepository {
   Future<List<FamilyModel>> findAll();
   Future<bool> update(FamilyModel family);
   Future<bool> create(FamilyModel family, String token);
-  Future<bool> delete(FamilyModel family);
+  Future<bool> delete(String cpf, String token);
 }

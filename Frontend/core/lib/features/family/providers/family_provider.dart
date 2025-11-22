@@ -66,4 +66,24 @@ class FamilyController extends _$FamilyController {
       state = state.copyWith(isLoading: false, error: translated);
     }
   }
+
+  Future<void> deleteFamily(String cpf) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await ref.read(familyRepositoryProvider).delete(cpf, await token);
+      await fetchFamilies();
+    } catch (e) {
+      final msg = e.toString().replaceFirst("Exception: ", "");
+      String translated = switch (msg) {
+        final String text when text.contains("found in this institution") => "Família não encontrada",
+        _ => msg,
+      };
+      state = state.copyWith(
+        error: translated,
+      );
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
 }
