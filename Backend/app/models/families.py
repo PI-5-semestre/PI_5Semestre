@@ -61,6 +61,10 @@ class Family(BaseModel):
     state: Mapped[str] = mapped_column(
         String(2), nullable=False, comment="UF do estado"
     )
+    
+    city: Mapped[Optional[str]] = mapped_column(
+        String(100), nullable=True, comment="Nome da cidade", default=None
+    )
 
     situation: Mapped[SituationType] = mapped_column(
         Enum(SituationType, native_enum=False),
@@ -221,7 +225,7 @@ class FamilyDelivery(BaseModel):
 
 
 class AuthorizedPersonsFamily(BaseModel):
-    __tablename__ = "autihorized_persons_families"
+    __tablename__ = "authorized_persons_families"
 
     name: Mapped[str] = mapped_column(
         String(100), nullable=False, comment="Nome da pessoa autorizada"

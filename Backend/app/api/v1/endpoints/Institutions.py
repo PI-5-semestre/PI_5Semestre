@@ -420,13 +420,20 @@ async def create_family_for_institution(
             detail=f"Family with CPF '{family_data.cpf}' already exists"
         )
 
-    new_family = Family(**family_data.model_dump(), institution_id=institution_id)
+    try:
+        new_family = Family(**family_data.model_dump(), institution_id=institution_id)
 
-    session.add(new_family)
-    await session.commit()
-    await session.refresh(new_family)
+        session.add(new_family)
+        await session.commit()
+        await session.refresh(new_family)
 
-    return FamilyResp.model_validate(new_family)
+        return FamilyResp.model_validate(new_family)
+    except IntegrityError as e:
+        await session.rollback()
+        error_msg = str(e.orig).lower()
+        if "cpf" in error_msg:
+             raise DuplicatedError(detail="Family with this CPF already exists.")
+        raise
 
 
 @router.get("/{institution_id}/families", response_model=List[FamilyResp])
@@ -491,23 +498,35 @@ async def update_family_from_institution(
     await get_institution_or_404(session, institution_id)
     family = await get_family_or_404(session, cpf, institution_id)
 
-    for field, value in family_data.model_dump(exclude_unset=True).items():
-        if field == "persons":
-            family.persons.clear()
-            for person_data in value:
-                person = AuthorizedPersonsFamily(
-                    name=person_data['name'],
-                    cpf=person_data.get('cpf'),
-                    kinship=person_data['kinship'],
-                    family_id=family.id
-                )
-                family.persons.append(person)
-        else:
-            setattr(family, field, value)
+    try:
+        for field, value in family_data.model_dump(exclude_unset=True).items():
+            if field == "persons":
+                # Check for duplicate CPFs in the incoming list
+                incoming_cpfs = [p['cpf'] for p in value if p.get('cpf')]
+                if len(incoming_cpfs) != len(set(incoming_cpfs)):
+                    raise DuplicatedError(detail="Duplicate CPFs in the persons list")
 
-    session.add(family)
-    await session.commit()
-    await session.refresh(family, ["persons"])
+                family.persons.clear()
+                for person_data in value:
+                    person = AuthorizedPersonsFamily(
+                        name=person_data['name'],
+                        cpf=person_data.get('cpf'),
+                        kinship=person_data['kinship'],
+                        family_id=family.id
+                    )
+                    family.persons.append(person)
+            else:
+                setattr(family, field, value)
+
+        session.add(family)
+        await session.commit()
+        await session.refresh(family, ["persons"])
+    except IntegrityError as e:
+        await session.rollback()
+        error_msg = str(e.orig).lower()
+        if "cpf" in error_msg and "autihorized_persons_families" in error_msg:
+             raise DuplicatedError(detail="One of the authorized persons has a CPF that is already registered.")
+        raise
 
     return FamilyResp.model_validate(family)
 
