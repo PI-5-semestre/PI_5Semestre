@@ -12,11 +12,14 @@ class FamilyRepositoryImpl implements FamilyRepository {
   FamilyRepositoryImpl({required this.dio});
 
   @override
-  Future<bool> create(FamilyModel family) async {
+  Future<bool> create(FamilyModel family, String token) async {
     try {
       final response = await dio.post(
         '/institutions/1/families',
         data: family.toJson(),
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
       );
 
       return response.statusCode == 201;

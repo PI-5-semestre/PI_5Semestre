@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FamilyModel {
 
- int? get id; DateTime? get created; DateTime? get modified; bool? get active; String get name; String get cpf; String get mobile_phone; String get zip_code; String get street; String get number; String get neighborhood; String? get city; String get state; String get situation; String get income; String get description; int get institution_id; List<Person>? get persons;
+ int? get id; DateTime? get created; DateTime? get modified; bool? get active; String get name; String get cpf; String get mobile_phone; String get zip_code; String get street; String get number; String get neighborhood; String? get city; String get state; String? get situation; String? get income; String? get description; int get institution_id; List<Person>? get persons;
 /// Create a copy of FamilyModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $FamilyModelCopyWith<$Res>  {
   factory $FamilyModelCopyWith(FamilyModel value, $Res Function(FamilyModel) _then) = _$FamilyModelCopyWithImpl;
 @useResult
 $Res call({
- int? id, DateTime? created, DateTime? modified, bool? active, String name, String cpf, String mobile_phone, String zip_code, String street, String number, String neighborhood, String? city, String state, String situation, String income, String description, int institution_id, List<Person>? persons
+ int? id, DateTime? created, DateTime? modified, bool? active, String name, String cpf, String mobile_phone, String zip_code, String street, String number, String neighborhood, String? city, String state, String? situation, String? income, String? description, int institution_id, List<Person>? persons
 });
 
 
@@ -65,7 +65,7 @@ class _$FamilyModelCopyWithImpl<$Res>
 
 /// Create a copy of FamilyModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? created = freezed,Object? modified = freezed,Object? active = freezed,Object? name = null,Object? cpf = null,Object? mobile_phone = null,Object? zip_code = null,Object? street = null,Object? number = null,Object? neighborhood = null,Object? city = freezed,Object? state = null,Object? situation = null,Object? income = null,Object? description = null,Object? institution_id = null,Object? persons = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? created = freezed,Object? modified = freezed,Object? active = freezed,Object? name = null,Object? cpf = null,Object? mobile_phone = null,Object? zip_code = null,Object? street = null,Object? number = null,Object? neighborhood = null,Object? city = freezed,Object? state = null,Object? situation = freezed,Object? income = freezed,Object? description = freezed,Object? institution_id = null,Object? persons = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,created: freezed == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
@@ -80,10 +80,10 @@ as String,number: null == number ? _self.number : number // ignore: cast_nullabl
 as String,neighborhood: null == neighborhood ? _self.neighborhood : neighborhood // ignore: cast_nullable_to_non_nullable
 as String,city: freezed == city ? _self.city : city // ignore: cast_nullable_to_non_nullable
 as String?,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
-as String,situation: null == situation ? _self.situation : situation // ignore: cast_nullable_to_non_nullable
-as String,income: null == income ? _self.income : income // ignore: cast_nullable_to_non_nullable
-as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String,institution_id: null == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
+as String,situation: freezed == situation ? _self.situation : situation // ignore: cast_nullable_to_non_nullable
+as String?,income: freezed == income ? _self.income : income // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String?,institution_id: null == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
 as int,persons: freezed == persons ? _self.persons : persons // ignore: cast_nullable_to_non_nullable
 as List<Person>?,
   ));
@@ -170,7 +170,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  DateTime? created,  DateTime? modified,  bool? active,  String name,  String cpf,  String mobile_phone,  String zip_code,  String street,  String number,  String neighborhood,  String? city,  String state,  String situation,  String income,  String description,  int institution_id,  List<Person>? persons)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  DateTime? created,  DateTime? modified,  bool? active,  String name,  String cpf,  String mobile_phone,  String zip_code,  String street,  String number,  String neighborhood,  String? city,  String state,  String? situation,  String? income,  String? description,  int institution_id,  List<Person>? persons)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FamilyModel() when $default != null:
 return $default(_that.id,_that.created,_that.modified,_that.active,_that.name,_that.cpf,_that.mobile_phone,_that.zip_code,_that.street,_that.number,_that.neighborhood,_that.city,_that.state,_that.situation,_that.income,_that.description,_that.institution_id,_that.persons);case _:
@@ -191,7 +191,7 @@ return $default(_that.id,_that.created,_that.modified,_that.active,_that.name,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  DateTime? created,  DateTime? modified,  bool? active,  String name,  String cpf,  String mobile_phone,  String zip_code,  String street,  String number,  String neighborhood,  String? city,  String state,  String situation,  String income,  String description,  int institution_id,  List<Person>? persons)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  DateTime? created,  DateTime? modified,  bool? active,  String name,  String cpf,  String mobile_phone,  String zip_code,  String street,  String number,  String neighborhood,  String? city,  String state,  String? situation,  String? income,  String? description,  int institution_id,  List<Person>? persons)  $default,) {final _that = this;
 switch (_that) {
 case _FamilyModel():
 return $default(_that.id,_that.created,_that.modified,_that.active,_that.name,_that.cpf,_that.mobile_phone,_that.zip_code,_that.street,_that.number,_that.neighborhood,_that.city,_that.state,_that.situation,_that.income,_that.description,_that.institution_id,_that.persons);case _:
@@ -211,7 +211,7 @@ return $default(_that.id,_that.created,_that.modified,_that.active,_that.name,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  DateTime? created,  DateTime? modified,  bool? active,  String name,  String cpf,  String mobile_phone,  String zip_code,  String street,  String number,  String neighborhood,  String? city,  String state,  String situation,  String income,  String description,  int institution_id,  List<Person>? persons)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  DateTime? created,  DateTime? modified,  bool? active,  String name,  String cpf,  String mobile_phone,  String zip_code,  String street,  String number,  String neighborhood,  String? city,  String state,  String? situation,  String? income,  String? description,  int institution_id,  List<Person>? persons)?  $default,) {final _that = this;
 switch (_that) {
 case _FamilyModel() when $default != null:
 return $default(_that.id,_that.created,_that.modified,_that.active,_that.name,_that.cpf,_that.mobile_phone,_that.zip_code,_that.street,_that.number,_that.neighborhood,_that.city,_that.state,_that.situation,_that.income,_that.description,_that.institution_id,_that.persons);case _:
@@ -226,7 +226,7 @@ return $default(_that.id,_that.created,_that.modified,_that.active,_that.name,_t
 @JsonSerializable()
 
 class _FamilyModel extends FamilyModel {
-  const _FamilyModel({this.id, this.created, this.modified, this.active, required this.name, required this.cpf, required this.mobile_phone, required this.zip_code, required this.street, required this.number, required this.neighborhood, required this.city, required this.state, required this.situation, required this.income, required this.description, required this.institution_id, final  List<Person>? persons}): _persons = persons,super._();
+  const _FamilyModel({this.id, this.created, this.modified, this.active, required this.name, required this.cpf, required this.mobile_phone, required this.zip_code, required this.street, required this.number, required this.neighborhood, this.city, required this.state, this.situation, this.income, this.description, required this.institution_id, final  List<Person>? persons}): _persons = persons,super._();
   factory _FamilyModel.fromJson(Map<String, dynamic> json) => _$FamilyModelFromJson(json);
 
 @override final  int? id;
@@ -242,9 +242,9 @@ class _FamilyModel extends FamilyModel {
 @override final  String neighborhood;
 @override final  String? city;
 @override final  String state;
-@override final  String situation;
-@override final  String income;
-@override final  String description;
+@override final  String? situation;
+@override final  String? income;
+@override final  String? description;
 @override final  int institution_id;
  final  List<Person>? _persons;
 @override List<Person>? get persons {
@@ -289,7 +289,7 @@ abstract mixin class _$FamilyModelCopyWith<$Res> implements $FamilyModelCopyWith
   factory _$FamilyModelCopyWith(_FamilyModel value, $Res Function(_FamilyModel) _then) = __$FamilyModelCopyWithImpl;
 @override @useResult
 $Res call({
- int? id, DateTime? created, DateTime? modified, bool? active, String name, String cpf, String mobile_phone, String zip_code, String street, String number, String neighborhood, String? city, String state, String situation, String income, String description, int institution_id, List<Person>? persons
+ int? id, DateTime? created, DateTime? modified, bool? active, String name, String cpf, String mobile_phone, String zip_code, String street, String number, String neighborhood, String? city, String state, String? situation, String? income, String? description, int institution_id, List<Person>? persons
 });
 
 
@@ -306,7 +306,7 @@ class __$FamilyModelCopyWithImpl<$Res>
 
 /// Create a copy of FamilyModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? created = freezed,Object? modified = freezed,Object? active = freezed,Object? name = null,Object? cpf = null,Object? mobile_phone = null,Object? zip_code = null,Object? street = null,Object? number = null,Object? neighborhood = null,Object? city = freezed,Object? state = null,Object? situation = null,Object? income = null,Object? description = null,Object? institution_id = null,Object? persons = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? created = freezed,Object? modified = freezed,Object? active = freezed,Object? name = null,Object? cpf = null,Object? mobile_phone = null,Object? zip_code = null,Object? street = null,Object? number = null,Object? neighborhood = null,Object? city = freezed,Object? state = null,Object? situation = freezed,Object? income = freezed,Object? description = freezed,Object? institution_id = null,Object? persons = freezed,}) {
   return _then(_FamilyModel(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,created: freezed == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
@@ -321,10 +321,10 @@ as String,number: null == number ? _self.number : number // ignore: cast_nullabl
 as String,neighborhood: null == neighborhood ? _self.neighborhood : neighborhood // ignore: cast_nullable_to_non_nullable
 as String,city: freezed == city ? _self.city : city // ignore: cast_nullable_to_non_nullable
 as String?,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
-as String,situation: null == situation ? _self.situation : situation // ignore: cast_nullable_to_non_nullable
-as String,income: null == income ? _self.income : income // ignore: cast_nullable_to_non_nullable
-as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String,institution_id: null == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
+as String,situation: freezed == situation ? _self.situation : situation // ignore: cast_nullable_to_non_nullable
+as String?,income: freezed == income ? _self.income : income // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String?,institution_id: null == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
 as int,persons: freezed == persons ? _self._persons : persons // ignore: cast_nullable_to_non_nullable
 as List<Person>?,
   ));

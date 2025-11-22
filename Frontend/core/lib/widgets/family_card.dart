@@ -210,7 +210,7 @@ class FamilyCard extends ConsumerWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      family.description,
+                                      family.description ?? '',
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -237,6 +237,7 @@ class FamilyCard extends ConsumerWidget {
                         bottom: 16,
                         right: 16,
                         child: FloatingActionButton(
+                          heroTag: "edit_${family.id}",
                           onPressed: () {
                             // Por enquanto não faz nada
                           },
@@ -292,6 +293,7 @@ class FamilyCard extends ConsumerWidget {
               ),
               if (family.roleSituation == "Pendente")
                 FloatingActionButton.small(
+                  heroTag: "calendar_${family.id}",
                   onPressed: () {},
                   elevation: 1,
                   child: const Icon(Icons.calendar_today),

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class EditFamilyPage extends StatefulWidget {
-  const EditFamilyPage({super.key});
+  const EditFamilyPage({super.key, required family});
 
   @override
   State<EditFamilyPage> createState() => _EditFamilyPageState();

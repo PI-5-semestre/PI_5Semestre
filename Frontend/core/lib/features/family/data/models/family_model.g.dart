@@ -24,9 +24,9 @@ _FamilyModel _$FamilyModelFromJson(Map<String, dynamic> json) => _FamilyModel(
   neighborhood: json['neighborhood'] as String,
   city: json['city'] as String?,
   state: json['state'] as String,
-  situation: json['situation'] as String,
-  income: json['income'] as String,
-  description: json['description'] as String,
+  situation: json['situation'] as String?,
+  income: json['income'] as String?,
+  description: json['description'] as String?,
   institution_id: (json['institution_id'] as num).toInt(),
   persons: (json['persons'] as List<dynamic>?)
       ?.map((e) => Person.fromJson(e as Map<String, dynamic>))

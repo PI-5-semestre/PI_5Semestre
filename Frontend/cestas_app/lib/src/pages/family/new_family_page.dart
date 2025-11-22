@@ -1,12 +1,11 @@
 import 'package:core/features/family/data/models/family_model.dart';
-// import 'package:core/features/family/providers/family_view_model.dart';
-// import 'package:core/features/family/providers/new_family_view_model.dart';
+import 'package:core/features/family/providers/family_provider.dart';
+import 'package:core/features/shared_preferences/service/storage_service.dart';
 import 'package:core/features/viacep/providers/cep_provider.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:go_router/go_router.dart';
 import 'package:validatorless/validatorless.dart';
 
 class NewFamilyPage extends ConsumerStatefulWidget {
@@ -26,6 +25,7 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
   final cepController = TextEditingController();
   final streetController = TextEditingController();
   final numberController = TextEditingController();
+  // final cityController = TextEditingController();
   final neighborhoodController = TextEditingController();
   final stateController = TextEditingController();
 
@@ -37,6 +37,7 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
     cepController.dispose();
     streetController.dispose();
     numberController.dispose();
+    // cityController.dispose();
     neighborhoodController.dispose();
     stateController.dispose();
     super.dispose();
@@ -44,10 +45,11 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
 
   @override
   Widget build(BuildContext context) {
-    // final familyVm = ref.watch(newFamilyViewModelProvider.notifier);
+    final theme = Theme.of(context);
     final cepState = ref.watch(viaCepProvider);
+    final state = ref.watch(familyControllerProvider);
+    final controller = ref.read(familyControllerProvider.notifier);
 
-    /// Sempre atualiza os campos quando um CEP válido é carregado
     cepState.when(
       data: (cep) {
         if (cep != null) {
@@ -86,7 +88,7 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
                       Validatorless.required("Campo obrigatório"),
                       Validatorless.min(11, "CPF deve ter 11 dígitos"),
                       Validatorless.max(11, "CPF deve ter 11 dígitos"),
-                      Validatorless.regex(RegExp(r'^\d+$'), "Apenas números"),
+                      Validatorless.regex(RegExp(r'^\d+$'), "Apenas números, 11 dígitos"),
                     ]),
                   ),
                   _buildTextField(
@@ -139,37 +141,58 @@ class _NewFamilyPageState extends ConsumerState<NewFamilyPage> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          if (!_formKey.currentState!.validate()) return;
+        child: state.isLoading
+            ? const CircularProgressIndicator(color: Colors.white)
+            : const Icon(Icons.check),
+        onPressed: state.isLoading
+                ? null
+                : () async {
+                    final institution_id = await ref.read(storageServiceProvider.notifier).get<String>('institution_id');
+                    if (_formKey.currentState!.validate()) {
+                      final family = FamilyModel(
+                        name: nameController.text.trim(),
+                        cpf: cpfController.text.trim(),
+                        mobile_phone: phoneController.text.trim(),
+                        zip_code: cepController.text.trim(),
+                        street: streetController.text.trim(),
+                        number: numberController.text.trim(),
+                        // city: cityController.text.trim(),
+                        neighborhood: neighborhoodController.text.trim(),
+                        state: stateController.text.trim(),
+                        income: "0",
+                        institution_id: int.tryParse(institution_id ?? '') ?? 0
+                      );
 
-          final family = '';
+                      await controller.createFamily(family);
 
-          // final ok = await familyVm.create(family);
-
-          // if (ok) {
-          //   // ref.invalidate(familyViewModelProvider);
-          //   if (!mounted) return;
-
-          //   ScaffoldMessenger.of(context).showSnackBar(
-          //     const SnackBar(
-          //       content: Row(
-          //         children: [
-          //           Icon(Icons.check_circle, color: Colors.white),
-          //           SizedBox(width: 12),
-          //           Text("Família cadastrada com sucesso!"),
-          //         ],
-          //       ),
-          //       backgroundColor: Colors.green,
-          //       behavior: SnackBarBehavior.floating,
-          //     ),
-          //   );
-
-          //   await Future.delayed(const Duration(milliseconds: 700));
-          //   if (!mounted) return;
-          //   context.go('/family');
-          // }
-        },
-        child: const Icon(Icons.check),
+                      if (ref.read(familyControllerProvider).error == null) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "Família criada com sucesso!",
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              backgroundColor: theme.colorScheme.primary,
+                            ),
+                          );
+                          Navigator.of(context).pop();
+                        }
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                ref.read(familyControllerProvider).error!,
+                                style: TextStyle(color: theme.colorScheme.onError),
+                              ),
+                              backgroundColor: theme.colorScheme.error,
+                            ),
+                          );
+                        }
+                      }
+                    }
+                },
       ),
     );
   }
