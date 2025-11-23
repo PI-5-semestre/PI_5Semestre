@@ -34,12 +34,12 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
   final incomeController = TextEditingController();
   final descriptionController = TextEditingController();
   final situationController = TextEditingController();
-  final familySizeController = TextEditingController();
   final comprovanteController = TextEditingController();
 
-  int familySize = 0;
   List<Map<String, dynamic>> familyMembers = [];
   List<Map<String, dynamic>> authorizedPeople = [];
+
+  String? selectedFilePath;
 
   Future<void> _searchCep(String cep) async {
     if (cep.length == 8) {
@@ -53,22 +53,15 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     }
   }
 
-  void _updateFamilySize(String value) {
-    int size = int.tryParse(value) ?? 0;
-    if (size != familySize) {
-      setState(() {
-        familySize = size;
-        familyMembers = List.generate(
-          familySize,
-          (_) => {
-            "name": TextEditingController(),
-            "cpf": TextEditingController(),
-            "kinship": "SON",
-            "otherController": TextEditingController(),
-          },
-        );
+  void _addMember() {
+    setState(() {
+      familyMembers.add({
+        "name": TextEditingController(),
+        "cpf": TextEditingController(),
+        "kinship": "SON",
+        "otherController": TextEditingController(),
       });
-    }
+    });
   }
 
   void _addAuthorizedPerson() {
@@ -84,8 +77,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     }
   }
 
-  String? selectedFilePath;
-
   Future<void> _pickComprovante() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -99,6 +90,7 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
       });
     }
   }
+
   @override
   void initState() {
     super.initState();
@@ -123,10 +115,7 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     cityController.text = f.city ?? '';
 
     if (f.members != null && f.members!.isNotEmpty) {
-      familySize = f.members!.length;
-      familySizeController.text = familySize.toString();
-
-      familyMembers = f.members!.map((m) => {
+      familyMembers = f.members!.map<Map<String, dynamic>>((m) => {
         "name": TextEditingController(text: m.name),
         "cpf": TextEditingController(text: m.cpf),
         "kinship": m.kinship,
@@ -134,6 +123,8 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
           text: m.kinship == "OTHER" ? m.kinship : '',
         ),
       }).toList();
+    } else {
+      familyMembers = [];
     }
   }
 
@@ -152,7 +143,7 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     comprovanteController.dispose();
     situationController.dispose();
     cityController.dispose();
-    familySizeController.dispose();
+
     for (var member in familyMembers) {
       member["name"].dispose();
       member["cpf"].dispose();
@@ -194,20 +185,14 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                     readOnly: true,
                   ),
                   _buildTextField("Telefone", controller: phoneController),
-                  _buildTextField(
-                    "Tamanho da Família",
-                    controller: familySizeController,
-                    onChanged: _updateFamilySize,
-                    validator: Validatorless.number("Informe um número válido"),
-                  ),
                 ],
               ),
 
-              if (familySize > 0)
-                _buildSection(
-                  title: "Membros da Família",
-                  icon: Icons.group,
-                  children: familyMembers.asMap().entries.map((entry) {
+              _buildSection(
+                title: "Membros da Família",
+                icon: Icons.group,
+                children: [
+                  ...familyMembers.asMap().entries.map((entry) {
                     int index = entry.key;
                     var member = entry.value;
 
@@ -218,10 +203,14 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Membro ${index + 1}",
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Membro ${index + 1}",
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 6),
                             _buildTextField("Nome *",
                               controller: member["name"],
                               validator: Validatorless.required("Campo obrigatório"),
@@ -230,7 +219,7 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                               controller: member["cpf"],
                             ),
                             DropdownButtonFormField<String>(
-                              initialValue: member["kinship"] ?? "SON",
+                              value: member["kinship"] ?? "SON",
                               items: const [
                                 DropdownMenuItem(value: "SON", child: Text("Filho(a)")),
                                 DropdownMenuItem(value: "SPOUSE", child: Text("Cônjuge")),
@@ -239,7 +228,7 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                                 DropdownMenuItem(value: "OTHER", child: Text("Outro")),
                               ],
                               onChanged: (value) {
-                                setState(() => member["kinship"] = value!);
+                                setState(() => member["kinship"] = value as dynamic);
                               },
                               decoration: const InputDecoration(
                                 labelText: "Grau de Parentesco",
@@ -247,7 +236,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                               ),
                             ),
                             if (member["kinship"] == "OTHER") ...[
-                              const SizedBox(height: 6),
                               _buildTextField("Informe o grau *",
                                 controller: member["otherController"],
                                 validator: Validatorless.required("Campo obrigatório"),
@@ -258,7 +246,15 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                       ),
                     );
                   }).toList(),
-                ),
+
+                  OutlinedButton.icon(
+                    onPressed: _addMember,
+                    icon: const Icon(Icons.add),
+                    label: const Text("Adicionar Membro",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
 
               _buildSection(
                 title: "Pessoas Autorizadas",
@@ -297,7 +293,7 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                             ),
                             _buildTextField("CPF", controller: person["cpf"]),
                             DropdownButtonFormField<String>(
-                              initialValue: person["kinship"] ?? "SON",
+                              value: person["kinship"] ?? "SON",
                               items: const [
                                 DropdownMenuItem(value: "SON", child: Text("Filho(a)")),
                                 DropdownMenuItem(value: "SPOUSE", child: Text("Cônjuge")),
@@ -306,7 +302,7 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                                 DropdownMenuItem(value: "OTHER", child: Text("Outro")),
                               ],
                               onChanged: (value) {
-                                setState(() => person["kinship"] = value!);
+                                setState(() => person["kinship"] = value as dynamic);
                               },
                               decoration: const InputDecoration(
                                 labelText: "Grau de Parentesco",
