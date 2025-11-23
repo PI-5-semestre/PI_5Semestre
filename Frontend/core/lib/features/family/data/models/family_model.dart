@@ -25,7 +25,7 @@ abstract class FamilyModel with _$FamilyModel {
     String? income,
     String? description,
     required int institution_id,
-    List<Person>? persons,
+    List<Member>? members,
   }) = _FamilyModel;
 
   factory FamilyModel.fromJson(Map<String, dynamic> json) =>
@@ -65,8 +65,8 @@ abstract class FamilyModel with _$FamilyModel {
 }
 
 @freezed
-abstract class Person with _$Person {
-  const factory Person({
+abstract class Member with _$Member {
+  const factory Member({
     int? id,
     DateTime? created,
     DateTime? modified,
@@ -75,7 +75,8 @@ abstract class Person with _$Person {
     required String cpf,
     required String kinship,
     int? family_id,
-  }) = _Person;
+    bool? can_receive,
+  }) = _Member;
 
-  factory Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
+  factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
 }

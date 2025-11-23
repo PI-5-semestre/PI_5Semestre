@@ -28,8 +28,8 @@ _FamilyModel _$FamilyModelFromJson(Map<String, dynamic> json) => _FamilyModel(
   income: json['income'] as String?,
   description: json['description'] as String?,
   institution_id: (json['institution_id'] as num).toInt(),
-  persons: (json['persons'] as List<dynamic>?)
-      ?.map((e) => Person.fromJson(e as Map<String, dynamic>))
+  members: (json['members'] as List<dynamic>?)
+      ?.map((e) => Member.fromJson(e as Map<String, dynamic>))
       .toList(),
 );
 
@@ -52,10 +52,10 @@ Map<String, dynamic> _$FamilyModelToJson(_FamilyModel instance) =>
       'income': instance.income,
       'description': instance.description,
       'institution_id': instance.institution_id,
-      'persons': instance.persons,
+      'members': instance.members,
     };
 
-_Person _$PersonFromJson(Map<String, dynamic> json) => _Person(
+_Member _$MemberFromJson(Map<String, dynamic> json) => _Member(
   id: (json['id'] as num?)?.toInt(),
   created: json['created'] == null
       ? null
@@ -68,9 +68,10 @@ _Person _$PersonFromJson(Map<String, dynamic> json) => _Person(
   cpf: json['cpf'] as String,
   kinship: json['kinship'] as String,
   family_id: (json['family_id'] as num?)?.toInt(),
+  can_receive: json['can_receive'] as bool?,
 );
 
-Map<String, dynamic> _$PersonToJson(_Person instance) => <String, dynamic>{
+Map<String, dynamic> _$MemberToJson(_Member instance) => <String, dynamic>{
   'id': instance.id,
   'created': instance.created?.toIso8601String(),
   'modified': instance.modified?.toIso8601String(),
@@ -79,4 +80,5 @@ Map<String, dynamic> _$PersonToJson(_Person instance) => <String, dynamic>{
   'cpf': instance.cpf,
   'kinship': instance.kinship,
   'family_id': instance.family_id,
+  'can_receive': instance.can_receive,
 };

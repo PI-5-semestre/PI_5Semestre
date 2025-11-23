@@ -122,16 +122,16 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     situationController.text = f.situation ?? '';
     cityController.text = f.city ?? '';
 
-    if (f.persons != null && f.persons!.isNotEmpty) {
-      familySize = f.persons!.length;
+    if (f.members != null && f.members!.isNotEmpty) {
+      familySize = f.members!.length;
       familySizeController.text = familySize.toString();
 
-      familyMembers = f.persons!.map((p) => {
-        "name": TextEditingController(text: p.name),
-        "cpf": TextEditingController(text: p.cpf),
-        "kinship": p.kinship,
+      familyMembers = f.members!.map((m) => {
+        "name": TextEditingController(text: m.name),
+        "cpf": TextEditingController(text: m.cpf),
+        "kinship": m.kinship,
         "otherController": TextEditingController(
-          text: p.kinship == "OTHER" ? p.kinship : '',
+          text: m.kinship == "OTHER" ? m.kinship : '',
         ),
       }).toList();
     }
@@ -441,13 +441,13 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
             income: incomeController.text.trim(),
             situation: situationController.text.trim(),
             description: descriptionController.text.trim(),
-            persons: familyMembers.map((member) {
+            members: familyMembers.map((member) {
               final kinshipValue = member["kinship"]?.toString() ?? "SON";
               final finalKinship = kinshipValue == "OTHER"
                   ? member["otherController"]?.text.trim() ?? kinshipValue
                   : kinshipValue;
 
-              return Person(
+              return Member(
                 name: member["name"]?.text.trim() ?? "",
                 cpf: member["cpf"]?.text.trim() ?? "",
                 kinship: finalKinship,

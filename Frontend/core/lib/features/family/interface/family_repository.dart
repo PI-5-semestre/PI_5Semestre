@@ -10,4 +10,6 @@ abstract interface class FamilyRepository {
     required String docType,
     required String filePath,
   });
+  Future<List<dynamic>> getDocuments(String cpf);
+  Future<void> downloadDocument(String cpf, int id);
 }

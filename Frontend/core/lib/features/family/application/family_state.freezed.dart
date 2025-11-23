@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FamilyState {
 
- List<FamilyModel> get families; List<FamilyModel> get filtered; String? get filterRole; bool get isLoading; String? get error;
+ List<FamilyModel> get families; List<FamilyModel> get filtered; String? get filterRole; Map<String, List<dynamic>> get documentsByCpf; bool get isLoading; String? get error; int? get currentDownloadId;
 /// Create a copy of FamilyState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $FamilyStateCopyWith<FamilyState> get copyWith => _$FamilyStateCopyWithImpl<Fami
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FamilyState&&const DeepCollectionEquality().equals(other.families, families)&&const DeepCollectionEquality().equals(other.filtered, filtered)&&(identical(other.filterRole, filterRole) || other.filterRole == filterRole)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FamilyState&&const DeepCollectionEquality().equals(other.families, families)&&const DeepCollectionEquality().equals(other.filtered, filtered)&&(identical(other.filterRole, filterRole) || other.filterRole == filterRole)&&const DeepCollectionEquality().equals(other.documentsByCpf, documentsByCpf)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error)&&(identical(other.currentDownloadId, currentDownloadId) || other.currentDownloadId == currentDownloadId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(families),const DeepCollectionEquality().hash(filtered),filterRole,isLoading,error);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(families),const DeepCollectionEquality().hash(filtered),filterRole,const DeepCollectionEquality().hash(documentsByCpf),isLoading,error,currentDownloadId);
 
 @override
 String toString() {
-  return 'FamilyState(families: $families, filtered: $filtered, filterRole: $filterRole, isLoading: $isLoading, error: $error)';
+  return 'FamilyState(families: $families, filtered: $filtered, filterRole: $filterRole, documentsByCpf: $documentsByCpf, isLoading: $isLoading, error: $error, currentDownloadId: $currentDownloadId)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $FamilyStateCopyWith<$Res>  {
   factory $FamilyStateCopyWith(FamilyState value, $Res Function(FamilyState) _then) = _$FamilyStateCopyWithImpl;
 @useResult
 $Res call({
- List<FamilyModel> families, List<FamilyModel> filtered, String? filterRole, bool isLoading, String? error
+ List<FamilyModel> families, List<FamilyModel> filtered, String? filterRole, Map<String, List<dynamic>> documentsByCpf, bool isLoading, String? error, int? currentDownloadId
 });
 
 
@@ -62,14 +62,16 @@ class _$FamilyStateCopyWithImpl<$Res>
 
 /// Create a copy of FamilyState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? families = null,Object? filtered = null,Object? filterRole = freezed,Object? isLoading = null,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? families = null,Object? filtered = null,Object? filterRole = freezed,Object? documentsByCpf = null,Object? isLoading = null,Object? error = freezed,Object? currentDownloadId = freezed,}) {
   return _then(_self.copyWith(
 families: null == families ? _self.families : families // ignore: cast_nullable_to_non_nullable
 as List<FamilyModel>,filtered: null == filtered ? _self.filtered : filtered // ignore: cast_nullable_to_non_nullable
 as List<FamilyModel>,filterRole: freezed == filterRole ? _self.filterRole : filterRole // ignore: cast_nullable_to_non_nullable
-as String?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as String?,documentsByCpf: null == documentsByCpf ? _self.documentsByCpf : documentsByCpf // ignore: cast_nullable_to_non_nullable
+as Map<String, List<dynamic>>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,currentDownloadId: freezed == currentDownloadId ? _self.currentDownloadId : currentDownloadId // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -154,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<FamilyModel> families,  List<FamilyModel> filtered,  String? filterRole,  bool isLoading,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<FamilyModel> families,  List<FamilyModel> filtered,  String? filterRole,  Map<String, List<dynamic>> documentsByCpf,  bool isLoading,  String? error,  int? currentDownloadId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FamilyState() when $default != null:
-return $default(_that.families,_that.filtered,_that.filterRole,_that.isLoading,_that.error);case _:
+return $default(_that.families,_that.filtered,_that.filterRole,_that.documentsByCpf,_that.isLoading,_that.error,_that.currentDownloadId);case _:
   return orElse();
 
 }
@@ -175,10 +177,10 @@ return $default(_that.families,_that.filtered,_that.filterRole,_that.isLoading,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<FamilyModel> families,  List<FamilyModel> filtered,  String? filterRole,  bool isLoading,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<FamilyModel> families,  List<FamilyModel> filtered,  String? filterRole,  Map<String, List<dynamic>> documentsByCpf,  bool isLoading,  String? error,  int? currentDownloadId)  $default,) {final _that = this;
 switch (_that) {
 case _FamilyState():
-return $default(_that.families,_that.filtered,_that.filterRole,_that.isLoading,_that.error);case _:
+return $default(_that.families,_that.filtered,_that.filterRole,_that.documentsByCpf,_that.isLoading,_that.error,_that.currentDownloadId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +197,10 @@ return $default(_that.families,_that.filtered,_that.filterRole,_that.isLoading,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<FamilyModel> families,  List<FamilyModel> filtered,  String? filterRole,  bool isLoading,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<FamilyModel> families,  List<FamilyModel> filtered,  String? filterRole,  Map<String, List<dynamic>> documentsByCpf,  bool isLoading,  String? error,  int? currentDownloadId)?  $default,) {final _that = this;
 switch (_that) {
 case _FamilyState() when $default != null:
-return $default(_that.families,_that.filtered,_that.filterRole,_that.isLoading,_that.error);case _:
+return $default(_that.families,_that.filtered,_that.filterRole,_that.documentsByCpf,_that.isLoading,_that.error,_that.currentDownloadId);case _:
   return null;
 
 }
@@ -210,7 +212,7 @@ return $default(_that.families,_that.filtered,_that.filterRole,_that.isLoading,_
 
 
 class _FamilyState implements FamilyState {
-  const _FamilyState({final  List<FamilyModel> families = const [], final  List<FamilyModel> filtered = const [], this.filterRole = null, this.isLoading = false, this.error}): _families = families,_filtered = filtered;
+  const _FamilyState({final  List<FamilyModel> families = const [], final  List<FamilyModel> filtered = const [], this.filterRole = null, final  Map<String, List<dynamic>> documentsByCpf = const {}, this.isLoading = false, this.error, this.currentDownloadId = null}): _families = families,_filtered = filtered,_documentsByCpf = documentsByCpf;
   
 
  final  List<FamilyModel> _families;
@@ -228,8 +230,16 @@ class _FamilyState implements FamilyState {
 }
 
 @override@JsonKey() final  String? filterRole;
+ final  Map<String, List<dynamic>> _documentsByCpf;
+@override@JsonKey() Map<String, List<dynamic>> get documentsByCpf {
+  if (_documentsByCpf is EqualUnmodifiableMapView) return _documentsByCpf;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_documentsByCpf);
+}
+
 @override@JsonKey() final  bool isLoading;
 @override final  String? error;
+@override@JsonKey() final  int? currentDownloadId;
 
 /// Create a copy of FamilyState
 /// with the given fields replaced by the non-null parameter values.
@@ -241,16 +251,16 @@ _$FamilyStateCopyWith<_FamilyState> get copyWith => __$FamilyStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FamilyState&&const DeepCollectionEquality().equals(other._families, _families)&&const DeepCollectionEquality().equals(other._filtered, _filtered)&&(identical(other.filterRole, filterRole) || other.filterRole == filterRole)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FamilyState&&const DeepCollectionEquality().equals(other._families, _families)&&const DeepCollectionEquality().equals(other._filtered, _filtered)&&(identical(other.filterRole, filterRole) || other.filterRole == filterRole)&&const DeepCollectionEquality().equals(other._documentsByCpf, _documentsByCpf)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error)&&(identical(other.currentDownloadId, currentDownloadId) || other.currentDownloadId == currentDownloadId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_families),const DeepCollectionEquality().hash(_filtered),filterRole,isLoading,error);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_families),const DeepCollectionEquality().hash(_filtered),filterRole,const DeepCollectionEquality().hash(_documentsByCpf),isLoading,error,currentDownloadId);
 
 @override
 String toString() {
-  return 'FamilyState(families: $families, filtered: $filtered, filterRole: $filterRole, isLoading: $isLoading, error: $error)';
+  return 'FamilyState(families: $families, filtered: $filtered, filterRole: $filterRole, documentsByCpf: $documentsByCpf, isLoading: $isLoading, error: $error, currentDownloadId: $currentDownloadId)';
 }
 
 
@@ -261,7 +271,7 @@ abstract mixin class _$FamilyStateCopyWith<$Res> implements $FamilyStateCopyWith
   factory _$FamilyStateCopyWith(_FamilyState value, $Res Function(_FamilyState) _then) = __$FamilyStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<FamilyModel> families, List<FamilyModel> filtered, String? filterRole, bool isLoading, String? error
+ List<FamilyModel> families, List<FamilyModel> filtered, String? filterRole, Map<String, List<dynamic>> documentsByCpf, bool isLoading, String? error, int? currentDownloadId
 });
 
 
@@ -278,14 +288,16 @@ class __$FamilyStateCopyWithImpl<$Res>
 
 /// Create a copy of FamilyState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? families = null,Object? filtered = null,Object? filterRole = freezed,Object? isLoading = null,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? families = null,Object? filtered = null,Object? filterRole = freezed,Object? documentsByCpf = null,Object? isLoading = null,Object? error = freezed,Object? currentDownloadId = freezed,}) {
   return _then(_FamilyState(
 families: null == families ? _self._families : families // ignore: cast_nullable_to_non_nullable
 as List<FamilyModel>,filtered: null == filtered ? _self._filtered : filtered // ignore: cast_nullable_to_non_nullable
 as List<FamilyModel>,filterRole: freezed == filterRole ? _self.filterRole : filterRole // ignore: cast_nullable_to_non_nullable
-as String?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as String?,documentsByCpf: null == documentsByCpf ? _self._documentsByCpf : documentsByCpf // ignore: cast_nullable_to_non_nullable
+as Map<String, List<dynamic>>,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,currentDownloadId: freezed == currentDownloadId ? _self.currentDownloadId : currentDownloadId // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

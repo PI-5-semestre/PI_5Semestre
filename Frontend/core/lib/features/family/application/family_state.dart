@@ -9,7 +9,10 @@ abstract class FamilyState with _$FamilyState {
     @Default([]) List<FamilyModel> families,
     @Default([]) List<FamilyModel> filtered,
     @Default(null) String? filterRole,
+    @Default({}) Map<String, List<dynamic>> documentsByCpf,
     @Default(false) bool isLoading,
     String? error,
+    @Default(null) int? currentDownloadId,
+
   }) = _FamilyState;
 }
