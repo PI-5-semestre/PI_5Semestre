@@ -2,6 +2,8 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 
+from app.schemas.users import UserResp
+
 
 class InstitutionCreate(BaseModel):
     name: str
@@ -66,3 +68,8 @@ class DeliveryResp(BaseModel):
     delivery_date: str
     account_id: int
     description: Optional[str] = None
+    
+class UserCorporateResp(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    user: UserResp

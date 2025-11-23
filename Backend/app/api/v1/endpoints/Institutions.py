@@ -22,6 +22,7 @@ from app.schemas.Institutions import (
     DeliveryResp,
     InstitutionUpdate,
     InstitutionResp,
+    UserCorporateResp,
 )
 from app.schemas.products import (
     StockItemResp,
@@ -815,3 +816,15 @@ async def delete_family_delivery(
     await session.commit()
 
     return None
+
+@router.get("/{institution_id}/corporate", status_code=200, response_model=List[UserCorporateResp])
+async def get_users(
+    institution_id: int,
+    session: Session,
+    current_account: Annotated[Account, Depends(get_current_account)],
+):
+    institution = await get_institution_or_404(session, institution_id)
+    query = select(Account).options(selectinload(Account.profile)).where(Account.institution_id == institution.id).order_by(Account.account_type.asc())
+    result = await session.execute(query)
+    users = result.scalars().all()
+    return [UserCorporateResp(user=user) for user in users]
