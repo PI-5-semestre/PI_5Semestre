@@ -60,9 +60,11 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
         "cpf": TextEditingController(),
         "kinship": "SON",
         "otherController": TextEditingController(),
+        "can_receive": false, // <---- AQUI
       });
     });
   }
+
 
   void _addAuthorizedPerson() {
     if (authorizedPeople.length < 2) {
@@ -122,6 +124,7 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
         "otherController": TextEditingController(
           text: m.kinship == "OTHER" ? m.kinship : '',
         ),
+        "can_receive": m.can_receive ?? false,
       }).toList();
     } else {
       familyMembers = [];
@@ -260,74 +263,56 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                 title: "Pessoas Autorizadas",
                 icon: Icons.group_add,
                 children: [
-                  const Text("Cadastre até 2 pessoas autorizadas"),
+                  const Text("Selecione até 2 membros para receber benefícios."),
                   const SizedBox(height: 8),
 
-                  ...authorizedPeople.asMap().entries.map((entry) {
+                  // Mostrar lista atual de autorizados
+                  ...familyMembers.asMap().entries.where((entry) {
+                    return entry.value["can_receive"] == true;
+                  }).map((entry) {
                     int index = entry.key;
-                    var person = entry.value;
+                    var member = entry.value;
+
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 6),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Pessoa Autorizada ${index + 1}",
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.close, color: Colors.red),
-                                  onPressed: () {
-                                    setState(() => authorizedPeople.removeAt(index));
-                                  },
-                                ),
-                              ],
-                            ),
-                            _buildTextField("Nome *",
-                              controller: person["name"],
-                              validator: Validatorless.required("Informe o nome"),
-                            ),
-                            _buildTextField("CPF", controller: person["cpf"]),
-                            DropdownButtonFormField<String>(
-                              value: person["kinship"] ?? "SON",
-                              items: const [
-                                DropdownMenuItem(value: "SON", child: Text("Filho(a)")),
-                                DropdownMenuItem(value: "SPOUSE", child: Text("Cônjuge")),
-                                DropdownMenuItem(value: "FATHER", child: Text("Pai")),
-                                DropdownMenuItem(value: "MOTHER", child: Text("Mãe")),
-                                DropdownMenuItem(value: "OTHER", child: Text("Outro")),
-                              ],
-                              onChanged: (value) {
-                                setState(() => person["kinship"] = value as dynamic);
-                              },
-                              decoration: const InputDecoration(
-                                labelText: "Grau de Parentesco",
-                                border: OutlineInputBorder(),
-                              ),
-                            ),
-                            if (person["kinship"] == "OTHER") ...[
-                              const SizedBox(height: 6),
-                              _buildTextField("Informe o grau *",
-                                controller: person["otherController"],
-                                validator: Validatorless.required("Campo obrigatório"),
-                              ),
-                            ],
-                          ],
+                      child: ListTile(
+                        title: Text(member["name"]?.text ?? "Sem nome"),
+                        subtitle: Text("Pessoa Autorizada"),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.red),
+                          onPressed: () {
+                            setState(() {
+                              familyMembers[index]["can_receive"] = false;
+                            });
+                          },
                         ),
                       ),
                     );
                   }),
 
-                  if (authorizedPeople.length < 2)
-                    OutlinedButton.icon(
-                      onPressed: _addAuthorizedPerson,
-                      icon: const Icon(Icons.add),
-                      label: const Text("Adicionar Pessoa",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                  if (familyMembers.where((m) => m["can_receive"] == true).length < 2)
+                    DropdownButtonFormField<int>(
+                      decoration: const InputDecoration(
+                        labelText: "Selecionar Membro",
+                        border: OutlineInputBorder(),
+                      ),
+                      items: familyMembers.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        var member = entry.value;
+                        return DropdownMenuItem<int>(
+                          value: index,
+                          child: Text(member["name"]?.text.isEmpty
+                              ? "Sem nome"
+                              : member["name"].text),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            familyMembers[value]["can_receive"] = true;
+                          });
+                        }
+                      },
                     ),
                 ],
               ),
@@ -448,6 +433,7 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                 cpf: member["cpf"]?.text.trim() ?? "",
                 kinship: finalKinship,
                 family_id: widget.family.id,
+                can_receive: member["can_receive"] ?? false,
               );
             }).toList(),
           );
