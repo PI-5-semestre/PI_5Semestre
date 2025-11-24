@@ -57,6 +57,7 @@ class DeliveryPut(BaseModel):
     date: datetime
     account_id: int
     description: Optional[str] = None
+    status: str
 
 class DeliveryResp(BaseModel):
     model_config = ConfigDict(from_attributes=True)

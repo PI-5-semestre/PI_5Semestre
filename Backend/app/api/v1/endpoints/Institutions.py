@@ -784,6 +784,7 @@ async def update_family_delivery(
     delivery.delivery_date = payload.date.isoformat()
     delivery.account_id = account.id
     delivery.description = payload.description
+    delivery.status = payload.status
 
     await session.commit()
     await session.refresh(delivery)
