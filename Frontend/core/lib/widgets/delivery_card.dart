@@ -139,7 +139,7 @@ class DeliveryCard extends ConsumerWidget {
                                     subtitle: Text(
                                       (delivery.family.autorizados?.isNotEmpty ?? false)
                                           ? delivery.family.autorizados!
-                                              .map((a) => '- ${a.name} (${a.parentesco})')
+                                              .map((a) => '• ${a.name} (${a.parentesco})')
                                               .join('\n')
                                           : 'Nenhuma pessoa autorizada',
                                       style: TextStyle(
