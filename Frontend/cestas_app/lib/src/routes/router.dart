@@ -17,6 +17,7 @@ import 'package:cestas_app/src/pages/teams/team_page.dart';
 import 'package:cestas_app/src/pages/visits_page.dart';
 import 'package:cestas_app/src/widgets/navigator_shell_route.dart';
 import 'package:core/features/auth/data/models/user.dart';
+import 'package:core/features/family/data/models/family_model.dart';
 import 'package:go_router/go_router.dart';
 
 final routes = GoRouter(
@@ -46,11 +47,10 @@ final routes = GoRouter(
                 ),
                 GoRoute(
                   path: 'edit_family',
-                  builder: (context, state) => EditFamilyPage(),
-                ),
-                GoRoute(
-                  path: 'edit_family/:id',
-                  builder: (context, state) => EditFamilyPage(),
+                  builder: (context, state) {
+                    final family = state.extra as FamilyModel;
+                    return EditFamilyPage(family: family);
+                  },
                 ),
               ],
             ),

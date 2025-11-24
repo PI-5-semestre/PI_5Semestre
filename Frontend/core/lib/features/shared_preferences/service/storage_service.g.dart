@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'new_family_view_model.dart';
+part of 'storage_service.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,28 +9,28 @@ part of 'new_family_view_model.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(NewFamilyViewModel)
-const newFamilyViewModelProvider = NewFamilyViewModelProvider._();
+@ProviderFor(StorageService)
+const storageServiceProvider = StorageServiceProvider._();
 
-final class NewFamilyViewModelProvider
-    extends $NotifierProvider<NewFamilyViewModel, void> {
-  const NewFamilyViewModelProvider._()
+final class StorageServiceProvider
+    extends $NotifierProvider<StorageService, void> {
+  const StorageServiceProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'newFamilyViewModelProvider',
+        name: r'storageServiceProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$newFamilyViewModelHash();
+  String debugGetCreateSourceHash() => _$storageServiceHash();
 
   @$internal
   @override
-  NewFamilyViewModel create() => NewFamilyViewModel();
+  StorageService create() => StorageService();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(void value) {
@@ -41,10 +41,9 @@ final class NewFamilyViewModelProvider
   }
 }
 
-String _$newFamilyViewModelHash() =>
-    r'97c44bb4c21a234fe58de3949d1b2fa820ecae4c';
+String _$storageServiceHash() => r'80ca55ad374c3aaa8ca89243c5d050fbb4472768';
 
-abstract class _$NewFamilyViewModel extends $Notifier<void> {
+abstract class _$StorageService extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override
