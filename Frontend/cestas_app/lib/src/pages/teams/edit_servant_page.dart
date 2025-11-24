@@ -20,7 +20,6 @@ class _EditServantPageState extends ConsumerState<EditServantPage> {
 
   final emailController = TextEditingController();
   final nameController = TextEditingController();
-  final passwordController = TextEditingController();
   final cpfController = TextEditingController();
   final phoneController = TextEditingController();
   final typeController = TextEditingController();
@@ -43,9 +42,7 @@ class _EditServantPageState extends ConsumerState<EditServantPage> {
   void dispose() {
     emailController.dispose();
     nameController.dispose();
-    passwordController.dispose();
     cpfController.dispose();
-    phoneController.dispose();
     typeController.dispose();
     institutionController.dispose();
     super.dispose();
@@ -77,15 +74,6 @@ class _EditServantPageState extends ConsumerState<EditServantPage> {
                     validator: Validatorless.multiple([
                       Validatorless.required("Campo obrigatório"),
                       Validatorless.email("E-mail inválido"),
-                    ]),
-                  ),
-                  _buildTextField(
-                    "Senha *",
-                    controller: passwordController,
-                    obscure: true,
-                    validator: Validatorless.multiple([
-                      Validatorless.required("Campo obrigatório"),
-                      Validatorless.min(6, "Mínimo 6 caracteres"),
                     ]),
                   ),
                 ],
@@ -162,7 +150,6 @@ class _EditServantPageState extends ConsumerState<EditServantPage> {
                 if (_formKey.currentState!.validate()) {
                   final user = CreateUser(
                     email: emailController.text.trim(),
-                    password: passwordController.text.trim(),
                     name: nameController.text.trim(),
                     cpf: cpfController.text.trim(),
                     mobile: phoneController.text.trim(),
@@ -178,7 +165,7 @@ class _EditServantPageState extends ConsumerState<EditServantPage> {
                         content: Text("Usuário atualizado com sucesso!",
                           style: TextStyle(color: Colors.white),
                         ),
-                        backgroundColor: theme.colorScheme.onPrimary,
+                        backgroundColor: theme.colorScheme.primary,
                       ),
                     );
                     Navigator.pop(context);

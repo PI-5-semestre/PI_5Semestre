@@ -13,7 +13,7 @@ class TeamCardModal extends ConsumerWidget {
     required this.account,
   });
 
-  Color _getStatusColor(String tipofunc) {
+  Color _getStatusColor() {
     switch (account.roleName) {
       case "Coordenador":
         return Colors.purple;
@@ -300,7 +300,7 @@ class TeamCardModal extends ConsumerWidget {
                 Wrap(
                   spacing: 6,
                   runSpacing: -6,
-                  children: [_buildChip(account.roleName, _getStatusColor(account.roleName))],
+                  children: [_buildChip(account.roleName, _getStatusColor())],
                 ),
               ],
             ),

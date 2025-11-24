@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'auth_provider.dart';
+part of 'cep_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,44 +9,43 @@ part of 'auth_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(AuthNotifier)
-const authProvider = AuthNotifierProvider._();
+@ProviderFor(ViaCep)
+const viaCepProvider = ViaCepProvider._();
 
-final class AuthNotifierProvider
-    extends $AsyncNotifierProvider<AuthNotifier, User?> {
-  const AuthNotifierProvider._()
+final class ViaCepProvider extends $AsyncNotifierProvider<ViaCep, Cep?> {
+  const ViaCepProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'authProvider',
+        name: r'viaCepProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$authNotifierHash();
+  String debugGetCreateSourceHash() => _$viaCepHash();
 
   @$internal
   @override
-  AuthNotifier create() => AuthNotifier();
+  ViaCep create() => ViaCep();
 }
 
-String _$authNotifierHash() => r'08f95b5ee910561ea3a2285f3c1cfc6e8c495f72';
+String _$viaCepHash() => r'581ae179104ff33d31878bd3454c2a85264f0b6a';
 
-abstract class _$AuthNotifier extends $AsyncNotifier<User?> {
-  FutureOr<User?> build();
+abstract class _$ViaCep extends $AsyncNotifier<Cep?> {
+  FutureOr<Cep?> build();
   @$mustCallSuper
   @override
   void runBuild() {
     final created = build();
-    final ref = this.ref as $Ref<AsyncValue<User?>, User?>;
+    final ref = this.ref as $Ref<AsyncValue<Cep?>, Cep?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<User?>, User?>,
-              AsyncValue<User?>,
+              AnyNotifier<AsyncValue<Cep?>, Cep?>,
+              AsyncValue<Cep?>,
               Object?,
               Object?
             >;
