@@ -27,7 +27,17 @@ class _DeliveryPageState extends ConsumerState<DeliveryPage> {
       "family": {
         "name": "João da Silva",
         "phone": "19 99999-0000",
-        "address": "Rua A, Nº 123"
+        "address": "Rua A, Nº 123",
+        "autorizados": [
+          {
+            "name": "Ana Silva",
+            "parentesco": "Esposa"
+          },
+          {
+            "name": "Patricia Silva",
+            "parentesco": "Filha"
+          }
+        ]
       },
       "delivery_date": "2025-02-15T12:30:00Z",
       "account_id": 300,
@@ -43,7 +53,13 @@ class _DeliveryPageState extends ConsumerState<DeliveryPage> {
       "family": {
         "name": "Maria Souza",
         "phone": "19 98888-1111",
-        "address": "Av. Paulista, 45"
+        "address": "Av. Paulista, 45",
+        "autorizados": [
+          {
+            "name": "Carlos Souza",
+            "parentesco": "Esposo"
+          }
+        ]
       },
       "delivery_date": "2025-02-15T12:35:00Z",
       "account_id": 300,
@@ -59,7 +75,8 @@ class _DeliveryPageState extends ConsumerState<DeliveryPage> {
       "family": {
         "name": "Carlos Santos",
         "phone": "19 97777-2222",
-        "address": "Rua Central, 88"
+        "address": "Rua Central, 88",
+        "autorizados": []
       },
       "delivery_date": "2025-02-15T13:00:00Z",
       "account_id": 300,

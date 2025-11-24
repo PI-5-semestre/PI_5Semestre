@@ -128,6 +128,27 @@ class DeliveryCard extends ConsumerWidget {
                                     ),
                                   ),
                                   ListTile(
+                                    leading: const Icon(Icons.group),
+                                    title: Text(
+                                      'Pessoas Autorizadas',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: theme.colorScheme.outline,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      (delivery.family.autorizados?.isNotEmpty ?? false)
+                                          ? delivery.family.autorizados!
+                                              .map((a) => '- ${a.name} (${a.parentesco})')
+                                              .join('\n')
+                                          : 'Nenhuma pessoa autorizada',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                  ListTile(
                                     leading: const Icon(Icons.article),
                                     title: Text(
                                       'Observações',
