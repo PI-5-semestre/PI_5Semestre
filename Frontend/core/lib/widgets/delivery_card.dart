@@ -1,93 +1,250 @@
+import 'package:core/features/delivery/data/models/delivery.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class DeliveryCard extends StatefulWidget {
-  final String name;
-  final String phone;
-  final String address;
-  final String deliveryStatus;
-  final String observations;
-  final void Function(String newStatus)? onStatusChanged;
+class DeliveryCard extends ConsumerWidget {
+  final DeliveryModel delivery;
 
   const DeliveryCard({
     super.key,
-    required this.name,
-    required this.phone,
-    required this.address,
-    required this.deliveryStatus,
-    this.observations = "",
-    this.onStatusChanged,
+    required this.delivery,
   });
 
-  @override
-  State<DeliveryCard> createState() => _DeliveryCardState();
-}
-
-class _DeliveryCardState extends State<DeliveryCard> {
-  late String _status;
-
-  @override
-  void initState() {
-    super.initState();
-    _status = widget.deliveryStatus;
-  }
-
-  @override
-  void didUpdateWidget(covariant DeliveryCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.deliveryStatus != widget.deliveryStatus) {
-      _status = widget.deliveryStatus;
-    }
-  }
-
-  Color _getTextColor(String status) {
-    switch (status.toLowerCase()) {
-      case "entregue":
-        return Colors.green.shade800;
-      case "não entregue":
-        return Colors.red.shade800;
+  Color _getStatusColor() {
+    switch (delivery.status) {
+      case "Entregue":
+        return Color(0xFF016630);
+      case "Pendente":
+        return Colors.orange;
+      case "Não Entregue":
+        return Colors.red;
       default:
-        return Colors.orange.shade800;
+        return Colors.grey;
     }
   }
 
-  void _updateStatus(String newStatus) {
-    setState(() {
-      _status = newStatus;
-    });
-    if (widget.onStatusChanged != null) {
-      widget.onStatusChanged!(_status);
-    }
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    return Card(
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        onTap: () {
+          showDialog<void>(
+            context: context,
+            builder: (BuildContext context) {
+              return Material(
+                type: MaterialType.transparency,
+                child: Center(
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).canvasColor,
+                        ),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Detalhes da Família',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.close),
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Divider(),
+                            Expanded(
+                              child: ListView(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                                children: [
+                                  ListTile(
+                                    leading: Icon(Icons.person),
+                                    title: Text(
+                                      'Nome',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: theme.colorScheme.outline,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      delivery.family.name,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.phone),
+                                    title: Text(
+                                      'Telefone',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: theme.colorScheme.outline,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      delivery.family.phone,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.location_on),
+                                    title: Text(
+                                      'Endereço',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: theme.colorScheme.outline,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      delivery.family.address,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.article),
+                                    title: Text(
+                                      'Observações',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: theme.colorScheme.outline,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      delivery.description ?? '',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 80),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Stack(
+                        children: [
+                          Positioned(
+                            bottom: 16,
+                            right: 16,
+                            child: FloatingActionButton(
+                              heroTag: "edit_${delivery.id}",
+                              onPressed: () {
+                                context.go(
+                                  '/family/edit_family',
+                                  extra: delivery,
+                                );
+                                Navigator.pop(context);
+                              },
+                              child: Icon(Icons.edit),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // if (selected != null && onSelected != null)
+              //   Checkbox(value: selected, onChanged: onSelected)
+              // else
+              //   const SizedBox.shrink(),
+              // const SizedBox(width: 8),
+              Expanded(
+                child: SizedBox(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        delivery.family.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        alignment: WrapAlignment.start,
+                        children: [
+                          // _buildChip(recommended, _getBasketColor(recommended)),
+                          _buildChip(delivery.status, _getStatusColor()),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (delivery.status == "Pendente")
+                FloatingActionButton.small(
+                  heroTag: "delivery_${delivery.id}",
+                  onPressed: () {
+                    _openInGoogleMaps(delivery.family.address);
+                  },
+                  elevation: 1,
+                  child: const Icon(Icons.send),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
-  Color _getBgColor(String status) {
-    switch (status.toLowerCase()) {
-      case "entregue":
-        return const Color.fromARGB(50, 144, 254, 148);
-      case "não entregue":
-        return const Color.fromARGB(50, 236, 143, 137);
-      default:
-        return const Color.fromARGB(50, 244, 244, 178);
-    }
-  }
-
-  Widget _buildChip(String text) {
-    final textColor = _getTextColor(text);
-    final bgColor = _getBgColor(text);
-
+  Widget _buildChip(String text, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: textColor),
+        border: Border.all(color: color),
       ),
       child: Text(
         text,
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: textColor,
+          color: color,
         ),
       ),
     );
@@ -104,101 +261,5 @@ class _DeliveryCardState extends State<DeliveryCard> {
     } catch (e) {
       debugPrint("Não foi possível abrir o Google Maps: $e");
     }
-  }
-
-  void _openStatusModal() {
-    // Aqui você vai implementar o modal depois
-    debugPrint("Abrir modal de status...");
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          widget.name,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildChip(_status),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.orange),
-                  tooltip: "Alterar status",
-                  onPressed: _openStatusModal,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send, color: Colors.blueAccent),
-                  onPressed: () => _openInGoogleMaps(widget.address),
-                  tooltip: "Abrir no Google Maps",
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.phone, size: 16),
-                const SizedBox(width: 4),
-                Text(widget.phone),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.location_on, size: 16),
-                const SizedBox(width: 4),
-                Expanded(child: Text(widget.address)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (widget.observations.isNotEmpty)
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(17, 171, 171, 171),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Text.rich(
-                  TextSpan(
-                    text: "Observações: ",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                    children: [
-                      TextSpan(
-                        text: widget.observations,
-                        style: const TextStyle(fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
   }
 }
