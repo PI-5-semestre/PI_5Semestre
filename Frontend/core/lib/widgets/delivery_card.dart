@@ -13,7 +13,7 @@ class DeliveryCard extends ConsumerWidget {
   });
 
   Color _getStatusColor() {
-    switch (delivery.status) {
+    switch (delivery.deliveryStatus) {
       case "Entregue":
         return Color(0xFF016630);
       case "Pendente":
@@ -27,6 +27,8 @@ class DeliveryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final family = delivery.family;
+    final address = '${family.street}, n° ${family.number} - ${family.neighborhood}, ${family.city}/${family.state} - ${family.zip_code}';
     final theme = Theme.of(context);
     return Card(
       clipBehavior: Clip.hardEdge,
@@ -86,7 +88,7 @@ class DeliveryCard extends ConsumerWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      delivery.family.name,
+                                      family.name,
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -103,7 +105,7 @@ class DeliveryCard extends ConsumerWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      delivery.family.phone,
+                                      family.mobile_phone,
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -120,7 +122,7 @@ class DeliveryCard extends ConsumerWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      delivery.family.address,
+                                      address,
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -137,9 +139,9 @@ class DeliveryCard extends ConsumerWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      (delivery.family.autorizados?.isNotEmpty ?? false)
-                                          ? delivery.family.autorizados!
-                                              .map((a) => '• ${a.name} (${a.parentesco})')
+                                      (family.members?.isNotEmpty ?? false)
+                                          ? family.members!
+                                              .map((a) => '• ${a.name} (${a.kinship})')
                                               .join('\n')
                                           : 'Nenhuma pessoa autorizada',
                                       style: TextStyle(
@@ -215,7 +217,7 @@ class DeliveryCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        delivery.family.name,
+                        family.name,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -229,18 +231,18 @@ class DeliveryCard extends ConsumerWidget {
                         alignment: WrapAlignment.start,
                         children: [
                           // _buildChip(recommended, _getBasketColor(recommended)),
-                          _buildChip(delivery.status, _getStatusColor()),
+                          _buildChip(delivery.deliveryStatus, _getStatusColor()),
                         ],
                       ),
                     ],
                   ),
                 ),
               ),
-              if (delivery.status == "Pendente")
+              if (delivery.deliveryStatus == "Pendente")
                 FloatingActionButton.small(
                   heroTag: "delivery_${delivery.id}",
                   onPressed: () {
-                    _openInGoogleMaps(delivery.family.address);
+                    _openInGoogleMaps(address);
                   },
                   elevation: 1,
                   child: const Icon(Icons.send),

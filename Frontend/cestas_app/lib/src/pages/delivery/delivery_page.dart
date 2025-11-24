@@ -1,4 +1,6 @@
-import 'package:core/features/delivery/data/models/delivery.dart';
+import 'package:core/features/delivery/providers/delivery_provider.dart';
+import 'package:core/widgets2/skeleton/stat_card_skeleton.dart';
+import 'package:core/widgets2/skeleton/team_card_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:core/widgets/card_header.dart';
@@ -16,79 +18,31 @@ class DeliveryPage extends ConsumerStatefulWidget {
 }
 
 class _DeliveryPageState extends ConsumerState<DeliveryPage> {
+  @override
+  void initState() {
+    super.initState(); 
 
-  final List<DeliveryModel> deliveries = [
-    DeliveryModel.fromJson({
-      "id": "1",
-      "active": true,
-      "created": "2025-02-15T09:00:00Z",
-      "institution_id": 1,
-      "family_id": 10,
-      "family": {
-        "name": "João da Silva",
-        "phone": "19 99999-0000",
-        "address": "Rua A, Nº 123",
-        "autorizados": [
-          {
-            "name": "Ana Silva",
-            "parentesco": "Esposa"
-          },
-          {
-            "name": "Patricia Silva",
-            "parentesco": "Filha"
-          }
-        ]
-      },
-      "delivery_date": "2025-02-15T12:30:00Z",
-      "account_id": 300,
-      "status": "Pendente",
-      "description": "Portão branco"
-    }),
-    DeliveryModel.fromJson({
-      "id": "2",
-      "active": true,
-      "created": "2025-02-15T09:10:00Z",
-      "institution_id": 1,
-      "family_id": 11,
-      "family": {
-        "name": "Maria Souza",
-        "phone": "19 98888-1111",
-        "address": "Av. Paulista, 45",
-        "autorizados": [
-          {
-            "name": "Carlos Souza",
-            "parentesco": "Esposo"
-          }
-        ]
-      },
-      "delivery_date": "2025-02-15T12:35:00Z",
-      "account_id": 300,
-      "status": "Entregue",
-      "description": "Tocar campainha"
-    }),
-    DeliveryModel.fromJson({
-      "id": "3",
-      "active": false,
-      "created": "2025-02-15T09:20:00Z",
-      "institution_id": 1,
-      "family_id": 12,
-      "family": {
-        "name": "Carlos Santos",
-        "phone": "19 97777-2222",
-        "address": "Rua Central, 88",
-        "autorizados": []
-      },
-      "delivery_date": "2025-02-15T13:00:00Z",
-      "account_id": 300,
-      "status": "Não Entregue",
-      "description": "Casa azul"
-    }),
-  ];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final deliveryState = ref.read(deliveryControllerProvider);
+      if (deliveryState.deliveries.isEmpty && !deliveryState.isLoading) {
+        ref.read(deliveryControllerProvider.notifier).fetchDeliverys();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final deliveryState = ref.watch(deliveryControllerProvider);
+    final controller = ref.watch(deliveryControllerProvider.notifier);
     final theme = Theme.of(context);
+
     final icons = [Icons.list_alt, Icons.access_time, Icons.check, Icons.close];
+
+    if (!deliveryState.isLoading && deliveryState.error != null && deliveryState.deliveries.isEmpty) {
+      return Center(
+        child: Text('Erro ao carregar entregas: ${deliveryState.error}'),
+      );
+    }
 
     return Scaffold(
       body: Padding(
@@ -102,24 +56,50 @@ class _DeliveryPageState extends ConsumerState<DeliveryPage> {
                 const SizedBox(height: 16),
                 _buildTodayLabel(context, theme),
                 const SizedBox(height: 16),
-                _buildSearchField(),
+                _buildSearchField(ref),
                 const SizedBox(height: 5),
-                SegmentedCardSwitcher(
-                  options: _buildStatusCards(deliveries),
-                  icons: icons,
-                ),
+                if (deliveryState.isLoading)
+                  Row(
+                    children: [
+                      Expanded(child: StatCardSkeleton())
+                    ],
+                  )
+                else
+                  SegmentedCardSwitcher(
+                    options: _buildStatusCards(deliveryState.deliveries),
+                    icons: icons,
+                    onTap: (index) {
+                      switch (index) {
+                        case 0:
+                          controller.filterByRole(null);
+                        case 1:
+                          controller.filterByRole("PENDING");
+                        case 2:
+                          controller.filterByRole("COMPLETED");
+                        case 3:
+                          controller.filterByRole("CANCELED");
+                      }
+                    },
+                  ),
               ],
             ),
             const SizedBox(height: 20),
             _buildDeliveryHeader(theme),
-            Column(
-              children: deliveries.map((delivery) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  child: DeliveryCard(delivery: delivery),
-                );
-              }).toList(),
-            )
+            if (deliveryState.isLoading && deliveryState.deliveries.isEmpty)
+              const Padding(
+                padding: 
+                  EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  child:  Center(child: TeamCardSkeleton())
+              )
+            else
+              Column(
+                children: deliveryState.filtered.map((delivery) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    child: DeliveryCard(delivery: delivery),
+                  );
+                }).toList(),
+              )
           ],
         ),
       ),
@@ -188,7 +168,8 @@ class _DeliveryPageState extends ConsumerState<DeliveryPage> {
       ),
     );
   }  
-  List<Widget> _buildStatusCards(List<DeliveryModel> deliveries) {
+
+  List<Widget> _buildStatusCards(deliveries) {
     return [
       StatCard(
         icon: Icons.list_alt,
@@ -200,32 +181,33 @@ class _DeliveryPageState extends ConsumerState<DeliveryPage> {
         icon: Icons.access_time,
         colors: [const Color(0xFFF0B100), const Color(0xFFD08700)],
         title: "Pendentes",
-        value: deliveries.where((d) => d.status == "Pendente").length.toString(),
+        value: deliveries.where((d) => d.deliveryStatus == "Pendente").length.toString(),
         backgroundColor: Colors.white,
       ),
       StatCard(
         icon: Icons.check,
         colors: [const Color(0xFF00C951), const Color(0xFF00A63E)],
         title: "Entregues",
-        value: deliveries.where((d) => d.status == "Entregue").length.toString(),
+        value: deliveries.where((d) => d.deliveryStatus == "Entregue").length.toString(),
       ),
       StatCard(
         icon: Icons.close,
         colors: [const Color(0xFFFF5C5C), const Color(0xFFB20000)],
         title: "Não Entregues",
-        value: deliveries.where((d) => d.status == "Não Entregue").length.toString(),
+        value: deliveries.where((d) => d.deliveryStatus == "Não Entregue").length.toString(),
       ),
     ];
   }
 
-  Widget _buildSearchField() {
+  Widget _buildSearchField(WidgetRef ref) {
     return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Padding(
         padding: const EdgeInsets.all(4),
         child: TextField(
-          onChanged: (value) => {},
+          onChanged: (v) => ref.read(deliveryControllerProvider.notifier).search(v),
           decoration: const InputDecoration(
-            hintText: "Buscar família...",
+            hintText: "Nome, CPF, CEP ou Endereço...",
             prefixIcon: Icon(Icons.search),
             border: InputBorder.none,
           ),
