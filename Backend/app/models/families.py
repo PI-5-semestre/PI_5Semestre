@@ -30,6 +30,11 @@ class DegreeOfKinship(str, PyEnum):
     FATHER = "FATHER"
     MOTHER = "MOTHER"
     OTHER = "OTHER"
+    
+class SituationDelivery(str, PyEnum):
+    PENDING = "PENDING"
+    COMPLETED = "COMPLETED"
+    CANCELED = "CANCELED"
 
 class Family(BaseModel):
     __tablename__ = "account_families"
@@ -213,6 +218,14 @@ class FamilyDelivery(BaseModel):
 
     account: Mapped[Optional["Account"]] = relationship(
         "Account", back_populates="deliveries", lazy="joined"
+    )
+    
+    status: Mapped[SituationDelivery] = mapped_column(
+        Enum(SituationDelivery, native_enum=False),
+        nullable=False,
+        default=SituationDelivery.PENDING,
+        index=True,
+        comment="Situação da entrega",
     )
 
     __table_args__ = (

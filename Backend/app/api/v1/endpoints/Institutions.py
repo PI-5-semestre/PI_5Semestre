@@ -38,7 +38,7 @@ from app.schemas.families import (
 )
 from app.models.Institutions import Institution, InstitutionType
 from app.models.products import StockItem, StockHistory
-from app.models.families import Family, DocFamily, FamilyDelivery, FamilyMember, SituationType
+from app.models.families import Family, DocFamily, FamilyDelivery, FamilyMember, SituationDelivery, SituationType
 
 router = APIRouter(prefix="/institutions", tags=["institutions"])
 Session = Annotated[AsyncSession, Depends(get_session)]
@@ -704,6 +704,10 @@ async def list_family_deliveries(
     result = await session.execute(query)
     deliveries = result.scalars().all()
 
+    for d in deliveries:
+        if d.status is None:
+            d.status = SituationDelivery.PENDING
+    
     return [DeliveryResp.model_validate(d) for d in deliveries]
 
 
@@ -734,10 +738,15 @@ async def create_family_delivery(
         delivery_date=payload.date.isoformat(),
         account_id=account.id,
         description=payload.description,
+        status=SituationDelivery.PENDING,
     )
     session.add(fd)
     await session.commit()
     await session.refresh(fd)
+
+    query = select(FamilyDelivery).options(selectinload(FamilyDelivery.family)).where(FamilyDelivery.id == fd.id)
+    result = await session.execute(query)
+    fd = result.scalar_one()
 
     return DeliveryResp.model_validate(fd)
 
@@ -778,6 +787,10 @@ async def update_family_delivery(
 
     await session.commit()
     await session.refresh(delivery)
+
+    query = select(FamilyDelivery).options(selectinload(FamilyDelivery.family)).where(FamilyDelivery.id == delivery.id)
+    result = await session.execute(query)
+    delivery = result.scalar_one()
 
     return DeliveryResp.model_validate(delivery)
 
