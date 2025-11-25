@@ -35,7 +35,21 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_delivery_attempts_family_delivery_id'), 'delivery_attempts', ['family_delivery_id'], unique=False)
     op.create_index(op.f('ix_delivery_attempts_status'), 'delivery_attempts', ['status'], unique=False)
-    op.add_column('family_deliveries', sa.Column('delivery_attempts', sa.Integer(), nullable=False, comment='Número de tentativas de entrega realizadas'))
+    # Add column with a server_default so existing rows get a value and the ALTER works
+    op.add_column(
+        'family_deliveries',
+        sa.Column(
+            'delivery_attempts',
+            sa.Integer(),
+            nullable=True,
+            server_default=sa.text('1'),
+            comment='Número de tentativas de entrega realizadas',
+        ),
+    )
+    # Ensure existing rows have a sensible value (1)
+    op.execute("UPDATE family_deliveries SET delivery_attempts = 1 WHERE delivery_attempts IS NULL")
+    # Remove server_default and make column non-nullable to match model
+    op.alter_column('family_deliveries', 'delivery_attempts', nullable=False, server_default=None)
     # ### end Alembic commands ###
 
 
