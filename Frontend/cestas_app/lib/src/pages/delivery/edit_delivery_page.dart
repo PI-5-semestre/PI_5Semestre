@@ -22,6 +22,7 @@ class _EditDeliveryPageState extends ConsumerState<EditDeliveryPage> {
   final nameController = TextEditingController();
   final statusController = TextEditingController();
   final descriptionController = TextEditingController();
+  final reasonController = TextEditingController();
 
   @override
   void initState() {
@@ -43,6 +44,7 @@ class _EditDeliveryPageState extends ConsumerState<EditDeliveryPage> {
     nameController.dispose();
     statusController.dispose();
     descriptionController.dispose();
+    reasonController.dispose();
 
     super.dispose();
   }
@@ -68,7 +70,11 @@ class _EditDeliveryPageState extends ConsumerState<EditDeliveryPage> {
                 children: [
                   _buildTextField("Nome *",
                     controller: nameController,
-                    validator: Validatorless.required("Campo obrigatório"),
+                    readOnly: true
+                  ),
+                  _buildTextField("Observações",
+                    controller: descriptionController,
+                    maxLines: 3,
                   ),
                   DropdownButtonFormField<String>(
                     initialValue: statusController.text.isNotEmpty
@@ -79,7 +85,10 @@ class _EditDeliveryPageState extends ConsumerState<EditDeliveryPage> {
                       DropdownMenuItem(value: "PENDING", child: Text("Pendente")),
                       DropdownMenuItem(value: "CANCELED", child: Text("Não Entregue")),
                     ],
-                    onChanged: (v) => statusController.text = v ?? '',
+                    onChanged: (v) {
+                      setState(() {});
+                      statusController.text = v ?? '';
+                    },
                     validator: Validatorless.required("Selecione uma opção"),
                     decoration: InputDecoration(
                       labelText: "Situação",
@@ -88,10 +97,12 @@ class _EditDeliveryPageState extends ConsumerState<EditDeliveryPage> {
                       ),
                     ),
                   ),
-                  _buildTextField("Observações",
-                    controller: descriptionController,
-                    maxLines: 3,
-                  ),
+                  if (statusController.text == "CANCELED")
+                    _buildTextField(
+                      "Motivo *",
+                      controller: reasonController,
+                      maxLines: 3
+                    )
                 ],
               ),
             ],
@@ -100,18 +111,29 @@ class _EditDeliveryPageState extends ConsumerState<EditDeliveryPage> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: deliveryState.isLoading ? null : () async {
+        onPressed: deliveryState.isLoading || statusController.text.trim() == "PENDING" ? null : () async {
           if (!formKey.currentState!.validate()) return;
 
-          final Map<String, dynamic> updated = {  
-            "id": widget.delivery.id,
-            "date": getNextDeliveryDate(widget.delivery.delivery_date!, statusController.text.trim()),   
-            "account_id": widget.delivery.account_id,   
-            "description": descriptionController.text.trim(),
-            "status": "PENDING"
-          };
+          if (statusController.text.trim() == "COMPLETED"){
+            final Map<String, dynamic> updated = {  
+              "id": widget.delivery.id,
+              "date": getNextDeliveryDate(widget.delivery.delivery_date!, statusController.text.trim()),   
+              "account_id": widget.delivery.account_id,   
+              "description": descriptionController.text.trim(),
+              "status": statusController.text.trim()
+            };
 
-          await controller.updateDelivery(updated);
+            await controller.updateDelivery(updated);
+          } else if (statusController.text.trim() == "CANCELED"){
+            final Map<String, dynamic> attempt = {   
+                "new_date": getNextDeliveryDate(widget.delivery.delivery_date!, statusController.text.trim()),   
+                "account_id": 41,   
+                "description": reasonController.text.trim()
+            };
+
+            await controller.attemptsDelivery(attempt, widget.delivery.id!);
+          }
+
 
           if (ref.read(deliveryControllerProvider).error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -121,7 +143,7 @@ class _EditDeliveryPageState extends ConsumerState<EditDeliveryPage> {
           }
 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Entrega realizada com sucesso!")),
+            const SnackBar(content: Text("Entrega atualizada com sucesso!")),
           );
           if (mounted) context.pop();
         },
@@ -204,11 +226,6 @@ class _EditDeliveryPageState extends ConsumerState<EditDeliveryPage> {
         newDate = currentDate.add(const Duration(days: 1));
         break;
 
-      case "COMPLETED":
-        newDate = currentDate.add(const Duration(days: 30));
-        break;
-
-      case "PENDING":
       default:
         newDate = currentDate;
         break;

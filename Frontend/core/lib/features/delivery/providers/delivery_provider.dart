@@ -88,4 +88,22 @@ class DeliveryController extends _$DeliveryController {
       state = state.copyWith(isLoading: false);
     }
   }
+
+  Future<void> attemptsDelivery(Map<String, dynamic> attempts, int delivery_id) async{
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await ref.read(deliveryRepositoryProvider).attemptsDelivery(attempts, delivery_id, await token);
+      await fetchDeliverys();
+    } catch (e) {
+      final message =  e.toString().replaceFirst("Exception: ", "");
+      String translated = switch (message) {
+        final String text when text.contains("Account with id") => "Entregador não encontrado",
+        _ => message
+      };
+      state = state.copyWith(error: translated);
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
 }
