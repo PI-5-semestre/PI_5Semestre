@@ -58,7 +58,6 @@ class DeliveryPut(BaseModel):
     account_id: int
     description: Optional[str] = None
     status: str
-
 class DeliveryReschedule(BaseModel):
     new_date: datetime
     account_id: int
@@ -85,6 +84,7 @@ class DeliveryResp(BaseModel):
     institution_id: int
     family_id: int
     delivery_date: str
+    delivery_at : Optional[str] = None
     account_id: int
     description: Optional[str] = None
     status: str

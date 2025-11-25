@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from http.client import HTTPException
+from fastapi import HTTPException
 from typing import Annotated, Optional, List, Union
 from io import BytesIO
 
@@ -789,7 +789,7 @@ async def update_family_delivery(
 ):
     await get_institution_or_404(session, institution_id)
     account = await get_account_or_404(session, payload.account_id)
-
+    
     if current_account.account_type not in [
         AccountType.ADMINISTRATIVE,
         AccountType.OWNER,
@@ -797,23 +797,75 @@ async def update_family_delivery(
         raise NotFoundError(detail="Unauthorized to create deliveries")
 
     result = await session.execute(
-        select(FamilyDelivery).where(
+        select(FamilyDelivery)
+        .options(selectinload(FamilyDelivery.family).selectinload(Family.deliveries))
+        .where(
             FamilyDelivery.id == delivery_id,
             FamilyDelivery.institution_id == institution_id,
         )
     )
     delivery = result.scalar_one_or_none()
-
     if delivery is None:
         raise NotFoundError(
             detail=f"Delivery with id {delivery_id} not found in this institution"
         )
+        
+    
+    if payload.status == SituationDelivery.COMPLETED and delivery.status != SituationDelivery.COMPLETED:
+        delivery.status = SituationDelivery.COMPLETED
+        delivery.delivered_at = payload.date.isoformat()
+        try:
+            q = (
+                select(DeliveryAttempt)
+                .where(DeliveryAttempt.family_delivery_id == delivery.id)
+                .order_by(DeliveryAttempt.created.desc())
+                .limit(1)
+            )
+            res = await session.execute(q)
+            last_attempt = res.scalar_one_or_none()
 
-    delivery.delivery_date = payload.date.isoformat()
-    delivery.account_id = account.id
-    delivery.description = payload.description
-    delivery.status = payload.status
-
+            if last_attempt:
+                last_attempt.status = DeliveryAttemptStatus.DELIVERED
+                session.add(last_attempt)
+                await session.commit()
+                await session.refresh(last_attempt)
+            else:
+                raise NotFoundError(
+                    detail=f"No delivery attempts found for delivery id {delivery.id}"
+                )
+                
+            if delivery.family.is_active_for_basket:
+                from datetime import datetime, timedelta
+                new_delivery_date = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%S')
+                new_delivery = FamilyDelivery(
+                    institution_id=delivery.institution_id,
+                    family_id=delivery.family_id,
+                    delivery_date=new_delivery_date,
+                    account_id=delivery.account_id,
+                    description=delivery.description,
+                    status=SituationDelivery.PENDING, 
+                )
+                session.add(new_delivery)
+                await session.commit()
+                await session.refresh(new_delivery)
+                
+        except NotFoundError:
+            raise
+        except IntegrityError:
+            await session.rollback()
+            raise DuplicatedError(detail="Error while logging delivery attempt")
+        except Exception:
+            await session.rollback()
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail="Error while logging delivery attempt",
+            )
+    else:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Only deliveries with status 'PENDING' can be updated",
+        )
+    
     await session.commit()
     await session.refresh(delivery)
 

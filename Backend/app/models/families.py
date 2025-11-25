@@ -12,6 +12,7 @@ from enum import Enum as PyEnum
 from typing import TYPE_CHECKING, Optional, List
 from decimal import Decimal
 from .base_modal import BaseModel
+from datetime import datetime, timezone, timedelta
 
 if TYPE_CHECKING:
     from .Institutions import Institution
@@ -142,6 +143,13 @@ class Family(BaseModel):
     def __repr__(self) -> str:
         return f"<Family(id={self.id}, name='{self.name}', cpf='{self.cpf}', situation='{self.situation.value}')>"
 
+    
+    #TODO IMPLEMENTAR LOGICA
+    @property
+    def is_active_for_basket(self) -> bool:
+        return True
+    
+    
 
 class DocFamily(BaseModel):
     __tablename__ = "doc_families"
@@ -207,6 +215,11 @@ class FamilyDelivery(BaseModel):
     delivery_date: Mapped[str] = mapped_column(
         String(25), nullable=False, comment="Data e hora da entrega"
     )
+    
+    delivered_at: Mapped[Optional[str]] = mapped_column(
+        String(25), nullable=True, comment="Data e hora em que a entrega foi realizada"
+    )
+    
     
     description: Mapped[Optional[str]] = mapped_column(
         String(500), nullable=True, comment="Descrição da entrega realizada"
