@@ -1,16 +1,15 @@
 import 'package:core/features/delivery/data/models/delivery.dart';
+import 'package:core/features/delivery/providers/delivery_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DeliveryCard extends ConsumerWidget {
   final DeliveryModel delivery;
 
-  const DeliveryCard({
-    super.key,
-    required this.delivery,
-  });
+  const DeliveryCard({super.key, required this.delivery});
 
   Color _getStatusColor() {
     switch (delivery.deliveryStatus) {
@@ -27,8 +26,9 @@ class DeliveryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final family = delivery.family;
-    final address = '${family.street}, n° ${family.number} - ${family.neighborhood}, ${family.city}/${family.state} - ${family.zip_code}';
+    final family = delivery.family!;
+    final address =
+        '${family.street}, n° ${family.number} - ${family.neighborhood}, ${family.city}/${family.state} - ${family.zip_code}';
     final theme = Theme.of(context);
     return Card(
       clipBehavior: Clip.hardEdge,
@@ -37,167 +37,249 @@ class DeliveryCard extends ConsumerWidget {
           showDialog<void>(
             context: context,
             builder: (BuildContext context) {
-              return Material(
-                type: MaterialType.transparency,
-                child: Center(
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).canvasColor,
-                        ),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'Detalhes da Família',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Divider(),
-                            Expanded(
-                              child: ListView(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                children: [
-                                  ListTile(
-                                    leading: Icon(Icons.person),
-                                    title: Text(
-                                      'Nome',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.outline,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      family.name,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.phone),
-                                    title: Text(
-                                      'Telefone',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.outline,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      family.mobile_phone,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.location_on),
-                                    title: Text(
-                                      'Endereço',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.outline,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      address,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.group),
-                                    title: Text(
-                                      'Pessoas Autorizadas',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.outline,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      (family.members?.isNotEmpty ?? false)
-                                          ? family.members!
-                                              .map((a) => '• ${a.name} (${a.kinship})')
-                                              .join('\n')
-                                          : 'Nenhuma pessoa autorizada',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.article),
-                                    title: Text(
-                                      'Observações',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.outline,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      delivery.description ?? '',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 80),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      Stack(
+              return Consumer(
+                builder: (context, ref, child) {
+                  final deliveryState = ref.watch(deliveryControllerProvider);
+                  final controller = ref.watch(
+                    deliveryControllerProvider.notifier,
+                  );
+                  return Material(
+                    type: MaterialType.transparency,
+                    child: Center(
+                      child: Stack(
                         children: [
-                          Positioned(
-                            bottom: 16,
-                            right: 16,
-                            child: FloatingActionButton(
-                              heroTag: "edit_${delivery.id}",
-                              onPressed: () {
-                                context.go(
-                                  '/family/edit_family',
-                                  extra: delivery,
-                                );
-                                Navigator.pop(context);
-                              },
-                              child: Icon(Icons.edit),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).canvasColor,
                             ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                        'Detalhes da Família',
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.close),
+                                        onPressed: () => Navigator.pop(context),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Divider(),
+                                Expanded(
+                                  child: ListView(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    children: [
+                                      ListTile(
+                                        leading: Icon(Icons.person),
+                                        title: Text(
+                                          'Nome',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: theme.colorScheme.outline,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          family.name,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: theme.colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      ),
+                                      ListTile(
+                                        leading: const Icon(Icons.phone),
+                                        title: Text(
+                                          'Telefone',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: theme.colorScheme.outline,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          family.mobile_phone,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: theme.colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      ),
+                                      ListTile(
+                                        leading: const Icon(Icons.location_on),
+                                        title: Text(
+                                          'Endereço',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: theme.colorScheme.outline,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          address,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: theme.colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      ),
+                                      ListTile(
+                                        leading: const Icon(Icons.group),
+                                        title: Text(
+                                          'Pessoas Autorizadas',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: theme.colorScheme.outline,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          (family.members?.isNotEmpty ?? false)
+                                              ? family.members!
+                                                    .map(
+                                                      (a) =>
+                                                          '• ${a.name} (${a.roleKinship})',
+                                                    )
+                                                    .join('\n')
+                                              : 'Nenhuma pessoa autorizada',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: theme.colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      ),
+                                      ListTile(
+                                        leading: const Icon(Icons.article),
+                                        title: Text(
+                                          'Observações',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: theme.colorScheme.outline,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          delivery.description ?? '',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: theme.colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 80),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          Stack(
+                            children: [
+                              Positioned(
+                                bottom: 16,
+                                left: 16,
+                                child: FloatingActionButton(
+                                  heroTag: "entrega_${delivery.id}",
+                                  onPressed: deliveryState.isLoading
+                                      ? null
+                                      : () async {
+                                          final formatter = DateFormat(
+                                            "yyyy-MM-dd'T'HH:mm:ss",
+                                          );
+                                          DateTime newDate = delivery
+                                              .delivery_date!
+                                              .add(const Duration(days: 30));
+
+                                          final Map<String, dynamic> updated = {
+                                            "id": delivery.id,
+                                            "date": formatter.format(newDate),
+                                            "account_id": delivery.account_id,
+                                            "description": delivery.description,
+                                            "status": "PENDING",
+                                          };
+
+                                          await controller.updateDelivery(
+                                            updated,
+                                          );
+
+                                          if (!context.mounted) return;
+
+                                          if (ref
+                                                  .read(
+                                                    deliveryControllerProvider,
+                                                  )
+                                                  .error !=
+                                              null) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  ref
+                                                      .read(
+                                                        deliveryControllerProvider,
+                                                      )
+                                                      .error!,
+                                                ),
+                                              ),
+                                            );
+                                            return;
+                                          }
+
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                "Entrega atualizada com sucesso!",
+                                              ),
+                                            ),
+                                          );
+
+                                          if (context.mounted)
+                                            Navigator.pop(context);
+                                        },
+                                  child: deliveryState.isLoading
+                                      ? const CircularProgressIndicator(
+                                          color: Colors.white,
+                                        )
+                                      : const Icon(Icons.check),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 16,
+                                right: 16,
+                                child: FloatingActionButton(
+                                  heroTag: "edit_${delivery.id}",
+                                  onPressed: () {
+                                    context.go(
+                                      '/delivery/edit_delivery',
+                                      extra: delivery,
+                                    );
+                                    Navigator.pop(context);
+                                  },
+                                  child: Icon(Icons.edit),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               );
             },
           );
@@ -231,7 +313,10 @@ class DeliveryCard extends ConsumerWidget {
                         alignment: WrapAlignment.start,
                         children: [
                           // _buildChip(recommended, _getBasketColor(recommended)),
-                          _buildChip(delivery.deliveryStatus, _getStatusColor()),
+                          _buildChip(
+                            delivery.deliveryStatus,
+                            _getStatusColor(),
+                          ),
                         ],
                       ),
                     ],

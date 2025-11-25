@@ -1,4 +1,5 @@
 
+import 'package:core/features/delivery/data/models/delivery.dart';
 import 'package:core/features/delivery/data/repositories/delivery_repository_impl.dart';
 import 'package:core/features/shared_preferences/service/storage_service.dart';
 import 'package:core/features/delivery/application/delivery_state.dart';
@@ -33,9 +34,9 @@ class DeliveryController extends _$DeliveryController {
 
       final filtered = data.where((d) {
         final activeDelivery = d.active == true;
-        final activeFamily = d.family.active == true;
-        final correctRole = d.family.situation == "ACTIVE";
-        final isTodayDelivery = _isToday(d.delivery_date);
+        final activeFamily = d.family!.active == true;
+        final correctRole = d.family!.situation == "ACTIVE";
+        final isTodayDelivery = _isToday(d.delivery_date!);
 
         return activeDelivery && activeFamily && correctRole && isTodayDelivery;
       }).toList();
@@ -53,10 +54,10 @@ class DeliveryController extends _$DeliveryController {
   void search(String text) {
     text = text.toLowerCase();
     final list = state.deliveries.where((f) {
-      return f.family.name.toLowerCase().contains(text) ||
-          f.family.cpf.contains(text) ||
-          f.family.zip_code.contains(text) ||
-          f.family.neighborhood.toLowerCase().contains(text);
+      return f.family!.name.toLowerCase().contains(text) ||
+          f.family!.cpf.contains(text) ||
+          f.family!.zip_code.contains(text) ||
+          f.family!.neighborhood.toLowerCase().contains(text);
     }).toList();
     state = state.copyWith(filtered: list);
   }
@@ -68,5 +69,23 @@ class DeliveryController extends _$DeliveryController {
     }
     final list = state.deliveries.where((f) => f.status == role).toList();
     state = state.copyWith(filtered: list, filterRole: role);
+  }
+
+  Future<void> updateDelivery(Map<String, dynamic> delivery) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await ref.read(deliveryRepositoryProvider).updateDelivery(delivery, await token);
+      await fetchDeliverys();
+    } catch (e) {
+      final message =  e.toString().replaceFirst("Exception: ", "");
+      String translated = switch (message) {
+        final String text when text.contains("Account with id") => "Entregador não encontrado",
+        _ => message
+      };
+      state = state.copyWith(error: translated);
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
   }
 }

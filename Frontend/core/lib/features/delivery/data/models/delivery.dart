@@ -12,12 +12,12 @@ abstract class DeliveryModel with _$DeliveryModel {
     int? id,
     bool? active,
     DateTime? created,
-    required int institution_id,
-    required int family_id,
-    required FamilyModel family,
-    required DateTime delivery_date,
-    required int account_id,
-    required String status,
+    int? institution_id,
+    int? family_id,
+    FamilyModel? family,
+    DateTime? delivery_date,
+    int? account_id,
+    String? status,
     String? description,
   }) = _DeliveryModel;
   factory DeliveryModel.fromJson(Map<String, dynamic> json) => _$DeliveryModelFromJson(json);

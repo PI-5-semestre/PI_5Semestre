@@ -1,5 +1,6 @@
 import 'package:cestas_app/src/pages/basket/basket_page.dart';
 import 'package:cestas_app/src/pages/delivery/delivery_page.dart';
+import 'package:cestas_app/src/pages/delivery/edit_delivery_page.dart';
 import 'package:cestas_app/src/pages/delivery/new_delivery_page.dart';
 import 'package:cestas_app/src/pages/family/edit_family_page.dart';
 import 'package:cestas_app/src/pages/family/family_page.dart';
@@ -17,6 +18,7 @@ import 'package:cestas_app/src/pages/teams/team_page.dart';
 import 'package:cestas_app/src/pages/visits_page.dart';
 import 'package:cestas_app/src/widgets/navigator_shell_route.dart';
 import 'package:core/features/auth/data/models/user.dart';
+import 'package:core/features/delivery/data/models/delivery.dart';
 import 'package:core/features/family/data/models/family_model.dart';
 import 'package:go_router/go_router.dart';
 
@@ -62,6 +64,13 @@ final routes = GoRouter(
               path: '/delivery',
               builder: (context, state) => DeliveryPage(),
               routes: [
+                GoRoute(
+                  path: 'edit_delivery',
+                  builder: (context, state) {
+                    final delivery = state.extra as DeliveryModel;
+                    return EditDeliveryPage(delivery: delivery);
+                  }
+                ),
                 GoRoute(
                   path: 'new_delivery',
                   builder: (context, state) => NewDeliveryPage(),

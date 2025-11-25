@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeliveryModel {
 
- int? get id; bool? get active; DateTime? get created; int get institution_id; int get family_id; FamilyModel get family; DateTime get delivery_date; int get account_id; String get status; String? get description;
+ int? get id; bool? get active; DateTime? get created; int? get institution_id; int? get family_id; FamilyModel? get family; DateTime? get delivery_date; int? get account_id; String? get status; String? get description;
 /// Create a copy of DeliveryModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,11 +48,11 @@ abstract mixin class $DeliveryModelCopyWith<$Res>  {
   factory $DeliveryModelCopyWith(DeliveryModel value, $Res Function(DeliveryModel) _then) = _$DeliveryModelCopyWithImpl;
 @useResult
 $Res call({
- int? id, bool? active, DateTime? created, int institution_id, int family_id, FamilyModel family, DateTime delivery_date, int account_id, String status, String? description
+ int? id, bool? active, DateTime? created, int? institution_id, int? family_id, FamilyModel? family, DateTime? delivery_date, int? account_id, String? status, String? description
 });
 
 
-$FamilyModelCopyWith<$Res> get family;
+$FamilyModelCopyWith<$Res>? get family;
 
 }
 /// @nodoc
@@ -65,18 +65,18 @@ class _$DeliveryModelCopyWithImpl<$Res>
 
 /// Create a copy of DeliveryModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? active = freezed,Object? created = freezed,Object? institution_id = null,Object? family_id = null,Object? family = null,Object? delivery_date = null,Object? account_id = null,Object? status = null,Object? description = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? active = freezed,Object? created = freezed,Object? institution_id = freezed,Object? family_id = freezed,Object? family = freezed,Object? delivery_date = freezed,Object? account_id = freezed,Object? status = freezed,Object? description = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,active: freezed == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
 as bool?,created: freezed == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
-as DateTime?,institution_id: null == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
-as int,family_id: null == family_id ? _self.family_id : family_id // ignore: cast_nullable_to_non_nullable
-as int,family: null == family ? _self.family : family // ignore: cast_nullable_to_non_nullable
-as FamilyModel,delivery_date: null == delivery_date ? _self.delivery_date : delivery_date // ignore: cast_nullable_to_non_nullable
-as DateTime,account_id: null == account_id ? _self.account_id : account_id // ignore: cast_nullable_to_non_nullable
-as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as DateTime?,institution_id: freezed == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
+as int?,family_id: freezed == family_id ? _self.family_id : family_id // ignore: cast_nullable_to_non_nullable
+as int?,family: freezed == family ? _self.family : family // ignore: cast_nullable_to_non_nullable
+as FamilyModel?,delivery_date: freezed == delivery_date ? _self.delivery_date : delivery_date // ignore: cast_nullable_to_non_nullable
+as DateTime?,account_id: freezed == account_id ? _self.account_id : account_id // ignore: cast_nullable_to_non_nullable
+as int?,status: freezed == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -84,9 +84,12 @@ as String?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$FamilyModelCopyWith<$Res> get family {
-  
-  return $FamilyModelCopyWith<$Res>(_self.family, (value) {
+$FamilyModelCopyWith<$Res>? get family {
+    if (_self.family == null) {
+    return null;
+  }
+
+  return $FamilyModelCopyWith<$Res>(_self.family!, (value) {
     return _then(_self.copyWith(family: value));
   });
 }
@@ -171,7 +174,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  bool? active,  DateTime? created,  int institution_id,  int family_id,  FamilyModel family,  DateTime delivery_date,  int account_id,  String status,  String? description)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  bool? active,  DateTime? created,  int? institution_id,  int? family_id,  FamilyModel? family,  DateTime? delivery_date,  int? account_id,  String? status,  String? description)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeliveryModel() when $default != null:
 return $default(_that.id,_that.active,_that.created,_that.institution_id,_that.family_id,_that.family,_that.delivery_date,_that.account_id,_that.status,_that.description);case _:
@@ -192,7 +195,7 @@ return $default(_that.id,_that.active,_that.created,_that.institution_id,_that.f
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  bool? active,  DateTime? created,  int institution_id,  int family_id,  FamilyModel family,  DateTime delivery_date,  int account_id,  String status,  String? description)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  bool? active,  DateTime? created,  int? institution_id,  int? family_id,  FamilyModel? family,  DateTime? delivery_date,  int? account_id,  String? status,  String? description)  $default,) {final _that = this;
 switch (_that) {
 case _DeliveryModel():
 return $default(_that.id,_that.active,_that.created,_that.institution_id,_that.family_id,_that.family,_that.delivery_date,_that.account_id,_that.status,_that.description);case _:
@@ -212,7 +215,7 @@ return $default(_that.id,_that.active,_that.created,_that.institution_id,_that.f
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  bool? active,  DateTime? created,  int institution_id,  int family_id,  FamilyModel family,  DateTime delivery_date,  int account_id,  String status,  String? description)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  bool? active,  DateTime? created,  int? institution_id,  int? family_id,  FamilyModel? family,  DateTime? delivery_date,  int? account_id,  String? status,  String? description)?  $default,) {final _that = this;
 switch (_that) {
 case _DeliveryModel() when $default != null:
 return $default(_that.id,_that.active,_that.created,_that.institution_id,_that.family_id,_that.family,_that.delivery_date,_that.account_id,_that.status,_that.description);case _:
@@ -227,18 +230,18 @@ return $default(_that.id,_that.active,_that.created,_that.institution_id,_that.f
 @JsonSerializable()
 
 class _DeliveryModel extends DeliveryModel {
-  const _DeliveryModel({this.id, this.active, this.created, required this.institution_id, required this.family_id, required this.family, required this.delivery_date, required this.account_id, required this.status, this.description}): super._();
+  const _DeliveryModel({this.id, this.active, this.created, this.institution_id, this.family_id, this.family, this.delivery_date, this.account_id, this.status, this.description}): super._();
   factory _DeliveryModel.fromJson(Map<String, dynamic> json) => _$DeliveryModelFromJson(json);
 
 @override final  int? id;
 @override final  bool? active;
 @override final  DateTime? created;
-@override final  int institution_id;
-@override final  int family_id;
-@override final  FamilyModel family;
-@override final  DateTime delivery_date;
-@override final  int account_id;
-@override final  String status;
+@override final  int? institution_id;
+@override final  int? family_id;
+@override final  FamilyModel? family;
+@override final  DateTime? delivery_date;
+@override final  int? account_id;
+@override final  String? status;
 @override final  String? description;
 
 /// Create a copy of DeliveryModel
@@ -274,11 +277,11 @@ abstract mixin class _$DeliveryModelCopyWith<$Res> implements $DeliveryModelCopy
   factory _$DeliveryModelCopyWith(_DeliveryModel value, $Res Function(_DeliveryModel) _then) = __$DeliveryModelCopyWithImpl;
 @override @useResult
 $Res call({
- int? id, bool? active, DateTime? created, int institution_id, int family_id, FamilyModel family, DateTime delivery_date, int account_id, String status, String? description
+ int? id, bool? active, DateTime? created, int? institution_id, int? family_id, FamilyModel? family, DateTime? delivery_date, int? account_id, String? status, String? description
 });
 
 
-@override $FamilyModelCopyWith<$Res> get family;
+@override $FamilyModelCopyWith<$Res>? get family;
 
 }
 /// @nodoc
@@ -291,18 +294,18 @@ class __$DeliveryModelCopyWithImpl<$Res>
 
 /// Create a copy of DeliveryModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? active = freezed,Object? created = freezed,Object? institution_id = null,Object? family_id = null,Object? family = null,Object? delivery_date = null,Object? account_id = null,Object? status = null,Object? description = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? active = freezed,Object? created = freezed,Object? institution_id = freezed,Object? family_id = freezed,Object? family = freezed,Object? delivery_date = freezed,Object? account_id = freezed,Object? status = freezed,Object? description = freezed,}) {
   return _then(_DeliveryModel(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,active: freezed == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
 as bool?,created: freezed == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
-as DateTime?,institution_id: null == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
-as int,family_id: null == family_id ? _self.family_id : family_id // ignore: cast_nullable_to_non_nullable
-as int,family: null == family ? _self.family : family // ignore: cast_nullable_to_non_nullable
-as FamilyModel,delivery_date: null == delivery_date ? _self.delivery_date : delivery_date // ignore: cast_nullable_to_non_nullable
-as DateTime,account_id: null == account_id ? _self.account_id : account_id // ignore: cast_nullable_to_non_nullable
-as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as DateTime?,institution_id: freezed == institution_id ? _self.institution_id : institution_id // ignore: cast_nullable_to_non_nullable
+as int?,family_id: freezed == family_id ? _self.family_id : family_id // ignore: cast_nullable_to_non_nullable
+as int?,family: freezed == family ? _self.family : family // ignore: cast_nullable_to_non_nullable
+as FamilyModel?,delivery_date: freezed == delivery_date ? _self.delivery_date : delivery_date // ignore: cast_nullable_to_non_nullable
+as DateTime?,account_id: freezed == account_id ? _self.account_id : account_id // ignore: cast_nullable_to_non_nullable
+as int?,status: freezed == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -311,9 +314,12 @@ as String?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$FamilyModelCopyWith<$Res> get family {
-  
-  return $FamilyModelCopyWith<$Res>(_self.family, (value) {
+$FamilyModelCopyWith<$Res>? get family {
+    if (_self.family == null) {
+    return null;
+  }
+
+  return $FamilyModelCopyWith<$Res>(_self.family!, (value) {
     return _then(_self.copyWith(family: value));
   });
 }

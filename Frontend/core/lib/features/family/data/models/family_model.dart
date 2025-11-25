@@ -66,6 +66,8 @@ abstract class FamilyModel with _$FamilyModel {
 
 @freezed
 abstract class Member with _$Member {
+  const Member._();
+
   const factory Member({
     int? id,
     DateTime? created,
@@ -79,4 +81,21 @@ abstract class Member with _$Member {
   }) = _Member;
 
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
+
+  String get roleKinship {
+    switch (kinship) {
+      case "SON":
+        return "Filho(a)";
+      case "SPOUSE":
+        return "Cônjuge";
+      case "FATHER":
+        return "Pai";
+      case "MOTHER":
+        return "Mãe";
+      case "OTHER":
+        return "Outro";
+      default:
+        return "Desconhecido";
+    }
+  }
 }

@@ -28,6 +28,22 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
       throw Exception(message);
     }
   }
+
+  Future<bool> updateDelivery(Map<String, dynamic> delivery, String token) async {
+    try {
+      final response = await dio.put(
+        '/institutions/1/deliveries/${delivery['id']}',
+        data: delivery,
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        )
+      );
+      return response.statusCode == 200;
+    } on DioException catch(e){
+      final message = e.response?.data['detail']?.toString() ?? 'Erro Inesperado';
+      throw Exception(message);
+    }
+  }
 }
 
 @riverpod
