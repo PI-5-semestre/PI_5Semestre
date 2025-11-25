@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from http.client import HTTPException
 from typing import Annotated, Optional, List, Union
 from io import BytesIO
 
@@ -19,6 +20,7 @@ from app.util.file_validation import validate_file_upload
 from app.schemas.Institutions import (
     DeliveryCreate,
     DeliveryPut,
+    DeliveryReschedule,
     DeliveryResp,
     InstitutionUpdate,
     InstitutionResp,
@@ -38,7 +40,7 @@ from app.schemas.families import (
 )
 from app.models.Institutions import Institution, InstitutionType
 from app.models.products import StockItem, StockHistory
-from app.models.families import Family, DocFamily, FamilyDelivery, FamilyMember, SituationDelivery, SituationType
+from app.models.families import DeliveryAttempt, DeliveryAttemptStatus, Family, DocFamily, FamilyDelivery, FamilyMember, SituationDelivery, SituationType
 
 router = APIRouter(prefix="/institutions", tags=["institutions"])
 Session = Annotated[AsyncSession, Depends(get_session)]
@@ -693,7 +695,7 @@ async def list_family_deliveries(
 
     query = select(FamilyDelivery).where(
         FamilyDelivery.institution_id == institution_id
-    )
+    ).options(selectinload(FamilyDelivery.family), selectinload(FamilyDelivery.attempts))
 
     query = (
         query.order_by(FamilyDelivery.delivery_date.desc())
@@ -744,7 +746,33 @@ async def create_family_delivery(
     await session.commit()
     await session.refresh(fd)
 
-    query = select(FamilyDelivery).options(selectinload(FamilyDelivery.family)).where(FamilyDelivery.id == fd.id)
+    try:
+        attempt = DeliveryAttempt(
+            family_delivery_id=fd.id,
+            status=DeliveryAttemptStatus.NOT_DELIVERED,
+            attempt_date=payload.date.isoformat(),
+            description=payload.description,
+        )
+        session.add(attempt)
+        await session.commit()
+        await session.refresh(attempt)
+    except IntegrityError:
+        await session.rollback()
+        raise DuplicatedError(detail="Error while logging initial delivery attempt")
+    except Exception:
+        await session.rollback()
+        raise
+
+    try:
+        fd.delivery_date = attempt.attempt_date
+        session.add(fd)
+        await session.commit()
+        await session.refresh(fd)
+    except Exception:
+        await session.rollback()
+        raise
+
+    query = select(FamilyDelivery).options(selectinload(FamilyDelivery.family), selectinload(FamilyDelivery.attempts)).where(FamilyDelivery.id == fd.id)
     result = await session.execute(query)
     fd = result.scalar_one()
 
@@ -789,7 +817,73 @@ async def update_family_delivery(
     await session.commit()
     await session.refresh(delivery)
 
-    query = select(FamilyDelivery).options(selectinload(FamilyDelivery.family)).where(FamilyDelivery.id == delivery.id)
+    query = select(FamilyDelivery).options(selectinload(FamilyDelivery.family), selectinload(FamilyDelivery.attempts)).where(FamilyDelivery.id == delivery.id)
+    result = await session.execute(query)
+    delivery = result.scalar_one()
+
+    return DeliveryResp.model_validate(delivery)
+
+@router.post("/{institution_id}/deliveries/{delivery_id}/reschedule", status_code=201, response_model=DeliveryResp)
+async def reschedule_family_delivery(    
+    institution_id: int,
+    current_account: Annotated[Account, Depends(get_current_account)],
+    delivery_id: int,
+    payload: DeliveryReschedule,
+    session: Session ):
+    
+    await get_institution_or_404(session, institution_id)
+    account = await get_account_or_404(session, payload.account_id)
+
+    query = select(FamilyDelivery).where(
+        FamilyDelivery.id == delivery_id,
+        FamilyDelivery.institution_id == institution_id,
+    )
+    result = await session.execute(query)
+    delivery = result.scalar_one_or_none()
+
+    if delivery is None:
+        raise NotFoundError(
+            detail=f"Delivery with id {delivery_id} not found in this institution"
+        )
+    delivery.delivery_date = payload.new_date.isoformat()
+    delivery.account_id = account.id
+
+    await session.commit()
+    await session.refresh(delivery)
+
+    try:
+        attempt = DeliveryAttempt(
+            family_delivery_id=delivery.id,
+            status=DeliveryAttemptStatus.NOT_DELIVERED,
+            attempt_date=payload.new_date.isoformat(),
+            description=payload.description,
+        )
+        session.add(attempt)
+        await session.commit()
+        await session.refresh(attempt)
+    except IntegrityError:
+        await session.rollback()
+        raise DuplicatedError(detail="Error while logging delivery attempt")
+    except Exception:
+        await session.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error while logging delivery attempt",
+        )
+
+    try:
+        delivery.delivery_date = attempt.attempt_date
+        session.add(delivery)
+        await session.commit()
+        await session.refresh(delivery)
+    except Exception:
+        await session.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error while updating delivery date after logging attempt",
+        )
+
+    query = select(FamilyDelivery).options(selectinload(FamilyDelivery.family), selectinload(FamilyDelivery.attempts)).where(FamilyDelivery.id == delivery.id)
     result = await session.execute(query)
     delivery = result.scalar_one()
 

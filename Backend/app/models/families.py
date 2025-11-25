@@ -36,6 +36,10 @@ class SituationDelivery(str, PyEnum):
     COMPLETED = "COMPLETED"
     CANCELED = "CANCELED"
 
+class DeliveryAttemptStatus(str, PyEnum):
+    DELIVERED = "DELIVERED"
+    NOT_DELIVERED = "NOT_DELIVERED"    
+
 class Family(BaseModel):
     __tablename__ = "account_families"
 
@@ -227,7 +231,18 @@ class FamilyDelivery(BaseModel):
         index=True,
         comment="Situação da entrega",
     )
-
+    
+    delivery_attempts: Mapped[int] = mapped_column(
+        default=1, nullable=False, comment="Número de tentativas de entrega realizadas"
+    )
+    
+    attempts: Mapped[List["DeliveryAttempt"]] = relationship(
+        "DeliveryAttempt",
+        back_populates="family_delivery",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    
     __table_args__ = (
         Index("idx_family_delivery_family_id", "family_id"),
         Index("idx_family_delivery_date", "delivery_date"),
@@ -236,6 +251,32 @@ class FamilyDelivery(BaseModel):
     def __repr__(self) -> str:
         return f"<FamilyDelivery(id={self.id}, family_id={self.family_id}, delivery_date='{self.delivery_date}')>"
 
+class DeliveryAttempt(BaseModel):
+    __tablename__ = "delivery_attempts"
+    
+    family_delivery_id: Mapped[int] = mapped_column(
+        ForeignKey("family_deliveries.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+        comment="ID da entrega da família",
+    )
+    status: Mapped[DeliveryAttemptStatus] = mapped_column(
+        Enum(DeliveryAttemptStatus, native_enum=False),
+        nullable=False, 
+        default=DeliveryAttemptStatus.NOT_DELIVERED,
+        index=True,
+        comment="Status da tentativa de entrega",
+    )
+    attempt_date: Mapped[str] = mapped_column(
+        String(25), nullable=False, comment="Data e hora da tentativa de entrega"
+    )
+    description: Mapped[Optional[str]] = mapped_column(
+        String(500), nullable=True, comment="Descrição da tentativa de entrega"
+    )
+    
+    family_delivery: Mapped["FamilyDelivery"] = relationship(
+        "FamilyDelivery", back_populates="attempts", lazy="joined"
+    )
 
 class FamilyMember(BaseModel):
     __tablename__ = "family_members"
