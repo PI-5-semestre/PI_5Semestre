@@ -8,7 +8,6 @@ import 'package:core/widgets/delivery_card.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:core/widgets2/segmented_card_switcher.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class DeliveryPage extends ConsumerStatefulWidget {
   const DeliveryPage({super.key});
@@ -36,7 +35,7 @@ class _DeliveryPageState extends ConsumerState<DeliveryPage> {
     final controller = ref.watch(deliveryControllerProvider.notifier);
     final theme = Theme.of(context);
 
-    final icons = [Icons.list_alt, Icons.access_time, Icons.check, Icons.close];
+    final icons = [Icons.list_alt, Icons.access_time, Icons.check];
 
     if (!deliveryState.isLoading && deliveryState.error != null && deliveryState.deliveries.isEmpty) {
       return Center(
@@ -76,8 +75,6 @@ class _DeliveryPageState extends ConsumerState<DeliveryPage> {
                           controller.filterByRole("PENDING");
                         case 2:
                           controller.filterByRole("COMPLETED");
-                        case 3:
-                          controller.filterByRole("CANCELED");
                       }
                     },
                   ),
@@ -102,10 +99,6 @@ class _DeliveryPageState extends ConsumerState<DeliveryPage> {
               )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/delivery/new_delivery'),
-        child: const Icon(Icons.add),
       ),
     );
   }
@@ -189,13 +182,7 @@ class _DeliveryPageState extends ConsumerState<DeliveryPage> {
         colors: [const Color(0xFF00C951), const Color(0xFF00A63E)],
         title: "Entregues",
         value: deliveries.where((d) => d.deliveryStatus == "Entregue").length.toString(),
-      ),
-      StatCard(
-        icon: Icons.close,
-        colors: [const Color(0xFFFF5C5C), const Color(0xFFB20000)],
-        title: "Não Entregues",
-        value: deliveries.where((d) => d.deliveryStatus == "Não Entregue").length.toString(),
-      ),
+      )
     ];
   }
 

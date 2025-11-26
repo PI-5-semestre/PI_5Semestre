@@ -1,7 +1,6 @@
 import 'package:cestas_app/src/pages/basket/basket_page.dart';
 import 'package:cestas_app/src/pages/delivery/delivery_page.dart';
 import 'package:cestas_app/src/pages/delivery/edit_delivery_page.dart';
-import 'package:cestas_app/src/pages/delivery/new_delivery_page.dart';
 import 'package:cestas_app/src/pages/family/edit_family_page.dart';
 import 'package:cestas_app/src/pages/family/family_page.dart';
 import 'package:cestas_app/src/pages/family/new_family_page.dart';
@@ -70,10 +69,6 @@ final routes = GoRouter(
                     final delivery = state.extra as DeliveryModel;
                     return EditDeliveryPage(delivery: delivery);
                   }
-                ),
-                GoRoute(
-                  path: 'new_delivery',
-                  builder: (context, state) => NewDeliveryPage(),
                 ),
               ],
             ),
