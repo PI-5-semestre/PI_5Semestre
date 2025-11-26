@@ -142,25 +142,25 @@ class _BasketPageState extends State<BasketPage> {
                 ...selectedFamilies.entries.map((entry) {
                   return Column(
                     children: [
-                      FamilyCard(
-                        name: entry.key,
-                        phone: "(19) 99999-0000",
-                        members: 4,
-                        income: 700,
-                        cpf: "000.000.000-00",
-                        address:
-                            "Rua Exemplo, 123 - Bairro Exemplo, São Paulo - SP",
-                        observations: "Família em situação de vulnerabilidade.",
-                        status: "ativa",
-                        deliveryStatus: "aguardando",
-                        recommended: "Recomendado Pequena",
-                        selected: entry.value,
-                        onSelected: (bool? v) {
-                          setState(() {
-                            selectedFamilies[entry.key] = v ?? false;
-                          });
-                        },
-                      ),
+                      // FamilyCard(
+                      //   name: entry.key,
+                      //   phone: "(19) 99999-0000",
+                      //   members: 4,
+                      //   income: 700,
+                      //   cpf: "000.000.000-00",
+                      //   address:
+                      //       "Rua Exemplo, 123 - Bairro Exemplo, São Paulo - SP",
+                      //   observations: "Família em situação de vulnerabilidade.",
+                      //   status: "ativa",
+                      //   deliveryStatus: "aguardando",
+                      //   recommended: "Recomendado Pequena",
+                      //   selected: entry.value,
+                      //   onSelected: (bool? v) {
+                      //     setState(() {
+                      //       selectedFamilies[entry.key] = v ?? false;
+                      //     });
+                      //   },
+                      // ),
                       const SizedBox(height: 12),
                     ],
                   );

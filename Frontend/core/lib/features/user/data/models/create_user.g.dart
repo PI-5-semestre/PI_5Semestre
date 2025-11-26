@@ -11,7 +11,7 @@ _CreateUser _$CreateUserFromJson(Map<String, dynamic> json) => _CreateUser(
   name: json['name'] as String,
   cpf: json['cpf'] as String,
   mobile: json['mobile'] as String,
-  password: json['password'] as String,
+  password: json['password'] as String?,
   account_type: json['account_type'] as String?,
   institution_id: (json['institution_id'] as num).toInt(),
 );

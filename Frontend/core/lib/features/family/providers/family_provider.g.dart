@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user_provider.dart';
+part of 'family_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,52 +9,52 @@ part of 'user_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(UserController)
-const userControllerProvider = UserControllerProvider._();
+@ProviderFor(FamilyController)
+const familyControllerProvider = FamilyControllerProvider._();
 
-final class UserControllerProvider
-    extends $NotifierProvider<UserController, UserState> {
-  const UserControllerProvider._()
+final class FamilyControllerProvider
+    extends $NotifierProvider<FamilyController, FamilyState> {
+  const FamilyControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'userControllerProvider',
+        name: r'familyControllerProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$userControllerHash();
+  String debugGetCreateSourceHash() => _$familyControllerHash();
 
   @$internal
   @override
-  UserController create() => UserController();
+  FamilyController create() => FamilyController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(UserState value) {
+  Override overrideWithValue(FamilyState value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<UserState>(value),
+      providerOverride: $SyncValueProvider<FamilyState>(value),
     );
   }
 }
 
-String _$userControllerHash() => r'1d5c7f45e09431c2432aa97ffc9974d34fc309e5';
+String _$familyControllerHash() => r'3e4d4db1ad940fe8aa30c177d04807add9c3b8b2';
 
-abstract class _$UserController extends $Notifier<UserState> {
-  UserState build();
+abstract class _$FamilyController extends $Notifier<FamilyState> {
+  FamilyState build();
   @$mustCallSuper
   @override
   void runBuild() {
     final created = build();
-    final ref = this.ref as $Ref<UserState, UserState>;
+    final ref = this.ref as $Ref<FamilyState, FamilyState>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<UserState, UserState>,
-              UserState,
+              AnyNotifier<FamilyState, FamilyState>,
+              FamilyState,
               Object?,
               Object?
             >;

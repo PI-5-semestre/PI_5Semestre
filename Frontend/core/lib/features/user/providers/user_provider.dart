@@ -14,9 +14,10 @@ class UserController extends _$UserController {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final data = await ref.read(userRepositoryProvider).fetchUsers();
+      final onlyActive = data.where((u) => u.active).toList();
       state = state.copyWith(
-        users: data,
-        filtered: data,
+        users: onlyActive,
+        filtered: onlyActive,
         isLoading: false,
       );
     } catch (e) {

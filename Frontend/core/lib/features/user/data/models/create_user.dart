@@ -11,7 +11,7 @@ abstract class CreateUser with _$CreateUser{
     required String name,
     required String cpf,
     required String mobile,
-    required String password,
+    String? password,
     // ignore: non_constant_identifier_names
     String? account_type,
     // ignore: non_constant_identifier_names
