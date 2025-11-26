@@ -198,16 +198,13 @@ class DeliveryCard extends ConsumerWidget {
                                           final formatter = DateFormat(
                                             "yyyy-MM-dd'T'HH:mm:ss",
                                           );
-                                          DateTime newDate = delivery
-                                              .delivery_date!
-                                              .add(const Duration(days: 30));
 
                                           final Map<String, dynamic> updated = {
                                             "id": delivery.id,
-                                            "date": formatter.format(newDate),
+                                            "date": formatter.format(delivery.delivery_date!),
                                             "account_id": delivery.account_id,
                                             "description": delivery.description,
-                                            "status": "PENDING",
+                                            "status": "COMPLETED",
                                           };
 
                                           await controller.updateDelivery(
