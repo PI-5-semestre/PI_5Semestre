@@ -10,6 +10,7 @@ import 'package:cestas_app/src/pages/login_page.dart';
 import 'package:cestas_app/src/pages/more_page.dart';
 import 'package:cestas_app/src/pages/new_password_page.dart';
 import 'package:cestas_app/src/pages/register_page.dart';
+import 'package:cestas_app/src/pages/stock/new_stock_page.dart';
 import 'package:cestas_app/src/pages/stock/stock_page.dart';
 import 'package:cestas_app/src/pages/teams/edit_servant_page.dart';
 import 'package:cestas_app/src/pages/teams/new_servant_page.dart';
@@ -83,6 +84,12 @@ final routes = GoRouter(
                 GoRoute(
                   path: 'stock',
                   builder: (context, state) => StockPage(),
+                  routes: [
+                    GoRoute(
+                      path: 'new_stock',
+                      builder: (context, state) => NewStockPage(),
+                    ),
+                  ],
                 ),
                 GoRoute(
                   path: 'visits',
