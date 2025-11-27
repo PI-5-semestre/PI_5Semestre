@@ -1,6 +1,9 @@
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
+
+from app.schemas.families import FamilyResp
+from app.schemas.users import UserResp
 
 
 class InstitutionCreate(BaseModel):
@@ -54,6 +57,23 @@ class DeliveryPut(BaseModel):
     date: datetime
     account_id: int
     description: Optional[str] = None
+    status: str
+class DeliveryReschedule(BaseModel):
+    new_date: datetime
+    account_id: int
+    description: Optional[str] = None
+
+class DeliveryAttemptResp(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    active: bool
+    created: datetime
+    family_delivery_id: int
+    status: str
+    attempt_date: str
+    description: Optional[str] = None
+
 
 class DeliveryResp(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -64,5 +84,15 @@ class DeliveryResp(BaseModel):
     institution_id: int
     family_id: int
     delivery_date: str
+    delivery_at : Optional[str] = None
     account_id: int
     description: Optional[str] = None
+    status: str
+    family: Optional["FamilyResp"] = None
+    attempts: Optional[List[DeliveryAttemptResp]] = None
+    
+    
+class UserCorporateResp(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    user: UserResp

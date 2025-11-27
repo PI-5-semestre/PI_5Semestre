@@ -3,7 +3,7 @@ from typing import Annotated
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 import jwt
@@ -43,7 +43,7 @@ async def login(
         select(Account)
         .options(selectinload(Account.profile))
         .where(
-            Account.email == payload.email.lower().strip(),
+            func.lower(Account.email) == func.lower(payload.email.lower().strip()),
             Account.password == payload.password,
             Account.active == True,
         )

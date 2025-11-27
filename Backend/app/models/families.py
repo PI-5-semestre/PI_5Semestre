@@ -12,6 +12,7 @@ from enum import Enum as PyEnum
 from typing import TYPE_CHECKING, Optional, List
 from decimal import Decimal
 from .base_modal import BaseModel
+from datetime import datetime, timezone, timedelta
 
 if TYPE_CHECKING:
     from .Institutions import Institution
@@ -30,6 +31,15 @@ class DegreeOfKinship(str, PyEnum):
     FATHER = "FATHER"
     MOTHER = "MOTHER"
     OTHER = "OTHER"
+    
+class SituationDelivery(str, PyEnum):
+    PENDING = "PENDING"
+    COMPLETED = "COMPLETED"
+    CANCELED = "CANCELED"
+
+class DeliveryAttemptStatus(str, PyEnum):
+    DELIVERED = "DELIVERED"
+    NOT_DELIVERED = "NOT_DELIVERED"    
 
 class Family(BaseModel):
     __tablename__ = "account_families"
@@ -60,6 +70,10 @@ class Family(BaseModel):
     )
     state: Mapped[str] = mapped_column(
         String(2), nullable=False, comment="UF do estado"
+    )
+    
+    city: Mapped[Optional[str]] = mapped_column(
+        String(100), nullable=True, comment="Nome da cidade", default=None
     )
 
     situation: Mapped[SituationType] = mapped_column(
@@ -109,8 +123,8 @@ class Family(BaseModel):
         lazy="selectin",
     )
     
-    persons: Mapped[List["AuthorizedPersonsFamily"]] = relationship(
-        "AuthorizedPersonsFamily",
+    members: Mapped[List["FamilyMember"]] = relationship(
+        "FamilyMember",
         back_populates="family",
         cascade="all, delete-orphan",
         lazy="selectin",
@@ -129,6 +143,13 @@ class Family(BaseModel):
     def __repr__(self) -> str:
         return f"<Family(id={self.id}, name='{self.name}', cpf='{self.cpf}', situation='{self.situation.value}')>"
 
+    
+    #TODO IMPLEMENTAR LOGICA
+    @property
+    def is_active_for_basket(self) -> bool:
+        return True
+    
+    
 
 class DocFamily(BaseModel):
     __tablename__ = "doc_families"
@@ -195,6 +216,11 @@ class FamilyDelivery(BaseModel):
         String(25), nullable=False, comment="Data e hora da entrega"
     )
     
+    delivered_at: Mapped[Optional[str]] = mapped_column(
+        String(25), nullable=True, comment="Data e hora em que a entrega foi realizada"
+    )
+    
+    
     description: Mapped[Optional[str]] = mapped_column(
         String(500), nullable=True, comment="Descrição da entrega realizada"
     )
@@ -210,7 +236,26 @@ class FamilyDelivery(BaseModel):
     account: Mapped[Optional["Account"]] = relationship(
         "Account", back_populates="deliveries", lazy="joined"
     )
-
+    
+    status: Mapped[SituationDelivery] = mapped_column(
+        Enum(SituationDelivery, native_enum=False),
+        nullable=False,
+        default=SituationDelivery.PENDING,
+        index=True,
+        comment="Situação da entrega",
+    )
+    
+    delivery_attempts: Mapped[int] = mapped_column(
+        default=1, nullable=False, comment="Número de tentativas de entrega realizadas"
+    )
+    
+    attempts: Mapped[List["DeliveryAttempt"]] = relationship(
+        "DeliveryAttempt",
+        back_populates="family_delivery",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    
     __table_args__ = (
         Index("idx_family_delivery_family_id", "family_id"),
         Index("idx_family_delivery_date", "delivery_date"),
@@ -219,9 +264,35 @@ class FamilyDelivery(BaseModel):
     def __repr__(self) -> str:
         return f"<FamilyDelivery(id={self.id}, family_id={self.family_id}, delivery_date='{self.delivery_date}')>"
 
+class DeliveryAttempt(BaseModel):
+    __tablename__ = "delivery_attempts"
+    
+    family_delivery_id: Mapped[int] = mapped_column(
+        ForeignKey("family_deliveries.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+        comment="ID da entrega da família",
+    )
+    status: Mapped[DeliveryAttemptStatus] = mapped_column(
+        Enum(DeliveryAttemptStatus, native_enum=False),
+        nullable=False, 
+        default=DeliveryAttemptStatus.NOT_DELIVERED,
+        index=True,
+        comment="Status da tentativa de entrega",
+    )
+    attempt_date: Mapped[str] = mapped_column(
+        String(25), nullable=False, comment="Data e hora da tentativa de entrega"
+    )
+    description: Mapped[Optional[str]] = mapped_column(
+        String(500), nullable=True, comment="Descrição da tentativa de entrega"
+    )
+    
+    family_delivery: Mapped["FamilyDelivery"] = relationship(
+        "FamilyDelivery", back_populates="attempts", lazy="joined"
+    )
 
-class AuthorizedPersonsFamily(BaseModel):
-    __tablename__ = "autihorized_persons_families"
+class FamilyMember(BaseModel):
+    __tablename__ = "family_members"
 
     name: Mapped[str] = mapped_column(
         String(100), nullable=False, comment="Nome da pessoa autorizada"
@@ -244,10 +315,15 @@ class AuthorizedPersonsFamily(BaseModel):
         comment="Família à qual a pessoa está autorizada",
     )
     family: Mapped["Family"] = relationship(
-        "Family", back_populates="persons", lazy="joined"
+        "Family", back_populates="members", lazy="joined"
     )
 
+    can_receive: Mapped[bool] = mapped_column(
+        nullable=False,
+        default=False,
+        comment="Indica se a pessoa autorizada pode receber auxílios em nome da família",
+    )
     __table_args__ = (
-        Index("idx_authorized_person_cpf", "cpf"),
-        Index("idx_authorized_person_family_id", "family_id"),
+        Index("idx_family_member_cpf", "cpf"),
+        Index("idx_family_member_family_id", "family_id"),
     )
