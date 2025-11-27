@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from fastapi import HTTPException
-from typing import Annotated, Optional, List, Union
+from typing import Annotated, Any, Optional, List, Union
 from io import BytesIO
 
 from fastapi import APIRouter, Depends, Query, UploadFile, File, Form
@@ -31,6 +31,7 @@ from app.schemas.products import (
     StockItemCreateForInstitution,
     StockItemUpdate,
     StockHistoryResp,
+    StockItemUpdateQuantity,
 )
 from app.schemas.families import (
     FamilyResp,
@@ -60,6 +61,21 @@ async def get_institution_or_404(
         raise NotFoundError(detail=f"Institution with id {institution_id} not found")
 
     return institution
+
+async def get_item_or_404(
+    session: AsyncSession, sku: str, institution_id: int,
+) -> Any:
+    result = await session.execute(
+        select(StockItem).where(
+            StockItem.sku == sku.upper(), StockItem.institution_id == institution_id
+        )
+    )
+    item = result.scalar_one_or_none()
+
+    if item is None:
+        raise NotFoundError(detail=f"StockItem with SKU {sku} not found in institution {institution_id}")
+
+    return item
 
 
 async def get_family_or_404(
@@ -254,7 +270,7 @@ async def add_stock_item_to_institution(
             institution_id=institution_id,
             name=payload.name,
             sku=payload.sku,
-            quantity=payload.quantity,
+            quantity=0,
         )
         session.add(stock_item)
         await session.commit()
@@ -276,6 +292,46 @@ async def add_stock_item_to_institution(
     except Exception:
         await session.rollback()
         raise
+    
+@router.post("/{institution_id}/stock/control", status_code=HTTPStatus.CREATED)
+async def control_stock_to_institution(
+    institution_id: int, payload: List[StockItemUpdateQuantity], session: Session
+):
+    await get_institution_or_404(session, institution_id)
+    try:
+        for item_data in payload:
+            item = await get_item_or_404(session, sku=item_data.sku, institution_id=institution_id)
+            
+            if item.quantity + item_data.quantity < 0:
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_REQUEST,
+                    detail=f"Insufficient stock for SKU '{item_data.sku}' in institution {institution_id}",
+                )
+        
+            item.quantity += item_data.quantity
+            session.add(item)
+            
+            history = StockHistory(
+                    stock_item_id=item.id, quantity=item_data.quantity
+                )
+            session.add(history)
+
+        await session.commit()
+    except NotFoundError:
+        raise
+
+    except Exception:
+        await session.rollback()
+        raise
+    
+    
+# @router.post("/{institution_id}/basket", status_code=HTTPStatus.CREATED)
+# async def create_basket_for_institution(
+#     institution_id: int, session: Session
+# ):
+#     await get_institution_or_404(session, institution_id)
+    
+#     return {"detail": "Basket creation not yet implemented"}
 
 
 @router.get("/{institution_id}/stock/summary")
@@ -338,16 +394,6 @@ async def update_institution_stock_item(
 
         if payload.name is not None:
             product.name = payload.name
-
-        if payload.quantity is not None:
-            quantity_change = payload.quantity - product.quantity
-            product.quantity = payload.quantity
-
-            if quantity_change != 0:
-                history = StockHistory(
-                    stock_item_id=product.id, quantity=quantity_change
-                )
-                session.add(history)
 
         await session.commit()
         await session.refresh(product)
