@@ -54,6 +54,8 @@ async def create_user(payload: UserCreate, session: Session):
             .where(Account.id == account.id)
         )
         account = result.unique().scalar_one()
+        
+        
 
         return UserResp.model_validate(account)
 
@@ -65,7 +67,7 @@ async def create_user(payload: UserCreate, session: Session):
             raise DuplicatedError(detail="Email already registered")
         elif "cpf" in error_msg or "profiles_cpf" in error_msg:
             raise DuplicatedError(detail="CPF already registered")
-        elif "institution" in error_msg:
+        elif "foreign key" in error_msg or "violates" in error_msg or "institution" in error_msg:
             raise NotFoundError(detail="Institution not found")
 
         raise DuplicatedError(detail="Duplicate entry")

@@ -538,8 +538,8 @@ return $default(_that.id,_that.created,_that.modified,_that.active,_that.name,_t
 /// @nodoc
 @JsonSerializable()
 
-class _Member implements Member {
-  const _Member({this.id, this.created, this.modified, this.active, required this.name, required this.cpf, required this.kinship, this.family_id, this.can_receive});
+class _Member extends Member {
+  const _Member({this.id, this.created, this.modified, this.active, required this.name, required this.cpf, required this.kinship, this.family_id, this.can_receive}): super._();
   factory _Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
 
 @override final  int? id;
