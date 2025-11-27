@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:core/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:core/features/auth/data/models/user.dart';
 import 'package:core/features/shared_preferences/service/storage_service.dart';
@@ -15,8 +17,9 @@ class AuthNotifier extends _$AuthNotifier {
 
     try {
       final user = await ref.read(authRepositoryProvider).login(email, password);
+
       await ref.read(storageServiceProvider.notifier).set('token', user.token);
-      await ref.read(storageServiceProvider.notifier).set('institution_id', user.account.institution_id);
+      await ref.read(storageServiceProvider.notifier).set('user', jsonEncode(user.account));
 
       if (ref.mounted) {
         state = AsyncData(user);
