@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Annotated, Optional, List, Union
+from fastapi import HTTPException
+from typing import Annotated, Any, Optional, List, Union
 from io import BytesIO
 
 from fastapi import APIRouter, Depends, Query, UploadFile, File, Form
@@ -19,15 +20,18 @@ from app.util.file_validation import validate_file_upload
 from app.schemas.Institutions import (
     DeliveryCreate,
     DeliveryPut,
+    DeliveryReschedule,
     DeliveryResp,
     InstitutionUpdate,
     InstitutionResp,
+    UserCorporateResp,
 )
 from app.schemas.products import (
     StockItemResp,
     StockItemCreateForInstitution,
     StockItemUpdate,
     StockHistoryResp,
+    StockItemUpdateQuantity,
 )
 from app.schemas.families import (
     FamilyResp,
@@ -37,7 +41,7 @@ from app.schemas.families import (
 )
 from app.models.Institutions import Institution, InstitutionType
 from app.models.products import StockItem, StockHistory
-from app.models.families import AuthorizedPersonsFamily, Family, DocFamily, FamilyDelivery, SituationType
+from app.models.families import DeliveryAttempt, DeliveryAttemptStatus, Family, DocFamily, FamilyDelivery, FamilyMember, SituationDelivery, SituationType
 
 router = APIRouter(prefix="/institutions", tags=["institutions"])
 Session = Annotated[AsyncSession, Depends(get_session)]
@@ -57,6 +61,21 @@ async def get_institution_or_404(
         raise NotFoundError(detail=f"Institution with id {institution_id} not found")
 
     return institution
+
+async def get_item_or_404(
+    session: AsyncSession, sku: str, institution_id: int,
+) -> Any:
+    result = await session.execute(
+        select(StockItem).where(
+            StockItem.sku == sku.upper(), StockItem.institution_id == institution_id
+        )
+    )
+    item = result.scalar_one_or_none()
+
+    if item is None:
+        raise NotFoundError(detail=f"StockItem with SKU {sku} not found in institution {institution_id}")
+
+    return item
 
 
 async def get_family_or_404(
@@ -251,7 +270,7 @@ async def add_stock_item_to_institution(
             institution_id=institution_id,
             name=payload.name,
             sku=payload.sku,
-            quantity=payload.quantity,
+            quantity=0,
         )
         session.add(stock_item)
         await session.commit()
@@ -273,6 +292,46 @@ async def add_stock_item_to_institution(
     except Exception:
         await session.rollback()
         raise
+    
+@router.post("/{institution_id}/stock/control", status_code=HTTPStatus.CREATED)
+async def control_stock_to_institution(
+    institution_id: int, payload: List[StockItemUpdateQuantity], session: Session
+):
+    await get_institution_or_404(session, institution_id)
+    try:
+        for item_data in payload:
+            item = await get_item_or_404(session, sku=item_data.sku, institution_id=institution_id)
+            
+            if item.quantity + item_data.quantity < 0:
+                raise HTTPException(
+                    status_code=HTTPStatus.BAD_REQUEST,
+                    detail=f"Insufficient stock for SKU '{item_data.sku}' in institution {institution_id}",
+                )
+        
+            item.quantity += item_data.quantity
+            session.add(item)
+            
+            history = StockHistory(
+                    stock_item_id=item.id, quantity=item_data.quantity
+                )
+            session.add(history)
+
+        await session.commit()
+    except NotFoundError:
+        raise
+
+    except Exception:
+        await session.rollback()
+        raise
+    
+    
+# @router.post("/{institution_id}/basket", status_code=HTTPStatus.CREATED)
+# async def create_basket_for_institution(
+#     institution_id: int, session: Session
+# ):
+#     await get_institution_or_404(session, institution_id)
+    
+#     return {"detail": "Basket creation not yet implemented"}
 
 
 @router.get("/{institution_id}/stock/summary")
@@ -335,16 +394,6 @@ async def update_institution_stock_item(
 
         if payload.name is not None:
             product.name = payload.name
-
-        if payload.quantity is not None:
-            quantity_change = payload.quantity - product.quantity
-            product.quantity = payload.quantity
-
-            if quantity_change != 0:
-                history = StockHistory(
-                    stock_item_id=product.id, quantity=quantity_change
-                )
-                session.add(history)
 
         await session.commit()
         await session.refresh(product)
@@ -420,13 +469,20 @@ async def create_family_for_institution(
             detail=f"Family with CPF '{family_data.cpf}' already exists"
         )
 
-    new_family = Family(**family_data.model_dump(), institution_id=institution_id)
+    try:
+        new_family = Family(**family_data.model_dump(), institution_id=institution_id)
 
-    session.add(new_family)
-    await session.commit()
-    await session.refresh(new_family)
+        session.add(new_family)
+        await session.commit()
+        await session.refresh(new_family)
 
-    return FamilyResp.model_validate(new_family)
+        return FamilyResp.model_validate(new_family)
+    except IntegrityError as e:
+        await session.rollback()
+        error_msg = str(e.orig).lower()
+        if "cpf" in error_msg:
+             raise DuplicatedError(detail="Family with this CPF already exists.")
+        raise
 
 
 @router.get("/{institution_id}/families", response_model=List[FamilyResp])
@@ -482,29 +538,73 @@ async def get_family_from_institution(institution_id: int, cpf: str, session: Se
 
 @router.put("/{institution_id}/families/{cpf}", response_model=FamilyResp)
 async def update_family_from_institution(
-    institution_id: int, cpf: str, family_data: FamilyUpdate, session: Session, current_account: Annotated[Account, Depends(get_current_account)]
+    institution_id: int,
+    cpf: str,
+    family_data: FamilyUpdate,
+    session: Session,
+    current_account: Annotated[Account, Depends(get_current_account)],
 ):
     await get_institution_or_404(session, institution_id)
     family = await get_family_or_404(session, cpf, institution_id)
 
-    for field, value in family_data.model_dump(exclude_unset=True).items():
-        setattr(family, field, value)
-    
-    if "persons" in family_data.model_dump(exclude_unset=True):
-        family.persons.clear()
-        for person_data in family_data.persons:
-            authorized_person = AuthorizedPersonsFamily(
-                name=person_data.name,
-                cpf=person_data.cpf,
-                kinship=person_data.kinship,
-                family_id=family.id,
-            )
-            family.persons.append(authorized_person)
-    await session.commit()
-    await session.refresh(family)
+    try:
+        for field, value in family_data.model_dump(exclude_unset=True).items():
+            if field == "members":               
+                for member_data in value:
+                    if 'cpf' in member_data and member_data['cpf']:
+                        member_data['cpf'] = member_data['cpf'].replace(".", "").replace("-", "")
+                    
+                    member_id = member_data.get('id')
+                    cpf = member_data.get('cpf')
+                    existing_member = None
 
-    
-    
+                    if member_id:
+                        for m in family.members:
+                            if m.id == member_id:
+                                existing_member = m
+                                break
+
+                    if not existing_member and cpf:
+                        for m in family.members:
+                            if m.cpf == cpf:
+                                existing_member = m
+                                break
+                    
+                    if existing_member:
+                        if 'cpf' in member_data:
+                            existing_member.cpf = member_data['cpf']
+                        if 'name' in member_data:
+                            existing_member.name = member_data['name']
+                        if 'kinship' in member_data:
+                            existing_member.kinship = member_data['kinship']
+                        if 'can_receive' in member_data and member_data['can_receive'] is not None:
+                            existing_member.can_receive = member_data['can_receive']
+                    else:
+                        member = FamilyMember(
+                            name=member_data.get('name'),
+                            cpf=cpf,
+                            kinship=member_data.get('kinship'),
+                            family_id=family.id,
+                            can_receive=member_data.get('can_receive', False),
+                        )
+                        family.members.append(member)
+            else:
+                setattr(family, field, value)
+
+        session.add(family)
+        await session.commit()
+        
+        query = select(Family).options(selectinload(Family.members)).where(Family.id == family.id)
+        result = await session.execute(query)
+        family = result.scalar_one()
+    except IntegrityError as e:
+        print(e)
+        await session.rollback()
+        error_msg = str(e.orig).lower()
+        if "cpf" in error_msg and ("family_members" in error_msg or "account_families" in error_msg):
+             raise DuplicatedError(detail="One of the authorized persons (or the family head) has a CPF that is already registered.")
+        raise
+
     return FamilyResp.model_validate(family)
 
 
@@ -641,7 +741,7 @@ async def list_family_deliveries(
 
     query = select(FamilyDelivery).where(
         FamilyDelivery.institution_id == institution_id
-    )
+    ).options(selectinload(FamilyDelivery.family), selectinload(FamilyDelivery.attempts))
 
     query = (
         query.order_by(FamilyDelivery.delivery_date.desc())
@@ -652,6 +752,10 @@ async def list_family_deliveries(
     result = await session.execute(query)
     deliveries = result.scalars().all()
 
+    for d in deliveries:
+        if d.status is None:
+            d.status = SituationDelivery.PENDING
+    
     return [DeliveryResp.model_validate(d) for d in deliveries]
 
 
@@ -682,10 +786,41 @@ async def create_family_delivery(
         delivery_date=payload.date.isoformat(),
         account_id=account.id,
         description=payload.description,
+        status=SituationDelivery.PENDING,
     )
     session.add(fd)
     await session.commit()
     await session.refresh(fd)
+
+    try:
+        attempt = DeliveryAttempt(
+            family_delivery_id=fd.id,
+            status=DeliveryAttemptStatus.NOT_DELIVERED,
+            attempt_date=payload.date.isoformat(),
+            description=payload.description,
+        )
+        session.add(attempt)
+        await session.commit()
+        await session.refresh(attempt)
+    except IntegrityError:
+        await session.rollback()
+        raise DuplicatedError(detail="Error while logging initial delivery attempt")
+    except Exception:
+        await session.rollback()
+        raise
+
+    try:
+        fd.delivery_date = attempt.attempt_date
+        session.add(fd)
+        await session.commit()
+        await session.refresh(fd)
+    except Exception:
+        await session.rollback()
+        raise
+
+    query = select(FamilyDelivery).options(selectinload(FamilyDelivery.family), selectinload(FamilyDelivery.attempts)).where(FamilyDelivery.id == fd.id)
+    result = await session.execute(query)
+    fd = result.scalar_one()
 
     return DeliveryResp.model_validate(fd)
 
@@ -700,7 +835,7 @@ async def update_family_delivery(
 ):
     await get_institution_or_404(session, institution_id)
     account = await get_account_or_404(session, payload.account_id)
-
+    
     if current_account.account_type not in [
         AccountType.ADMINISTRATIVE,
         AccountType.OWNER,
@@ -708,24 +843,147 @@ async def update_family_delivery(
         raise NotFoundError(detail="Unauthorized to create deliveries")
 
     result = await session.execute(
-        select(FamilyDelivery).where(
+        select(FamilyDelivery)
+        .options(selectinload(FamilyDelivery.family).selectinload(Family.deliveries))
+        .where(
             FamilyDelivery.id == delivery_id,
             FamilyDelivery.institution_id == institution_id,
         )
     )
+    delivery = result.scalar_one_or_none()
+    if delivery is None:
+        raise NotFoundError(
+            detail=f"Delivery with id {delivery_id} not found in this institution"
+        )
+        
+    
+    if payload.status == SituationDelivery.COMPLETED and delivery.status != SituationDelivery.COMPLETED:
+        delivery.status = SituationDelivery.COMPLETED
+        delivery.delivered_at = payload.date.isoformat()
+        try:
+            q = (
+                select(DeliveryAttempt)
+                .where(DeliveryAttempt.family_delivery_id == delivery.id)
+                .order_by(DeliveryAttempt.created.desc())
+                .limit(1)
+            )
+            res = await session.execute(q)
+            last_attempt = res.scalar_one_or_none()
+
+            if last_attempt:
+                last_attempt.status = DeliveryAttemptStatus.DELIVERED
+                session.add(last_attempt)
+                await session.commit()
+                await session.refresh(last_attempt)
+            else:
+                raise NotFoundError(
+                    detail=f"No delivery attempts found for delivery id {delivery.id}"
+                )
+                
+            if delivery.family.is_active_for_basket:
+                from datetime import datetime, timedelta
+                new_delivery_date = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%S')
+                new_delivery = FamilyDelivery(
+                    institution_id=delivery.institution_id,
+                    family_id=delivery.family_id,
+                    delivery_date=new_delivery_date,
+                    account_id=delivery.account_id,
+                    description=delivery.description,
+                    status=SituationDelivery.PENDING, 
+                )
+                session.add(new_delivery)
+                await session.commit()
+                await session.refresh(new_delivery)
+                
+        except NotFoundError:
+            raise
+        except IntegrityError:
+            await session.rollback()
+            raise DuplicatedError(detail="Error while logging delivery attempt")
+        except Exception:
+            await session.rollback()
+            raise HTTPException(
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                detail="Error while logging delivery attempt",
+            )
+    else:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Only deliveries with status 'PENDING' can be updated",
+        )
+    
+    await session.commit()
+    await session.refresh(delivery)
+
+    query = select(FamilyDelivery).options(selectinload(FamilyDelivery.family), selectinload(FamilyDelivery.attempts)).where(FamilyDelivery.id == delivery.id)
+    result = await session.execute(query)
+    delivery = result.scalar_one()
+
+    return DeliveryResp.model_validate(delivery)
+
+@router.post("/{institution_id}/deliveries/{delivery_id}/reschedule", status_code=201, response_model=DeliveryResp)
+async def reschedule_family_delivery(    
+    institution_id: int,
+    current_account: Annotated[Account, Depends(get_current_account)],
+    delivery_id: int,
+    payload: DeliveryReschedule,
+    session: Session ):
+    
+    await get_institution_or_404(session, institution_id)
+    account = await get_account_or_404(session, payload.account_id)
+
+    query = select(FamilyDelivery).where(
+        FamilyDelivery.id == delivery_id,
+        FamilyDelivery.institution_id == institution_id,
+    )
+    result = await session.execute(query)
     delivery = result.scalar_one_or_none()
 
     if delivery is None:
         raise NotFoundError(
             detail=f"Delivery with id {delivery_id} not found in this institution"
         )
-
-    delivery.delivery_date = payload.date.isoformat()
+    delivery.delivery_date = payload.new_date.isoformat()
     delivery.account_id = account.id
-    delivery.description = payload.description
 
     await session.commit()
     await session.refresh(delivery)
+
+    try:
+        attempt = DeliveryAttempt(
+            family_delivery_id=delivery.id,
+            status=DeliveryAttemptStatus.NOT_DELIVERED,
+            attempt_date=payload.new_date.isoformat(),
+            description=payload.description,
+        )
+        session.add(attempt)
+        await session.commit()
+        await session.refresh(attempt)
+    except IntegrityError:
+        await session.rollback()
+        raise DuplicatedError(detail="Error while logging delivery attempt")
+    except Exception:
+        await session.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error while logging delivery attempt",
+        )
+
+    try:
+        delivery.delivery_date = attempt.attempt_date
+        session.add(delivery)
+        await session.commit()
+        await session.refresh(delivery)
+    except Exception:
+        await session.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error while updating delivery date after logging attempt",
+        )
+
+    query = select(FamilyDelivery).options(selectinload(FamilyDelivery.family), selectinload(FamilyDelivery.attempts)).where(FamilyDelivery.id == delivery.id)
+    result = await session.execute(query)
+    delivery = result.scalar_one()
 
     return DeliveryResp.model_validate(delivery)
 
@@ -764,3 +1022,15 @@ async def delete_family_delivery(
     await session.commit()
 
     return None
+
+@router.get("/{institution_id}/corporate", status_code=200, response_model=List[UserCorporateResp])
+async def get_users(
+    institution_id: int,
+    session: Session,
+    current_account: Annotated[Account, Depends(get_current_account)],
+):
+    institution = await get_institution_or_404(session, institution_id)
+    query = select(Account).options(selectinload(Account.profile)).where(Account.institution_id == institution.id).order_by(Account.account_type.asc())
+    result = await session.execute(query)
+    users = result.scalars().all()
+    return [UserCorporateResp(user=user) for user in users]

@@ -1,0 +1,19 @@
+services:
+  postgres_test:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: basket_test
+      POSTGRES_USER: basket
+      POSTGRES_PASSWORD: 25385d3659bf9c41cfb94b5d823fdaf4
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U basket -d basket_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_test_data:

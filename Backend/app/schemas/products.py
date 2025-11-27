@@ -6,7 +6,6 @@ from datetime import datetime
 class StockItemCreateForInstitution(BaseModel):
     name: str
     sku: str
-    quantity: int = Field(default=0, ge=0)
 
     @field_validator("name")
     @classmethod
@@ -20,14 +19,17 @@ class StockItemCreateForInstitution(BaseModel):
 
 
 class StockItemUpdate(BaseModel):
+    sku: str
     name: Optional[str] = None
-    quantity: Optional[int] = Field(default=None, ge=0)
 
     @field_validator("name")
     @classmethod
     def normalize_name(cls, v: Optional[str]) -> Optional[str]:
         return v.strip() if v else None
 
+class StockItemUpdateQuantity(BaseModel):
+    sku: str
+    quantity: int
 
 class StockItemResp(BaseModel):
     model_config = ConfigDict(from_attributes=True)

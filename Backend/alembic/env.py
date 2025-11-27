@@ -26,7 +26,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 
 from app.models.base_modal import Base
-from app.models.families import Family
+from app.models.families import Family, FamilyDelivery, DocFamily
 from app.models.Institutions import Institution
 from app.models.products import StockHistory, StockItem
 from app.models.users import Account, Profile
