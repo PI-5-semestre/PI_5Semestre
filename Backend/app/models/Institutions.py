@@ -20,6 +20,16 @@ class BasketType(PyEnum):
     M = "M"
     G = "G"
 
+class InstitutionVisitationType(PyEnum):
+    ADMISSION="ADMISSION"
+    READMISSION="READMISSION"
+    ROUTINE="ROUTINE"
+    
+class InstitutionVisitationResultType(PyEnum):
+    ACCEPTED="ACCEPTED"
+    REJECTED="REJECTED"
+    PENDING="PENDING"
+
 class Institution(BaseModel):
     __tablename__ = "institutions"
 
@@ -104,3 +114,44 @@ class ProductsBasketsInstitutions(BaseModel):
 
     def __repr__(self):
         return f"<ProductsBasketsInstitutions(id={self.id}, basket_id={self.basket_id}, product_sku='{self.product_sku}', quantity={self.quantity})>"
+    
+    
+class InstitutionVisitation(BaseModel):
+    __tablename__ = "institution_visitations"
+
+    institution_id: Mapped[int] = mapped_column(
+        ForeignKey("institutions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    account_id: Mapped[int] = mapped_column(
+        ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    visit_at: Mapped[str] = mapped_column(
+        String(25), nullable=False
+    )
+    description: Mapped[str] = mapped_column(
+        String(500), nullable=True
+    )
+
+    type_of_visit: Mapped[InstitutionVisitationType] = mapped_column(
+        Enum(InstitutionVisitationType, native_enum=False), nullable=False
+    )
+    
+    def __repr__(self):
+        return f"<InstitutionView(id={self.id}, name='{self.name}', type='{self.institution_type.value}')>"
+    
+class InstitutionVisitationResult(BaseModel):
+    __tablename__ = "institution_visitation_results"
+
+    visitation_id: Mapped[int] = mapped_column(
+        ForeignKey("institution_visitations.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    description: Mapped[str] = mapped_column(
+        String(500), nullable=False
+    )
+    
+    status: Mapped[InstitutionVisitationResultType] = mapped_column(
+        Enum(InstitutionVisitationResultType, native_enum=False, default=InstitutionVisitationResultType.PENDING), nullable=False
+    )
+    
+    def __repr__(self):
+        return f"<InstitutionVisitationResult(id={self.id}, visitation_id={self.visitation_id})>"

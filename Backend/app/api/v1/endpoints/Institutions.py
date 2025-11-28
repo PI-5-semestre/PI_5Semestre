@@ -25,6 +25,10 @@ from app.schemas.Institutions import (
     InstitutionUpdate,
     InstitutionResp,
     UserCorporateResp,
+    VisitationCreate,
+    VisitationCreateReturn,
+    VisitationResp,
+    VisitationResponseReturn,
 )
 from app.schemas.products import (
     StockItemResp,
@@ -39,7 +43,7 @@ from app.schemas.families import (
     FamilyUpdate,
     DocFamilyResp,
 )
-from app.models.Institutions import Institution, InstitutionType
+from app.models.Institutions import Institution, InstitutionType, InstitutionVisitation, InstitutionVisitationResult, InstitutionVisitationResultType, InstitutionVisitationType
 from app.models.products import StockItem, StockHistory
 from app.models.families import DeliveryAttempt, DeliveryAttemptStatus, Family, DocFamily, FamilyDelivery, FamilyMember, SituationDelivery, SituationType
 
@@ -1034,3 +1038,124 @@ async def get_users(
     result = await session.execute(query)
     users = result.scalars().all()
     return [UserCorporateResp(user=user) for user in users]
+
+
+@router.post("/{institution_id}/visit/{family_id}", status_code=201, response_model=VisitationResp)
+async def create_institution_visit(
+    institution_id: int,
+    family_id: int,
+    session: Session,
+    payload: VisitationCreate,
+):
+    institution = await get_institution_or_404(session, institution_id)
+    family = await get_family_or_404(session, family_id, institution_id)
+
+    visit = InstitutionVisitation(
+        institution_id=institution.id,
+        account_id=payload.account_id,
+        visit_at=payload.visit_at,
+        description=payload.description,
+        type_of_visit=InstitutionVisitationType(payload.type_of_visit),
+    )
+    
+    session.add(visit)
+    await session.commit()
+    await session.refresh(visit)
+
+    return VisitationResp.model_validate(visit)
+
+@router.get("/{institution_id}/visits", status_code=200, response_model=List[VisitationResp])
+async def list_institution_visits(
+    institution_id: int,
+    session: Session,
+):
+    institution = await get_institution_or_404(session, institution_id)
+
+    query = select(InstitutionVisitation).where(
+        InstitutionVisitation.institution_id == institution.id
+    ).order_by(InstitutionVisitation.visit_at.desc())
+
+    result = await session.execute(query)
+    visits = result.scalars().all()
+
+    visit_ids = [v.id for v in visits]
+    if visit_ids:
+        responses_query = select(InstitutionVisitationResult).where(
+            InstitutionVisitationResult.visitation_id.in_(visit_ids)
+        )
+        responses_result = await session.execute(responses_query)
+        responses = responses_result.scalars().all()
+        responses_dict = {r.visitation_id: r for r in responses}
+    else:
+        responses_dict = {}
+
+    visits_data = []
+    for v in visits:
+        response_data = None
+        if v.id in responses_dict:
+            r = responses_dict[v.id]
+            response_data = VisitationResponseReturn(
+                visitation_id=r.visitation_id,
+                description=r.description,
+                status=r.status.value
+            )
+        visit_resp = VisitationResp(
+            id=v.id,
+            active=v.active,
+            created=v.created,
+            institution_id=v.institution_id,
+            account_id=v.account_id,
+            visit_at=v.visit_at,
+            description=v.description,
+            type_of_visit=v.type_of_visit.value,
+            response=response_data
+        )
+        visits_data.append(visit_resp)
+
+    return visits_data
+
+
+@router.post("/{institution_id}/visit/{family_id}/response", status_code=200, response_model=VisitationResponseReturn)
+async def create_visit_response(
+    institution_id: int,
+    family_id: int,
+    session: Session,
+    payload: VisitationCreateReturn,
+):
+    
+    institution = await get_institution_or_404(session, institution_id)
+    family = await get_family_or_404(session, family_id, institution_id)
+
+    query = select(InstitutionVisitation).where(
+        InstitutionVisitation.id == payload.visitation_id,
+        InstitutionVisitation.institution_id == institution_id
+    )
+    result = await session.execute(query)
+    visitation = result.scalar_one_or_none()
+
+    if visitation is None:
+        raise NotFoundError(detail=f"Visitation with id {payload.visitation_id} not found in this institution")
+
+    try:
+        result_obj = InstitutionVisitationResult(
+            visitation_id=payload.visitation_id,
+            description=payload.description,
+            status=InstitutionVisitationResultType(payload.status.upper())
+        )
+
+        session.add(result_obj)
+        await session.commit()
+        await session.refresh(result_obj)
+
+        return VisitationResponseReturn(
+            visitation_id=result_obj.visitation_id,
+            description=result_obj.description,
+            status=result_obj.status.value
+        )
+    except IntegrityError as e:
+        await session.rollback()
+        raise DuplicatedError(detail="A response for this visitation already exists")
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+

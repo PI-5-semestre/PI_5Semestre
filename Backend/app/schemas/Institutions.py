@@ -96,3 +96,37 @@ class UserCorporateResp(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     user: UserResp
+    
+class VisitationCreate(BaseModel):
+    account_id: int
+    visit_at: str
+    description: Optional[str] = None
+    type_of_visit: str
+    
+class VisitationCreateReturn(BaseModel):
+    visitation_id: int
+    description: str
+    status: str
+    
+class VisitationResponseReturn(BaseModel):
+    visitation_id: int
+    description: str
+    status: str
+    
+class VisitationUpdate(BaseModel):
+    visit_at: Optional[str] = None
+    description: Optional[str] = None
+    type_of_visit: Optional[str] = None
+    
+class VisitationResp(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    active: bool
+    created: datetime
+    institution_id: int
+    account_id: int
+    visit_at: str
+    description: Optional[str] = None
+    type_of_visit: str
+    response: Optional[VisitationResponseReturn] = None
