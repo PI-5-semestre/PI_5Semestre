@@ -15,7 +15,7 @@ class StockRepositoryImpl implements StockRepository {
   Future<bool> add(StockModel stock, String token) async {
     try {
       var response = await dio.post(
-        '/institutions/1/stock',
+        '/institutions/${stock.institution_id}/stock',
         data: stock.toJson(),
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -29,10 +29,10 @@ class StockRepositoryImpl implements StockRepository {
   }
 
   @override
-  Future<bool> delete(String sku, String token) async {
+  Future<bool> delete(StockModel stock, String token) async {
     try {
       final response = await dio.delete(
-        '/institutions/1/stock/$sku',
+        '/institutions/${stock.institution_id}/stock/${stock.sku}',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
@@ -64,7 +64,7 @@ class StockRepositoryImpl implements StockRepository {
       final stockJson = stock.toJson();
 
       final response = await dio.put(
-        '/institutions/1/families/${stockJson['sku']}',
+        '/institutions/${stock.institution_id}/families/${stockJson['sku']}',
         data: stockJson,
         options: Options(
           headers: {
