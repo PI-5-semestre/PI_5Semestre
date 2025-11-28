@@ -1051,10 +1051,11 @@ async def create_institution_visit(
     family = await get_family_or_404(session, family_id, institution_id)
 
     visit = InstitutionVisitation(
+        family_id=family.id,
         institution_id=institution.id,
         account_id=payload.account_id,
         visit_at=payload.visit_at,
-        description=payload.description,
+        description=payload.description,    
         type_of_visit=InstitutionVisitationType(payload.type_of_visit),
     )
     
@@ -1071,7 +1072,7 @@ async def list_institution_visits(
 ):
     institution = await get_institution_or_404(session, institution_id)
 
-    query = select(InstitutionVisitation).where(
+    query = select(InstitutionVisitation).options(selectinload(InstitutionVisitation.family)).where(
         InstitutionVisitation.institution_id == institution.id
     ).order_by(InstitutionVisitation.visit_at.desc())
 
@@ -1105,10 +1106,12 @@ async def list_institution_visits(
             created=v.created,
             institution_id=v.institution_id,
             account_id=v.account_id,
+            family_id=v.family_id,
             visit_at=v.visit_at,
             description=v.description,
             type_of_visit=v.type_of_visit.value,
-            response=response_data
+            response=response_data,
+            family=FamilyResp.model_validate(v.family) if v.family else None
         )
         visits_data.append(visit_resp)
 

@@ -66,7 +66,7 @@ class BasketsInstitutions(BaseModel):
     __tablename__ = "baskets_institutions"
 
     institution_id: Mapped[int] = mapped_column(
-        nullable=False
+        ForeignKey("institutions.id", ondelete="CASCADE"), nullable=False, index=True
     )
     
     family_id: Mapped[int] = mapped_column(
@@ -125,6 +125,11 @@ class InstitutionVisitation(BaseModel):
     account_id: Mapped[int] = mapped_column(
         ForeignKey("accounts.id", ondelete="CASCADE"), nullable=False, index=True
     )
+    
+    family_id: Mapped[int] = mapped_column(
+        ForeignKey("account_families.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    
     visit_at: Mapped[str] = mapped_column(
         String(25), nullable=False
     )
@@ -136,8 +141,10 @@ class InstitutionVisitation(BaseModel):
         Enum(InstitutionVisitationType, native_enum=False), nullable=False
     )
     
+    family: Mapped["Family"] = relationship("Family")
+    
     def __repr__(self):
-        return f"<InstitutionView(id={self.id}, name='{self.name}', type='{self.institution_type.value}')>"
+        return f"<InstitutionVisitation(id={self.id}, institution_id={self.institution_id}, family_id={self.family_id})>"
     
 class InstitutionVisitationResult(BaseModel):
     __tablename__ = "institution_visitation_results"

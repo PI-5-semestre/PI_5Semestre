@@ -126,7 +126,9 @@ class VisitationResp(BaseModel):
     created: datetime
     institution_id: int
     account_id: int
+    family_id: Optional[int]
     visit_at: str
     description: Optional[str] = None
     type_of_visit: str
     response: Optional[VisitationResponseReturn] = None
+    family: Optional["FamilyResp"] = None
