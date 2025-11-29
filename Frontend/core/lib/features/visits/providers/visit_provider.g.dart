@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'family_provider.dart';
+part of 'visit_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,52 +9,52 @@ part of 'family_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(FamilyController)
-const familyControllerProvider = FamilyControllerProvider._();
+@ProviderFor(VisitController)
+const visitControllerProvider = VisitControllerProvider._();
 
-final class FamilyControllerProvider
-    extends $NotifierProvider<FamilyController, FamilyState> {
-  const FamilyControllerProvider._()
+final class VisitControllerProvider
+    extends $NotifierProvider<VisitController, VisitState> {
+  const VisitControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'familyControllerProvider',
+        name: r'visitControllerProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$familyControllerHash();
+  String debugGetCreateSourceHash() => _$visitControllerHash();
 
   @$internal
   @override
-  FamilyController create() => FamilyController();
+  VisitController create() => VisitController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(FamilyState value) {
+  Override overrideWithValue(VisitState value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<FamilyState>(value),
+      providerOverride: $SyncValueProvider<VisitState>(value),
     );
   }
 }
 
-String _$familyControllerHash() => r'f3941f2dddcddf95c831273a3578f2416ba8e15f';
+String _$visitControllerHash() => r'ffe6aa5f1adc8763d440bca07da0a1f661365104';
 
-abstract class _$FamilyController extends $Notifier<FamilyState> {
-  FamilyState build();
+abstract class _$VisitController extends $Notifier<VisitState> {
+  VisitState build();
   @$mustCallSuper
   @override
   void runBuild() {
     final created = build();
-    final ref = this.ref as $Ref<FamilyState, FamilyState>;
+    final ref = this.ref as $Ref<VisitState, VisitState>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<FamilyState, FamilyState>,
-              FamilyState,
+              AnyNotifier<VisitState, VisitState>,
+              VisitState,
               Object?,
               Object?
             >;
