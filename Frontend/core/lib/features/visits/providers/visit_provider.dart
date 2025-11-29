@@ -25,10 +25,9 @@ class VisitController extends _$VisitController {
 
       final onlyActive = data.where((v) {
         final activeVisit = v.active == true;
-        // final isTodayDelivery = _isToday(DateTime.parse(v.visit_at));
+        final isTodayDelivery = _isToday(DateTime.parse(v.visit_at));
 
-        // return activeVisit && isTodayDelivery;
-        return activeVisit;
+        return activeVisit && isTodayDelivery;
       }).toList();
 
       state = state.copyWith(

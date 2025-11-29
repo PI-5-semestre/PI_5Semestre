@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$VisitState {
 
- List<Visit> get visities; List<Visit> get filtered; String? get filterRole; bool get isLoading; int? get selectedIndex; String? get error;
+ List<Visit> get visities; List<Visit> get filtered; String? get filterRole; bool get isLoading; String? get error;
 /// Create a copy of VisitState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $VisitStateCopyWith<VisitState> get copyWith => _$VisitStateCopyWithImpl<VisitSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitState&&const DeepCollectionEquality().equals(other.visities, visities)&&const DeepCollectionEquality().equals(other.filtered, filtered)&&(identical(other.filterRole, filterRole) || other.filterRole == filterRole)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.selectedIndex, selectedIndex) || other.selectedIndex == selectedIndex)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VisitState&&const DeepCollectionEquality().equals(other.visities, visities)&&const DeepCollectionEquality().equals(other.filtered, filtered)&&(identical(other.filterRole, filterRole) || other.filterRole == filterRole)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(visities),const DeepCollectionEquality().hash(filtered),filterRole,isLoading,selectedIndex,error);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(visities),const DeepCollectionEquality().hash(filtered),filterRole,isLoading,error);
 
 @override
 String toString() {
-  return 'VisitState(visities: $visities, filtered: $filtered, filterRole: $filterRole, isLoading: $isLoading, selectedIndex: $selectedIndex, error: $error)';
+  return 'VisitState(visities: $visities, filtered: $filtered, filterRole: $filterRole, isLoading: $isLoading, error: $error)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $VisitStateCopyWith<$Res>  {
   factory $VisitStateCopyWith(VisitState value, $Res Function(VisitState) _then) = _$VisitStateCopyWithImpl;
 @useResult
 $Res call({
- List<Visit> visities, List<Visit> filtered, String? filterRole, bool isLoading, int? selectedIndex, String? error
+ List<Visit> visities, List<Visit> filtered, String? filterRole, bool isLoading, String? error
 });
 
 
@@ -62,14 +62,13 @@ class _$VisitStateCopyWithImpl<$Res>
 
 /// Create a copy of VisitState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? visities = null,Object? filtered = null,Object? filterRole = freezed,Object? isLoading = null,Object? selectedIndex = freezed,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? visities = null,Object? filtered = null,Object? filterRole = freezed,Object? isLoading = null,Object? error = freezed,}) {
   return _then(_self.copyWith(
 visities: null == visities ? _self.visities : visities // ignore: cast_nullable_to_non_nullable
 as List<Visit>,filtered: null == filtered ? _self.filtered : filtered // ignore: cast_nullable_to_non_nullable
 as List<Visit>,filterRole: freezed == filterRole ? _self.filterRole : filterRole // ignore: cast_nullable_to_non_nullable
 as String?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
-as bool,selectedIndex: freezed == selectedIndex ? _self.selectedIndex : selectedIndex // ignore: cast_nullable_to_non_nullable
-as int?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -155,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Visit> visities,  List<Visit> filtered,  String? filterRole,  bool isLoading,  int? selectedIndex,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Visit> visities,  List<Visit> filtered,  String? filterRole,  bool isLoading,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VisitState() when $default != null:
-return $default(_that.visities,_that.filtered,_that.filterRole,_that.isLoading,_that.selectedIndex,_that.error);case _:
+return $default(_that.visities,_that.filtered,_that.filterRole,_that.isLoading,_that.error);case _:
   return orElse();
 
 }
@@ -176,10 +175,10 @@ return $default(_that.visities,_that.filtered,_that.filterRole,_that.isLoading,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Visit> visities,  List<Visit> filtered,  String? filterRole,  bool isLoading,  int? selectedIndex,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Visit> visities,  List<Visit> filtered,  String? filterRole,  bool isLoading,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _VisitState():
-return $default(_that.visities,_that.filtered,_that.filterRole,_that.isLoading,_that.selectedIndex,_that.error);case _:
+return $default(_that.visities,_that.filtered,_that.filterRole,_that.isLoading,_that.error);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +195,10 @@ return $default(_that.visities,_that.filtered,_that.filterRole,_that.isLoading,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Visit> visities,  List<Visit> filtered,  String? filterRole,  bool isLoading,  int? selectedIndex,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Visit> visities,  List<Visit> filtered,  String? filterRole,  bool isLoading,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _VisitState() when $default != null:
-return $default(_that.visities,_that.filtered,_that.filterRole,_that.isLoading,_that.selectedIndex,_that.error);case _:
+return $default(_that.visities,_that.filtered,_that.filterRole,_that.isLoading,_that.error);case _:
   return null;
 
 }
@@ -211,7 +210,7 @@ return $default(_that.visities,_that.filtered,_that.filterRole,_that.isLoading,_
 
 
 class _VisitState implements VisitState {
-  const _VisitState({final  List<Visit> visities = const [], final  List<Visit> filtered = const [], this.filterRole = null, this.isLoading = false, this.selectedIndex, this.error}): _visities = visities,_filtered = filtered;
+  const _VisitState({final  List<Visit> visities = const [], final  List<Visit> filtered = const [], this.filterRole = null, this.isLoading = false, this.error}): _visities = visities,_filtered = filtered;
   
 
  final  List<Visit> _visities;
@@ -230,7 +229,6 @@ class _VisitState implements VisitState {
 
 @override@JsonKey() final  String? filterRole;
 @override@JsonKey() final  bool isLoading;
-@override final  int? selectedIndex;
 @override final  String? error;
 
 /// Create a copy of VisitState
@@ -243,16 +241,16 @@ _$VisitStateCopyWith<_VisitState> get copyWith => __$VisitStateCopyWithImpl<_Vis
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VisitState&&const DeepCollectionEquality().equals(other._visities, _visities)&&const DeepCollectionEquality().equals(other._filtered, _filtered)&&(identical(other.filterRole, filterRole) || other.filterRole == filterRole)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.selectedIndex, selectedIndex) || other.selectedIndex == selectedIndex)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VisitState&&const DeepCollectionEquality().equals(other._visities, _visities)&&const DeepCollectionEquality().equals(other._filtered, _filtered)&&(identical(other.filterRole, filterRole) || other.filterRole == filterRole)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_visities),const DeepCollectionEquality().hash(_filtered),filterRole,isLoading,selectedIndex,error);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_visities),const DeepCollectionEquality().hash(_filtered),filterRole,isLoading,error);
 
 @override
 String toString() {
-  return 'VisitState(visities: $visities, filtered: $filtered, filterRole: $filterRole, isLoading: $isLoading, selectedIndex: $selectedIndex, error: $error)';
+  return 'VisitState(visities: $visities, filtered: $filtered, filterRole: $filterRole, isLoading: $isLoading, error: $error)';
 }
 
 
@@ -263,7 +261,7 @@ abstract mixin class _$VisitStateCopyWith<$Res> implements $VisitStateCopyWith<$
   factory _$VisitStateCopyWith(_VisitState value, $Res Function(_VisitState) _then) = __$VisitStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<Visit> visities, List<Visit> filtered, String? filterRole, bool isLoading, int? selectedIndex, String? error
+ List<Visit> visities, List<Visit> filtered, String? filterRole, bool isLoading, String? error
 });
 
 
@@ -280,14 +278,13 @@ class __$VisitStateCopyWithImpl<$Res>
 
 /// Create a copy of VisitState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? visities = null,Object? filtered = null,Object? filterRole = freezed,Object? isLoading = null,Object? selectedIndex = freezed,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? visities = null,Object? filtered = null,Object? filterRole = freezed,Object? isLoading = null,Object? error = freezed,}) {
   return _then(_VisitState(
 visities: null == visities ? _self._visities : visities // ignore: cast_nullable_to_non_nullable
 as List<Visit>,filtered: null == filtered ? _self._filtered : filtered // ignore: cast_nullable_to_non_nullable
 as List<Visit>,filterRole: freezed == filterRole ? _self.filterRole : filterRole // ignore: cast_nullable_to_non_nullable
 as String?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
-as bool,selectedIndex: freezed == selectedIndex ? _self.selectedIndex : selectedIndex // ignore: cast_nullable_to_non_nullable
-as int?,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
