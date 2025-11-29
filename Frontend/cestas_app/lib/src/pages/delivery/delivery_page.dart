@@ -44,60 +44,69 @@ class _DeliveryPageState extends ConsumerState<DeliveryPage> {
     }
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16),
-        child: ListView(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildCardHeader(),
-                const SizedBox(height: 16),
-                _buildTodayLabel(context, theme),
-                const SizedBox(height: 16),
-                _buildSearchField(ref),
-                const SizedBox(height: 5),
-                if (deliveryState.isLoading)
-                  Row(
-                    children: [
-                      Expanded(child: StatCardSkeleton())
-                    ],
-                  )
-                else
-                  SegmentedCardSwitcher(
-                    options: _buildStatusCards(deliveryState.deliveries),
-                    icons: icons,
-                    onTap: (index) {
-                      switch (index) {
-                        case 0:
-                          controller.filterByRole(null);
-                        case 1:
-                          controller.filterByRole("PENDING");
-                        case 2:
-                          controller.filterByRole("COMPLETED");
-                      }
-                    },
-                  ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _buildDeliveryHeader(theme),
-            if (deliveryState.isLoading && deliveryState.deliveries.isEmpty)
-              const Padding(
-                padding: 
-                  EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  child:  Center(child: TeamCardSkeleton())
-              )
-            else
+      body: RefreshIndicator(
+        onRefresh: () async {
+          controller.fetchDeliverys();
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          child: ListView(
+            children: [
               Column(
-                children: deliveryState.filtered.map((delivery) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                    child: DeliveryCard(delivery: delivery),
-                  );
-                }).toList(),
-              )
-          ],
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildCardHeader(),
+                  const SizedBox(height: 16),
+                  _buildTodayLabel(context, theme),
+                  const SizedBox(height: 16),
+                  _buildSearchField(ref),
+                  const SizedBox(height: 5),
+                  if (deliveryState.isLoading)
+                    Row(
+                      children: [
+                        Expanded(child: StatCardSkeleton())
+                      ],
+                    )
+                  else
+                    SegmentedCardSwitcher(
+                      options: _buildStatusCards(deliveryState.deliveries),
+                      icons: icons,
+                      onTap: (index) {
+                        switch (index) {
+                          case 0:
+                            controller.filterByRole(null);
+                          case 1:
+                            controller.filterByRole("PENDING");
+                          case 2:
+                            controller.filterByRole("COMPLETED");
+                        }
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              _buildDeliveryHeader(theme),
+              if (deliveryState.isLoading)
+                Column(
+                  children: List.generate(
+                    4,
+                    (_) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                      child: Center(child: TeamCardSkeleton()),
+                    )
+                  ),
+                )
+              else
+                Column(
+                  children: deliveryState.filtered.map((delivery) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                      child: DeliveryCard(delivery: delivery),
+                    );
+                  }).toList(),
+                )
+            ],
+          ),
         ),
       ),
     );
