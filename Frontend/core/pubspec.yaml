@@ -25,6 +25,7 @@ dependencies:
   shared_preferences: ^2.5.3
   shimmer: ^3.0.0
   url_launcher: ^6.3.2
+  validatorless: ^1.2.5
 
 dev_dependencies:
   flutter_test:

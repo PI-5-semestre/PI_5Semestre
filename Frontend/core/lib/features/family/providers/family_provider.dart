@@ -120,6 +120,7 @@ class FamilyController extends _$FamilyController {
         docType: docType,
         filePath: filePath,
       );
+      await fetchDocuments(cpf);
       await fetchFamilies();
     } catch (e) {
       final msg = e.toString().replaceFirst("Exception: ", "");

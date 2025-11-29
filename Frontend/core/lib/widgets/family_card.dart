@@ -1,5 +1,6 @@
 import 'package:core/features/family/data/models/family_model.dart';
 import 'package:core/features/family/providers/family_provider.dart';
+import 'package:core/widgets/forms/new_visit_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -219,123 +220,124 @@ class FamilyCard extends ConsumerWidget {
                                       ),
                                     ),
                                   ),
-ListTile(
-  leading: const Icon(Icons.attachment),
-  title: Text(
-    'Comprovantes de Residência',
-    style: TextStyle(
-      fontSize: 14,
-      color: theme.colorScheme.outline
-    ),
-  ),
-  subtitle: Consumer(
-    builder: (context, ref, child) {
-      final state = ref.watch(familyControllerProvider);
-      final documents = state.documentsByCpf[family.cpf];
+                                  ListTile(
+                                    leading: const Icon(Icons.attachment),
+                                    title: Text(
+                                      'Comprovantes de Residência',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: theme.colorScheme.outline
+                                      ),
+                                    ),
+                                    subtitle: Consumer(
+                                      builder: (context, ref, child) {
+                                        final state = ref.watch(familyControllerProvider);
+                                        final documents = state.documentsByCpf[family.cpf];
 
-      // Busca os documentos quando abrir
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (documents == null && !state.isLoading) {
-          ref.read(familyControllerProvider.notifier).fetchDocuments(family.cpf);
-        }
-      });
+                                        // Busca os documentos quando abrir
+                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                          if (documents == null && !state.isLoading) {
+                                            ref.read(familyControllerProvider.notifier).fetchDocuments(family.cpf);
+                                          }
+                                        });
 
-      // Loading inicial
-      if (state.isLoading && documents == null) {
-        return const Padding(
-          padding: EdgeInsets.only(top: 4),
-          child: Text("Carregando..."),
-        );
-      }
+                                        // Loading inicial
+                                        if (state.isLoading && documents == null) {
+                                          return const Padding(
+                                            padding: EdgeInsets.only(top: 4),
+                                            child: Text("Carregando..."),
+                                          );
+                                        }
 
-      // Sem documentos
-      if (documents == null || documents.isEmpty) {
-        return const Padding(
-          padding: EdgeInsets.only(top: 4),
-          child: Text("Nenhum comprovante enviado"),
-        );
-      }
+                                        // Sem documentos
+                                        if (documents == null || documents.isEmpty) {
+                                          return const Padding(
+                                            padding: EdgeInsets.only(top: 4),
+                                            child: Text("Nenhum comprovante enviado"),
+                                          );
+                                        }
 
-      // Lista de documentos
-      return Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: documents.map((doc) {
-            final filename = doc['file_name'] ?? 'Arquivo sem nome';
-            final type = doc['mime_type']?.toString().toLowerCase() ?? '';
-            final id = doc['id'];
+                                        // Lista de documentos
+                                        return Padding(
+                                          padding: const EdgeInsets.only(top: 4),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: documents.map((doc) {
+                                              final filename = doc['file_name'] ?? 'Arquivo sem nome';
+                                              final type = doc['mime_type']?.toString().toLowerCase() ?? '';
+                                              final id = doc['id'];
 
-            IconData icon;
-            Color iconColor;
+                                              IconData icon;
+                                              Color iconColor;
 
-            if (type.contains('pdf')) {
-              icon = Icons.picture_as_pdf;
-              iconColor = Colors.red;
-            } else if (type.contains('image')) {
-              icon = Icons.image;
-              iconColor = Colors.green;
-            } else {
-              icon = Icons.insert_drive_file;
-              iconColor = Colors.blue;
-            }
+                                              if (type.contains('pdf')) {
+                                                icon = Icons.picture_as_pdf;
+                                                iconColor = Colors.red;
+                                              } else if (type.contains('image')) {
+                                                icon = Icons.image;
+                                                iconColor = Colors.green;
+                                              } else {
+                                                icon = Icons.insert_drive_file;
+                                                iconColor = Colors.blue;
+                                              }
 
-            return Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(6),
-                onTap: () {
-                  ref.read(familyControllerProvider.notifier)
-                    .downloadDocument(family.cpf, id);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(8), // 👈 Aqui
-                  child: Row(
-                    children: [
-                      // Ícone do tipo
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: iconColor.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Icon(icon, size: 18, color: iconColor),
-                      ),
+                                              return Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  onTap: () {
+                                                    ref.read(familyControllerProvider.notifier)
+                                                      .downloadDocument(family.cpf, id);
+                                                  },
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(8), // 👈 Aqui
+                                                    child: Row(
+                                                      children: [
+                                                        // Ícone do tipo
+                                                        Container(
+                                                          padding: const EdgeInsets.all(6),
+                                                          decoration: BoxDecoration(
+                                                            color: iconColor.withValues(alpha: 0.12),
+                                                            borderRadius: BorderRadius.circular(6),
+                                                          ),
+                                                          child: Icon(icon, size: 18, color: iconColor),
+                                                        ),
 
-                      const SizedBox(width: 10),
+                                                        const SizedBox(width: 10),
 
-                      Expanded(
-                        child: Text(
-                          filename,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                                                        Expanded(
+                                                          child: Text(
+                                                            filename,
+                                                            style: const TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight: FontWeight.w500,
+                                                            ),
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                        ),
 
-                      Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: state.currentDownloadId == id
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const SizedBox(width: 18), // garantindo alinhamento
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      );
-    },
-  ),
-),                                  // TODO: Recomendação não está no modelo
+                                                        Padding(
+                                                          padding: const EdgeInsets.only(right: 6),
+                                                          child: state.currentDownloadId == id
+                                                              ? const SizedBox(
+                                                                  width: 18,
+                                                                  height: 18,
+                                                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                                                )
+                                                              : const SizedBox(width: 18), // garantindo alinhamento
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            }).toList(),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),                                  
+                                  // TODO: Recomendação não está no modelo
                                   // ListTile(
                                   //   leading: const Icon(Icons.star),
                                   //   title: const Text('Recomendação'),
@@ -494,10 +496,20 @@ ListTile(
               if (family.roleSituation == "Pendente")
                 FloatingActionButton.small(
                   heroTag: "calendar_${family.id}",
-                  onPressed: () {},
                   elevation: 1,
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                        ),
+                        builder: (_) => NewVisitForm(family_id: family.id ?? 0,),
+                      );
+                    },
                   child: const Icon(Icons.calendar_today),
-                ),
+                )
             ],
           ),
         ),
