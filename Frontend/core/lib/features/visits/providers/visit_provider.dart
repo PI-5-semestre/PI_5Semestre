@@ -10,11 +10,27 @@ class VisitController extends _$VisitController {
   @override
   VisitState build() => VisitState();
 
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    final normalizedNow = DateTime(now.year, now.month, now.day);
+    
+    return normalizedDate == normalizedNow;
+  }
+
   Future<void> fetchVisits() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final data = await ref.read(visitRepositoryProvider).fetchVisits();
-      final onlyActive = data.where((v) => v.active!).toList();
+
+      final onlyActive = data.where((v) {
+        final activeVisit = v.active == true;
+        // final isTodayDelivery = _isToday(DateTime.parse(v.visit_at));
+
+        // return activeVisit && isTodayDelivery;
+        return activeVisit;
+      }).toList();
+
       state = state.copyWith(
         visities: onlyActive,
         filtered: onlyActive,
@@ -37,30 +53,8 @@ class VisitController extends _$VisitController {
   }
 
   void filterByRole(String? role) {
-    int index = 0;
-
-    // Determina o índice da aba
-    switch (role) {
-      case null:
-        index = 0;
-        break;
-      case 'ACCEPTED':
-        index = 1;
-        break;
-      case 'PENDING':
-        index = 2;
-        break;
-      case 'REJECTED':
-        index = 3;
-        break;
-    }
-
     if (role == null) {
-      state = state.copyWith(
-        filtered: state.visities,
-        filterRole: null,
-        selectedIndex: index,
-      );
+      state = state.copyWith(filtered: state.visities, filterRole: null);
       return;
     }
 
@@ -72,11 +66,7 @@ class VisitController extends _$VisitController {
           : status == role;
     }).toList();
 
-    state = state.copyWith(
-      filtered: list,
-      filterRole: role,
-      selectedIndex: index,
-    );
+    state = state.copyWith(filtered: list, filterRole: role);
   }
 
 

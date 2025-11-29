@@ -6,7 +6,6 @@ import 'package:core/widgets2/skeleton/stat_card_skeleton.dart';
 import 'package:core/widgets2/skeleton/team_card_skeleton.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class VisitsPage extends ConsumerStatefulWidget {
@@ -92,8 +91,7 @@ class _VisitsPageState extends ConsumerState<VisitsPage>  {
                     children: [
                       _buildCardHeader(), 
                       const SizedBox(height: 16),
-                      if (visitState.filterRole == 'PENDING')
-                        _buildTodayLabel(context, theme), 
+                      _buildTodayLabel(context, theme), 
                       const SizedBox(height: 16),
                       _buildSearchField(ref),
                       const SizedBox(height: 5),
@@ -232,7 +230,7 @@ class _VisitsPageState extends ConsumerState<VisitsPage>  {
 
             // Texto principal
             const Text(
-              "Entregas de Hoje",
+              "Visitas de Hoje",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 17,
