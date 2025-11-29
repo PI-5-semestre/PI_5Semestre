@@ -10,7 +10,6 @@ abstract class VisitState with _$VisitState {
     @Default([]) List<Visit> filtered,
     @Default(null) String? filterRole,
     @Default(false) bool isLoading,
-    int? selectedIndex,
     String? error,
 
   }) = _VisitState;

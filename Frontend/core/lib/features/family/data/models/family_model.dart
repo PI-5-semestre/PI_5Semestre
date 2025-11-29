@@ -54,10 +54,6 @@ abstract class FamilyModel with _$FamilyModel {
         return "Recebendo";
       case "PENDING":
         return "Aguardando";
-      case "INACTIVE":
-        return "Não Recebendo";
-      case "SUSPENDED":
-        return "Suspensa";
       default:
         return "Desconhecido";
     }

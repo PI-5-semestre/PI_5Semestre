@@ -61,6 +61,23 @@ class DeliveryRepositoryImpl implements DeliveryRepository {
       throw Exception(message);
     }
   }
+  
+  @override
+  Future<bool> createDelivery(Map<String, dynamic> delivery, String token) async {
+    try {
+      final response = await dio.post(
+        '/institutions/1/deliveries',
+        data: delivery,
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'}
+        )
+      );
+      return response.statusCode == 201;
+    } on DioException catch (e) {
+      final message = e.response?.data['detail']?.toString() ?? 'Erro Inesperado';
+      throw Exception(message);
+    }
+  }
 }
 
 @riverpod

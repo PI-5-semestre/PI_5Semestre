@@ -1,3 +1,5 @@
+import 'package:core/features/family/data/models/family_model.dart';
+import 'package:core/features/family/providers/family_provider.dart';
 import 'package:core/features/visits/data/models/visits.dart';
 import 'package:core/features/visits/providers/visit_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,9 +21,10 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
 
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
-  final visitationController = TextEditingController();
   final descriptionController = TextEditingController();
   final statusController = TextEditingController();
+
+  bool isProcessing = false;
 
   @override
   void initState() {
@@ -32,9 +35,9 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
     });
 
     final v = widget.visit;
-
     nameController.text = v.family!.name;
     phoneController.text = v.family!.mobile_phone;
+    statusController.text = v.response?.status ?? "PENDING";
   }
 
   @override
@@ -43,15 +46,23 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
     phoneController.dispose();
     statusController.dispose();
     descriptionController.dispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final visitState = ref.watch(visitControllerProvider);
-    final controller = ref.watch(visitControllerProvider.notifier);
+    final visitController = ref.watch(visitControllerProvider.notifier);
+
+    final familyState = ref.watch(familyControllerProvider);
+    final familyController = ref.watch(familyControllerProvider.notifier);
+
+    final theme = Theme.of(context);
+
+    final isBtnDisabled = isProcessing ||
+        visitState.isLoading ||
+        familyState.isLoading ||
+        statusController.text.trim() == "PENDING";
 
     return Scaffold(
       appBar: AppBar(),
@@ -64,33 +75,44 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
               _buildCardHeader(),
 
               _buildSection(
-                title: "Informações de Visitas",
+                title: "Informações da Visita",
                 icon: Icons.person,
                 children: [
                   _buildTextField(
-                    "Nome *",
+                    "Nome",
                     controller: nameController,
-                    readOnly: true
+                    readOnly: true,
                   ),
                   _buildTextField(
                     "Telefone",
                     controller: phoneController,
-                    readOnly: true
+                    readOnly: true,
                   ),
-                  _buildTextField("Observações",
+                  _buildTextField(
+                    "Observações",
                     controller: descriptionController,
                     maxLines: 3,
                   ),
+
                   DropdownButtonFormField<String>(
-                    initialValue: widget.visit.response?.status ?? 'PENDING',
+                    value: statusController.text,
                     items: const [
-                      DropdownMenuItem(value: "ACCEPTED", child: Text("Aprovada")),
-                      DropdownMenuItem(value: "REJECTED", child: Text("Reprovada")),
-                      DropdownMenuItem(value: "PENDING", child: Text("Agendada")),
+                      DropdownMenuItem(
+                        value: "ACCEPTED",
+                        child: Text("Aprovada"),
+                      ),
+                      DropdownMenuItem(
+                        value: "REJECTED",
+                        child: Text("Reprovada"),
+                      ),
+                      DropdownMenuItem(
+                        value: "PENDING",
+                        child: Text("Agendada"),
+                      ),
                     ],
                     onChanged: (v) {
-                      setState(() {});
                       statusController.text = v ?? '';
+                      setState(() {});
                     },
                     validator: Validatorless.required("Selecione uma opção"),
                     decoration: InputDecoration(
@@ -110,43 +132,67 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: visitState.isLoading || statusController.text.trim() == "PENDING" ? null : () async {
-          if (!_formKey.currentState!.validate()) return;
+        onPressed: isBtnDisabled
+            ? null
+            : () async {
+                if (!_formKey.currentState!.validate()) return;
 
-          final Response resp = Response(
-            visitation_id: widget.visit.id,
-            description: descriptionController.text.trim(),
-            status: statusController.text.trim(),
-          );
+                setState(() => isProcessing = true);
 
-          await controller.createResponseVisit(resp);
+                final resp = Response(
+                  visitation_id: widget.visit.id,
+                  description: descriptionController.text.trim(),
+                  status: statusController.text.trim(),
+                );
 
-          if (visitState.error != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(visitState.error!)),
-            );
-            return;
-          }
+                await visitController.createResponseVisit(resp);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Visita atualizada com sucesso!")),
-          );
+                if (visitState.error != null) {
+                  setState(() => isProcessing = false);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(visitState.error!)),
+                  );
+                  return;
+                }
 
-          if (mounted) context.pop();
-        },
-        child: visitState.isLoading
+                if (statusController.text.trim() == "ACCEPTED") {
+                  final updatedFamily = (widget.visit.family as FamilyModel)
+                      .copyWith(situation: "ACTIVE");
+
+                  await familyController.updateFamily(updatedFamily);
+
+                  if (familyState.error != null) {
+                    setState(() => isProcessing = false);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(familyState.error!)),
+                    );
+                    return;
+                  }
+                }
+
+                setState(() => isProcessing = false);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Visita atualizada com sucesso!"),
+                  ),
+                );
+
+                if (mounted) context.pop();
+              },
+
+        child: isBtnDisabled
             ? const CircularProgressIndicator(color: Colors.white)
             : const Icon(Icons.check),
       ),
     );
   }
 
-  // Reutilizável com validações
   Widget _buildTextField(
     String label, {
     TextEditingController? controller,
-    Function(String)? onChanged,
     String? Function(String?)? validator,
+    Function(String)? onChanged,
     bool readOnly = false,
     int maxLines = 1,
   }) {
@@ -160,18 +206,20 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
         maxLines: maxLines,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildCardHeader() => CardHeader(
-    title: 'Atualizar Agendamento',
-    subtitle: 'Atualiazar avaliação de famílias',
-    colors: const [Color(0xFF2B7FFF), Color(0xFF155DFC)],
-    icon: Icons.calendar_today,
-  );
+        title: 'Atualizar Agendamento',
+        subtitle: 'Atualizar avaliação de família',
+        colors: const [Color(0xFF2B7FFF), Color(0xFF155DFC)],
+        icon: Icons.calendar_today,
+      );
 
   Widget _buildSection({
     required String title,
@@ -186,11 +234,19 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Icon(icon, color: Colors.blue),
-              const SizedBox(width: 8),
-              Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ]),
+            Row(
+              children: [
+                Icon(icon, color: Colors.blue),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
             ...children,
           ],
