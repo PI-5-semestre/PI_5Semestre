@@ -72,74 +72,79 @@ class TeamPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16),
-        child: ListView(
-          children: [
-            Column(
-              children: [
-                _buildCardHeader(),
-                const SizedBox(height: 16),
-                _buildSearchField(ref),
-                const SizedBox(height: 8),
-                if (userState.isLoading)
-                  Row(
-                    children: const [
-                      Expanded(child: StatCardSkeleton()),
-                    ],
-                  )
-                else
-                  SegmentedCardSwitcher(
-                    options: cards,
-                    icons: iconCards,
-                    onTap: (index) {
-                      final controller = ref.read(userControllerProvider.notifier);
-
-                      switch (index) {
-                        case 0:
-                          controller.filterByRole(null);
-                          break;
-                        case 1:
-                          controller.filterByRole("Coordenador");
-                          break;
-                        case 2:
-                          controller.filterByRole("Entregador");
-                          break;
-                        case 3:
-                          controller.filterByRole("Assistente Social");
-                          break;
-                        case 4:
-                          controller.filterByRole("Voluntário");
-                          break;
-                      }
-                    },
-                  ),
-                const SizedBox(height: 20),
-                _buildEquipesHeader(theme),
-
-                if (userState.isLoading && userState.users.isEmpty)
-                  Column(
-                    children: List.generate(
-                      4,
-                      (_) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                        child: const TeamCardSkeleton(),
-                      ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          controller.fetchUsers();
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          child: ListView(
+            children: [
+              Column(
+                children: [
+                  _buildCardHeader(),
+                  const SizedBox(height: 16),
+                  _buildSearchField(ref),
+                  const SizedBox(height: 8),
+                  if (userState.isLoading)
+                    Row(
+                      children: const [
+                        Expanded(child: StatCardSkeleton()),
+                      ],
+                    )
+                  else
+                    SegmentedCardSwitcher(
+                      options: cards,
+                      icons: iconCards,
+                      onTap: (index) {
+                        final controller = ref.read(userControllerProvider.notifier);
+        
+                        switch (index) {
+                          case 0:
+                            controller.filterByRole(null);
+                            break;
+                          case 1:
+                            controller.filterByRole("Coordenador");
+                            break;
+                          case 2:
+                            controller.filterByRole("Entregador");
+                            break;
+                          case 3:
+                            controller.filterByRole("Assistente Social");
+                            break;
+                          case 4:
+                            controller.filterByRole("Voluntário");
+                            break;
+                        }
+                      },
                     ),
-                  )
-                else
-                  // Lista real
-                  Column(
-                    children: userState.filtered.map((account) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                        child: TeamCardModal(account: account),
-                      );
-                    }).toList(),
-                  ),
-              ],
-            ),
-          ],
+                  const SizedBox(height: 20),
+                  _buildEquipesHeader(theme),
+        
+                  if (userState.isLoading)
+                    Column(
+                      children: List.generate(
+                        4,
+                        (_) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                          child: const TeamCardSkeleton(),
+                        ),
+                      ),
+                    )
+                  else
+                    // Lista real
+                    Column(
+                      children: userState.filtered.map((account) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                          child: TeamCardModal(account: account),
+                        );
+                      }).toList(),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

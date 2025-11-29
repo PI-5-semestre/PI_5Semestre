@@ -11,7 +11,7 @@ class TeamCardSkeleton extends StatelessWidget {
     return Card(
       clipBehavior: Clip.hardEdge,
       child: SizedBox(
-        height: 100,
+        height: 80,
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -20,7 +20,6 @@ class TeamCardSkeleton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // ---- Nome (lado esquerdo)
               Expanded(
                 child: Shimmer.fromColors(
                   baseColor: theme.colorScheme.surfaceContainerHighest,
@@ -38,7 +37,6 @@ class TeamCardSkeleton extends StatelessWidget {
 
               const SizedBox(width: 20),
 
-              // ---- Chip skeleton (lado direito)
               Shimmer.fromColors(
                 baseColor: theme.colorScheme.surfaceContainerHighest,
                 highlightColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),

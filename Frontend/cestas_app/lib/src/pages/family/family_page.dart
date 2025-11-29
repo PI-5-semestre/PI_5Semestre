@@ -62,62 +62,72 @@ class _FamilyPageState extends ConsumerState<FamilyPage>  {
     final iconCards = [Icons.groups, Icons.check, Icons.event];
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16),
-        child: ListView(
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildCardHeader(), 
-                    const SizedBox(height: 16),
-                    _buildSearchField(ref),
-                    if (familyState.isLoading)
-                      Row(
-                        children: const [
-                          Expanded(child: StatCardSkeleton())
-                        ],
-                      )
-                    else
-                      SegmentedCardSwitcher(
-                        options: cards, 
-                        icons: iconCards,
-                        onTap: (index) {
-                          switch (index) {
-                            case 0:
-                              controller.filterByRole(null);
-                            case 1:
-                              controller.filterByRole("ACTIVE");
-                            case 2:
-                              controller.filterByRole("PENDING");
-                            default:
-                          }
-                        },
+      body: RefreshIndicator(
+        onRefresh: () async {
+          controller.fetchFamilies();
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          child: ListView(
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildCardHeader(), 
+                      const SizedBox(height: 16),
+                      _buildSearchField(ref),
+                      if (familyState.isLoading)
+                        Row(
+                          children: const [
+                            Expanded(child: StatCardSkeleton())
+                          ],
+                        )
+                      else
+                        SegmentedCardSwitcher(
+                          options: cards, 
+                          icons: iconCards,
+                          onTap: (index) {
+                            switch (index) {
+                              case 0:
+                                controller.filterByRole(null);
+                              case 1:
+                                controller.filterByRole("ACTIVE");
+                              case 2:
+                                controller.filterByRole("PENDING");
+                              default:
+                            }
+                          },
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  _buildfamilyHeader(theme),
+                  if (familyState.isLoading)
+                    Column(
+                      children: List.generate(
+                        4,
+                        (_) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                          child: Center(child: TeamCardSkeleton()),
+                        )
                       ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _buildfamilyHeader(theme),
-                if (familyState.isLoading && familyState.families.isEmpty)
-                  const Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                    child: Center(child: TeamCardSkeleton()),
-                  )
-                else
-                Column(
-                  children: familyState.filtered.map((family) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                      child: FamilyCard(family: family),
-                    );
-                  }).toList(),
-                )
-              ],
-            ),
-          ],
+                    )
+                  else
+                    Column(
+                      children: familyState.filtered.map((family) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                          child: FamilyCard(family: family),
+                        );
+                      }).toList(),
+                    )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

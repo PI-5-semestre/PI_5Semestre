@@ -327,7 +327,7 @@ class DeliveryCard extends ConsumerWidget {
                     _openInGoogleMaps(address);
                   },
                   elevation: 1,
-                  child: const Icon(Icons.send),
+                  child: const Icon(Icons.location_on),
                 ),
             ],
           ),
