@@ -4,7 +4,6 @@ import 'package:core/features/stock/providers/stock_provider.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 class NewStockPage extends ConsumerStatefulWidget {
   const NewStockPage({super.key});
@@ -16,13 +15,13 @@ class NewStockPage extends ConsumerStatefulWidget {
 class _NewStockPageState extends ConsumerState<NewStockPage> {
   final skuController = TextEditingController();
   final nameController = TextEditingController();
-  final quantityController = TextEditingController();
+  // final quantityController = TextEditingController();
 
   @override
   void dispose() {
     skuController.dispose();
     nameController.dispose();
-    quantityController.dispose();
+    // quantityController.dispose();
     super.dispose();
   }
 
@@ -49,15 +48,15 @@ class _NewStockPageState extends ConsumerState<NewStockPage> {
                   title: "Produtos",
                   icon: Icons.shopping_cart_checkout,
                   children: [
-                    _buildTextField("SKU", controller: skuController),
+                    _buildTextField("SKU *", controller: skuController),
                     _buildTextField(
-                      "Nome do produto",
+                      "Nome do produto *",
                       controller: nameController,
                     ),
-                    _buildTextField(
-                      "Quantidade",
-                      controller: quantityController,
-                    ),
+                    // _buildTextField(
+                    //   "Quantidade",
+                    //   controller: quantityController,
+                    // ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -72,6 +71,8 @@ class _NewStockPageState extends ConsumerState<NewStockPage> {
             : const Icon(Icons.check),
         onPressed: () async {
           if (!state.isLoading) {
+            if (!_validateFields()) return;
+
             var institution_id = await ref
                 .read(storageServiceProvider.notifier)
                 .get<String>('institution_id');
@@ -79,7 +80,7 @@ class _NewStockPageState extends ConsumerState<NewStockPage> {
             var stock = StockModel(
               institution_id: int.tryParse(institution_id ?? '') ?? 0,
               name: nameController.text.trim(),
-              quantity: int.tryParse(quantityController.text) ?? 0,
+              // quantity: int.tryParse(quantityController.text) ?? 0,
               sku: skuController.text,
             );
 
@@ -180,5 +181,22 @@ class _NewStockPageState extends ConsumerState<NewStockPage> {
         ),
       ),
     );
+  }
+
+  bool _validateFields() {
+    if (skuController.text.trim().isEmpty ||
+        nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Preencha todos os campos obrigatórios!",
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+    return true;
   }
 }

@@ -1,87 +1,92 @@
+import 'package:core/features/stock/application/stock_state.dart';
 import 'package:core/features/stock/data/models/stock_model.dart';
-import 'package:core/services/state/stock_provider.dart';
+import 'package:core/features/stock/providers/stock_provider.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/card_info.dart';
-import 'package:core/widgets/statCard.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
-class StockPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) {
-        final provider = StockProvider();
-        provider.fetchStocks();
-        return provider;
-      },
-      child: const _StockView(),
-    );
-  }
-}
-
-class _StockView extends StatefulWidget {
-  const _StockView({super.key});
+class StockPage extends ConsumerStatefulWidget {
+  const StockPage({super.key});
 
   @override
-  State<_StockView> createState() => _StockViewState();
+  ConsumerState<StockPage> createState() => _StockPageState();
 }
 
-class _StockViewState extends State<_StockView> {
+class _StockPageState extends ConsumerState<StockPage> {
   static const double _pagePadding = 16;
   static const double _spacing = 16;
-  int itemsToShow = 10;
 
+  int itemsToShow = 10;
   String selectedStatus = "Todos";
   String searchQuery = "";
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = ref.read(stockControllerProvider);
+
+      if (state.stocks.isEmpty && !state.isLoading) {
+        ref.read(stockControllerProvider.notifier).findAll();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<StockProvider>(context);
-    final stocks = provider.data ?? [];
-    final List<StockModel> mockStocks = [
-      StockModel(id: 1, name: "Arroz Tipo 1", sku: "ARZ-001", quantity: 25),
-      StockModel(id: 2, name: "Feijão Carioca", sku: "FEI-002", quantity: 8),
-      StockModel(
-        id: 3,
-        name: "Macarrão Espaguete 500g",
-        sku: "MAC-003",
-        quantity: 40,
-      ),
-      StockModel(
-        id: 4,
-        name: "Óleo de Soja 900ml",
-        sku: "OLE-004",
-        quantity: 12,
-      ),
-      StockModel(
-        id: 5,
-        name: "Açúcar Refinado 1kg",
-        sku: "ACU-005",
-        quantity: 0,
-      ),
-      StockModel(id: 6, name: "Sal Refinado 1kg", sku: "SAL-006", quantity: 18),
-      StockModel(id: 7, name: "Café Torrado 500g", sku: "CAF-007", quantity: 7),
-      StockModel(
-        id: 8,
-        name: "Farinha de Trigo 1kg",
-        sku: "FAR-008",
-        quantity: 32,
-      ),
-      StockModel(
-        id: 9,
-        name: "Molho de Tomate 300g",
-        sku: "MOL-009",
-        quantity: 11,
-      ),
-      StockModel(
-        id: 10,
-        name: "Biscoito Cream Cracker",
-        sku: "BIS-010",
-        quantity: 15,
-      ),
-    ];
+    final state = ref.watch(stockControllerProvider);
+    final controller = ref.read(stockControllerProvider.notifier);
+    final theme = Theme.of(context);
+
+    if (!state.isLoading && state.error != null && state.stocks.isEmpty) {
+      return Center(child: Text("Não foi possível carregar as famílias"));
+    }
+
+    // final List<StockModel> mockStocks = [
+    //   StockModel(id: 1, name: "Arroz Tipo 1", sku: "ARZ-001", quantity: 25),
+    //   StockModel(id: 2, name: "Feijão Carioca", sku: "FEI-002", quantity: 8),
+    //   StockModel(
+    //     id: 3,
+    //     name: "Macarrão Espaguete 500g",
+    //     sku: "MAC-003",
+    //     quantity: 40,
+    //   ),
+    //   StockModel(
+    //     id: 4,
+    //     name: "Óleo de Soja 900ml",
+    //     sku: "OLE-004",
+    //     quantity: 12,
+    //   ),
+    //   StockModel(
+    //     id: 5,
+    //     name: "Açúcar Refinado 1kg",
+    //     sku: "ACU-005",
+    //     quantity: 0,
+    //   ),
+    //   StockModel(id: 6, name: "Sal Refinado 1kg", sku: "SAL-006", quantity: 18),
+    //   StockModel(id: 7, name: "Café Torrado 500g", sku: "CAF-007", quantity: 7),
+    //   StockModel(
+    //     id: 8,
+    //     name: "Farinha de Trigo 1kg",
+    //     sku: "FAR-008",
+    //     quantity: 32,
+    //   ),
+    //   StockModel(
+    //     id: 9,
+    //     name: "Molho de Tomate 300g",
+    //     sku: "MOL-009",
+    //     quantity: 11,
+    //   ),
+    //   StockModel(
+    //     id: 10,
+    //     name: "Biscoito Cream Cracker",
+    //     sku: "BIS-010",
+    //     quantity: 15,
+    //   ),
+    // ];
 
     return Scaffold(
       appBar: AppBar(),
@@ -100,34 +105,34 @@ class _StockViewState extends State<_StockView> {
                 ),
               ),
               const SizedBox(width: _spacing),
-              //_buildButton(context),
             ],
           ),
           const SizedBox(height: _spacing),
+
           InfoCard(
             title: "Estoque Atual",
             color: const Color(0xFF155DFC),
             icon: Icons.today,
             iconColor: Colors.white,
-            iconBackground: Colors.white.withOpacity(0.2),
+            iconBackground: Colors.white54,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                //_buildStatCards(counts),
                 const SizedBox(height: _spacing),
                 Row(children: [Expanded(flex: 2, child: _buildSearchField())]),
                 const SizedBox(height: _spacing),
-                _buildList(mockStocks),
+                _buildList(state.stocks, controller, state),
               ],
             ),
           ),
         ],
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           context.go('/more/stock/new_stock');
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -146,7 +151,11 @@ class _StockViewState extends State<_StockView> {
     );
   }
 
-  Widget _buildList(List<StockModel> stocks) {
+  Widget _buildList(
+    List<StockModel> stocks,
+    StockController controller,
+    StockState state,
+  ) {
     final visibleStocks = stocks.take(itemsToShow).toList();
 
     return Column(
@@ -173,12 +182,15 @@ class _StockViewState extends State<_StockView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          stock.name ?? "",
+                          (stock.name == null || stock.name!.trim().isEmpty)
+                              ? "[Produto não encontrado]"
+                              : stock.name!,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -189,7 +201,9 @@ class _StockViewState extends State<_StockView> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            stock.sku ?? "—",
+                            (stock.sku == null || stock.sku!.trim().isEmpty)
+                                ? "NE — 000"
+                                : stock.sku!,
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.blue,
@@ -209,9 +223,63 @@ class _StockViewState extends State<_StockView> {
                           color: Colors.blue,
                         ),
                         const SizedBox(width: 6),
+
                         Text(
                           "Quantidade: ${stock.quantity}",
                           style: const TextStyle(fontSize: 14),
+                        ),
+                        const Spacer(),
+                        Row(
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                // ação de editar
+                              },
+                              icon: const Icon(Icons.tune_outlined),
+                              color: Colors.blue.shade600,
+                              tooltip: "Editar",
+                            ),
+                            IconButton(
+                              onPressed: () async {
+                                final shouldDelete = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text("Confirmar exclusão"),
+                                      content: Text(
+                                        "Tem certeza que deseja excluir o produto ?",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          child: const Text("Cancelar"),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          child: const Text(
+                                            "Excluir",
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+
+                                if (shouldDelete == true) {
+                                  controller.delete(
+                                    stock,
+                                  ); // <-- agora só exclui se confirmar
+                                }
+                              },
+
+                              icon: const Icon(Icons.delete_forever_rounded),
+                              color: Colors.red.shade400,
+                              tooltip: "Excluir",
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -225,115 +293,11 @@ class _StockViewState extends State<_StockView> {
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  itemsToShow += 5;
-                });
-              },
+              onPressed: () => setState(() => itemsToShow += 5),
               child: const Text("Carregar mais"),
             ),
           ),
       ],
     );
   }
-
-  // Widget _buildTable(List stocks) {
-  //   if (stocks.isEmpty) {
-  //     return const Center(
-  //       child: Padding(
-  //         padding: EdgeInsets.all(32),
-  //         child: Text("Estoque Vazio", style: TextStyle(fontSize: 16)),
-  //       ),
-  //     );
-  //   }
-
-  //   final availableHeight =
-  //       MediaQuery.of(context).size.height - kToolbarHeight - 350;
-
-  //   return ConstrainedBox(
-  //     constraints: BoxConstraints(minHeight: availableHeight),
-  //     child: LayoutBuilder(
-  //       builder: (context, constraints) {
-  //         return SingleChildScrollView(
-  //           scrollDirection: Axis.horizontal,
-  //           child: SizedBox(
-  //             width: constraints.maxWidth,
-  //             child: DataTable(
-  //               columnSpacing: 12,
-  //               headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
-  //               dataRowMinHeight: 48,
-  //               dataRowMaxHeight: 56,
-  //               columns: const [
-  //                 DataColumn(label: Text("SKU")),
-  //                 DataColumn(label: Text("Nome")),
-  //                 DataColumn(label: Text("Quantidade")),
-  //               ],
-  //               rows: stocks.map((stock) {
-  //                 return DataRow(
-  //                   cells: [
-  //                     DataCell(Text(stock.sku)),
-  //                     DataCell(Text(stock.name)),
-  //                     DataCell(Text(stock.quantity.toString())),
-  //                   ],
-  //                 );
-  //               }).toList(),
-  //             ),
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildStatCards(Map<String, int> counts) {
-
-  //   ];
-
-  //   return LayoutBuilder(
-  //     builder: (context, constraints) {
-  //       final maxWidth = constraints.maxWidth;
-  //       final maxColumns = maxWidth > 1300
-  //           ? 5
-  //           : maxWidth > 1200
-  //           ? 4
-  //           : maxWidth > 800
-  //           ? 3
-  //           : maxWidth > 500
-  //           ? 2
-  //           : 1;
-
-  //       final columns = cards.length < maxColumns ? cards.length : maxColumns;
-  //       final totalSpacing = _spacing * (columns - 1);
-  //       final cardWidth = (maxWidth - totalSpacing) / columns;
-
-  //       return Wrap(
-  //         spacing: _spacing,
-  //         runSpacing: _spacing,
-  //         children: cards
-  //             .map((c) => SizedBox(width: cardWidth, child: c))
-  //             .toList(),
-  //       );
-  //     },
-  //   );
-  // }
-
-  // Widget _buildButton(BuildContext context) {
-  //   return ElevatedButton.icon(
-  //     onPressed: () {
-  //       Navigator.of(
-  //         context,
-  //       ).push(MaterialPageRoute(builder: (_) => NewStockPage()));
-  //     },
-  //     icon: const Icon(Icons.add, color: Colors.white),
-  //     label: const Text(
-  //       "Adicionar produto",
-  //       style: TextStyle(color: Colors.white),
-  //     ),
-  //     style: ElevatedButton.styleFrom(
-  //       backgroundColor: const Color(0xFF00c64f),
-  //       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-  //     ),
-  //   );
-  // }
 }
