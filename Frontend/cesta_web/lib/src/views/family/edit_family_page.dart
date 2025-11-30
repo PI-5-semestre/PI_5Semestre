@@ -65,20 +65,6 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
     });
   }
 
-
-  void _addAuthorizedPerson() {
-    if (authorizedPeople.length < 2) {
-      setState(() {
-        authorizedPeople.add({
-          "name": TextEditingController(),
-          "cpf": TextEditingController(),
-          "kinship": "SON",
-          "otherController": TextEditingController(),
-        });
-      });
-    }
-  }
-
   Future<void> _pickComprovante() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,

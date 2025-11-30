@@ -39,7 +39,7 @@ class _StockPageState extends ConsumerState<StockPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(stockControllerProvider);
     final controller = ref.read(stockControllerProvider.notifier);
-    final theme = Theme.of(context);
+    // final theme = Theme.of(context);
 
     if (!state.isLoading && state.error != null && state.stocks.isEmpty) {
       return Center(child: Text("Não foi possível carregar as famílias"));
