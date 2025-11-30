@@ -1,28 +1,37 @@
-import 'package:core/features/auth/data/models/user.dart';
-import 'package:core/features/user/providers/user_provider.dart';
+import 'package:core/features/visits/data/models/visits.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class TeamCardModal extends ConsumerWidget {
-  final Account account;
+class VisitCard extends ConsumerWidget {
+  final Visit visit;
 
-  const TeamCardModal({
-    super.key,
-    required this.account,
-  });
+  const VisitCard({super.key, required this.visit});
 
   Color _getStatusColor() {
-    switch (account.roleName) {
-      case "Coordenador":
-        return Colors.purple;
-      case "Entregador":
-        return Colors.blue;
-      case "Assistente Social":
+    final status = visit.response?.roleStatus ?? "Agendada";
+
+    switch (status) {
+      case "Aprovada":
         return Colors.green;
-      case "Voluntário":
+      case "Agendada":
+        return Colors.lightBlue;
+      case "Reprovada":
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Color _getTypeVisitColor() {
+    switch (visit.roleTypeVisit) {
+      case "Admissão":
         return Colors.orange;
+      case "Readmissão":
+        return Colors.pink;
+      case "Rotina":
+        return Colors.yellow;
       default:
         return Colors.grey;
     }
@@ -30,8 +39,10 @@ class TeamCardModal extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final family = visit.family!;
+    final address =
+        '${family.street}, n° ${family.number} - ${family.neighborhood}, ${family.city}/${family.state} - ${family.zip_code}';
     final theme = Theme.of(context);
-
     return Card(
       clipBehavior: Clip.hardEdge,
       child: InkWell(
@@ -41,8 +52,7 @@ class TeamCardModal extends ConsumerWidget {
             builder: (BuildContext context) {
               return Material(
                 type: MaterialType.transparency,
-                child: SizedBox(
-                  height: 500,
+                child: Center(
                   child: Stack(
                     children: [
                       Container(
@@ -60,15 +70,15 @@ class TeamCardModal extends ConsumerWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    'Detalhes do Funcionário',
+                                  const Text(
+                                    'Detalhes da Família',
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.close),
+                                    icon: const Icon(Icons.close),
                                     onPressed: () => Navigator.pop(context),
                                   ),
                                 ],
@@ -91,7 +101,7 @@ class TeamCardModal extends ConsumerWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      account.profile?.name ?? '',
+                                      family.name,
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -99,7 +109,7 @@ class TeamCardModal extends ConsumerWidget {
                                     ),
                                   ),
                                   ListTile(
-                                    leading: Icon(Icons.phone),
+                                    leading: const Icon(Icons.phone),
                                     title: Text(
                                       'Telefone',
                                       style: TextStyle(
@@ -108,7 +118,7 @@ class TeamCardModal extends ConsumerWidget {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      account.profile?.mobile ?? '',
+                                      family.mobile_phone,
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -116,16 +126,16 @@ class TeamCardModal extends ConsumerWidget {
                                     ),
                                   ),
                                   ListTile(
-                                    leading: Icon(Icons.email),
+                                    leading: const Icon(Icons.location_on),
                                     title: Text(
-                                      'Email',
+                                      'Endereço',
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: theme.colorScheme.outline,
                                       ),
                                     ),
                                     subtitle: Text(
-                                      account.email,
+                                      address,
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -133,16 +143,23 @@ class TeamCardModal extends ConsumerWidget {
                                     ),
                                   ),
                                   ListTile(
-                                    leading: Icon(Icons.badge),
+                                    leading: const Icon(Icons.group),
                                     title: Text(
-                                      'CPF',
+                                      'Pessoas Autorizadas',
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: theme.colorScheme.outline,
                                       ),
                                     ),
                                     subtitle: Text(
-                                      account.profile?.cpf ?? '',
+                                      (family.members?.isNotEmpty ?? false)
+                                          ? family.members!
+                                                .map(
+                                                  (a) =>
+                                                      '• ${a.name} (${a.roleKinship})',
+                                                )
+                                                .join('\n')
+                                          : 'Nenhuma pessoa autorizada',
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
@@ -150,123 +167,51 @@ class TeamCardModal extends ConsumerWidget {
                                     ),
                                   ),
                                   ListTile(
-                                    leading: Icon(Icons.work),
+                                    leading: const Icon(Icons.article),
                                     title: Text(
-                                      'Atividade',
+                                      'Observações',
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: theme.colorScheme.outline,
                                       ),
                                     ),
                                     subtitle: Text(
-                                      account.roleName,
+                                      visit.description ?? '',
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: theme.colorScheme.onSurface,
                                       ),
                                     ),
                                   ),
-                                  ListTile(
-                                    leading: Icon(Icons.calendar_today),
-                                    title: Text(
-                                      'Início',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.outline,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      DateFormat('dd/MM/yyyy').format(DateTime.parse(account.created)),
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
+
+                                  const SizedBox(height: 80),
                                 ],
                               ),
                             ),
                           ],
                         ),
                       ),
+
                       Stack(
                         children: [
                           Positioned(
                             bottom: 16,
                             left: 16,
-                            child: Consumer(
-                              builder: (context, ref, _) {
-                                final isLoading = ref.watch(userControllerProvider).isLoading;
-                                final theme = Theme.of(context);
-
-                                return FloatingActionButton(
-                                  onPressed: isLoading
-                                      ? null
-                                      : () async {
-                                          final confirm = await showDialog<bool>(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                title: const Text('Excluir Funcionário'),
-                                                content: Text(
-                                                  'Tem certeza que deseja excluir '
-                                                  '${account.profile?.name ?? ''}?',
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () => Navigator.pop(context, false),
-                                                    child: const Text('Cancelar'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () => Navigator.pop(context, true),
-                                                    child: const Text(
-                                                      'Excluir',
-                                                      style: TextStyle(color: Colors.red),
-                                                    ),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                          if (confirm != true) return;
-                                          await ref
-                                              .read(userControllerProvider.notifier)
-                                              .deleteUser(account.email);
-                                          final error = ref.read(userControllerProvider).error;
-                                          if (error == null) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(
-                                                content: Text("Usuário excluído com sucesso!"),
-                                              ),
-                                            );
-                                          } else {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text(error)),
-                                            );
-                                          }
-                                          Navigator.pop(context);
-                                        },
-                                  backgroundColor: theme.colorScheme.surfaceContainerLow,
-                                  child: isLoading
-                                      ? const SizedBox(
-                                          width: 22,
-                                          height: 22,
-                                          child: CircularProgressIndicator(strokeWidth: 3),
-                                        )
-                                      : const Icon(Icons.delete),
-                                );
-                              },
+                            child: FloatingActionButton(
+                              heroTag: "visita_${visit.id}",
+                              onPressed: () {},
+                              child: const Icon(Icons.check),
                             ),
                           ),
                           Positioned(
                             bottom: 16,
                             right: 16,
                             child: FloatingActionButton(
+                              heroTag: "edit_${visit.id}",
                               onPressed: () {
                                 context.go(
-                                  '/more/team/edit_servant',
-                                  extra: account,
+                                  '/more/visits/edit_visit',
+                                  extra: visit,
                                 );
                                 Navigator.pop(context);
                               },
@@ -282,28 +227,50 @@ class TeamCardModal extends ConsumerWidget {
             },
           );
         },
-        child: SizedBox(
-          height: 80,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  account.profile?.name ?? '',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        family.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        alignment: WrapAlignment.start,
+                        children: [
+                          _buildChip(
+                            visit.response?.roleStatus ?? 'Agendada',
+                            _getStatusColor(),
+                          ),
+                          _buildChip(visit.roleTypeVisit, _getTypeVisitColor()),
+                        ],
+                      ),
+                    ],
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: -6,
-                  children: [_buildChip(account.roleName, _getStatusColor())],
+              ),
+              if (visit.response == null || visit.response?.roleStatus == "Agendado")
+                FloatingActionButton.small(
+                  heroTag: "visita_${visit.id}",
+                  onPressed: () {
+                    _openInGoogleMaps(address);
+                  },
+                  elevation: 1,
+                  child: const Icon(Icons.location_on),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
@@ -321,11 +288,24 @@ class TeamCardModal extends ConsumerWidget {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: FontWeight.bold,
           color: color,
         ),
       ),
     );
+  }
+
+  void _openInGoogleMaps(String address) async {
+    final query = Uri.encodeComponent(address);
+    final url = Uri.parse(
+      "https://www.google.com/maps/search/?api=1&query=$query",
+    );
+
+    try {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      debugPrint("Não foi possível abrir o Google Maps: $e");
+    }
   }
 }

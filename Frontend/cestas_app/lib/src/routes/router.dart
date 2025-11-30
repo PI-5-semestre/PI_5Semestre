@@ -10,15 +10,18 @@ import 'package:cestas_app/src/pages/login_page.dart';
 import 'package:cestas_app/src/pages/more_page.dart';
 import 'package:cestas_app/src/pages/new_password_page.dart';
 import 'package:cestas_app/src/pages/register_page.dart';
+import 'package:cestas_app/src/pages/stock/new_stock_page.dart';
 import 'package:cestas_app/src/pages/stock/stock_page.dart';
 import 'package:cestas_app/src/pages/teams/edit_servant_page.dart';
 import 'package:cestas_app/src/pages/teams/new_servant_page.dart';
 import 'package:cestas_app/src/pages/teams/team_page.dart';
-import 'package:cestas_app/src/pages/visits_page.dart';
+import 'package:cestas_app/src/pages/visits/edit_visit_page.dart';
+import 'package:cestas_app/src/pages/visits/visits_page.dart';
 import 'package:cestas_app/src/widgets/navigator_shell_route.dart';
 import 'package:core/features/auth/data/models/user.dart';
 import 'package:core/features/delivery/data/models/delivery.dart';
 import 'package:core/features/family/data/models/family_model.dart';
+import 'package:core/features/visits/data/models/visits.dart';
 import 'package:go_router/go_router.dart';
 
 final routes = GoRouter(
@@ -83,10 +86,25 @@ final routes = GoRouter(
                 GoRoute(
                   path: 'stock',
                   builder: (context, state) => StockPage(),
+                  routes: [
+                    GoRoute(
+                      path: 'new_stock',
+                      builder: (context, state) => NewStockPage(),
+                    ),
+                  ],
                 ),
                 GoRoute(
                   path: 'visits',
                   builder: (context, state) => VisitsPage(),
+                  routes: [
+                    GoRoute(
+                      path: 'edit_visit',
+                      builder: (context, state){
+                        final visit = state.extra as Visit;
+                        return EditVisitPage(visit: visit);
+                      },
+                    )
+                  ]
                 ),
                 GoRoute(
                   path: 'basket',

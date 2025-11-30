@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'family_provider.dart';
+part of 'stock_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,52 +9,52 @@ part of 'family_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(FamilyController)
-const familyControllerProvider = FamilyControllerProvider._();
+@ProviderFor(StockController)
+const stockControllerProvider = StockControllerProvider._();
 
-final class FamilyControllerProvider
-    extends $NotifierProvider<FamilyController, FamilyState> {
-  const FamilyControllerProvider._()
+final class StockControllerProvider
+    extends $NotifierProvider<StockController, StockState> {
+  const StockControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'familyControllerProvider',
+        name: r'stockControllerProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$familyControllerHash();
+  String debugGetCreateSourceHash() => _$stockControllerHash();
 
   @$internal
   @override
-  FamilyController create() => FamilyController();
+  StockController create() => StockController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(FamilyState value) {
+  Override overrideWithValue(StockState value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<FamilyState>(value),
+      providerOverride: $SyncValueProvider<StockState>(value),
     );
   }
 }
 
-String _$familyControllerHash() => r'f3941f2dddcddf95c831273a3578f2416ba8e15f';
+String _$stockControllerHash() => r'216ac37bc4e7eaca67db0ee4cf7f81a689662fcd';
 
-abstract class _$FamilyController extends $Notifier<FamilyState> {
-  FamilyState build();
+abstract class _$StockController extends $Notifier<StockState> {
+  StockState build();
   @$mustCallSuper
   @override
   void runBuild() {
     final created = build();
-    final ref = this.ref as $Ref<FamilyState, FamilyState>;
+    final ref = this.ref as $Ref<StockState, StockState>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<FamilyState, FamilyState>,
-              FamilyState,
+              AnyNotifier<StockState, StockState>,
+              StockState,
               Object?,
               Object?
             >;
