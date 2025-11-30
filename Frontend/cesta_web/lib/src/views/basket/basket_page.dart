@@ -1,12 +1,11 @@
 import 'package:cesta_web/src/views/basket/basket_list_page.dart';
-import 'package:flutter/material.dart';
 import 'package:cesta_web/src/widgets/app_drawer.dart';
+import 'package:flutter/material.dart';
 import 'package:core/widgets/statCard.dart';
-import 'package:core/widgets/family_card.dart';
 import 'package:core/widgets/card_header.dart';
-import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:core/widgets/basket_selected_families_modal.dart';
+import 'package:core/widgets2/segmented_card_switcher.dart';
 
 class BasketPage extends StatefulWidget {
   const BasketPage({super.key});
@@ -35,8 +34,75 @@ class _BasketPageState extends State<BasketPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final spacing = screenWidth < 600 ? 8.0 : 16.0;
     final selectedCount = selectedFamilies.values.where((v) => v).length;
+
+    final cards = [
+      StatCard(
+        icon: Icons.group,
+        colors: [Colors.green, Colors.green],
+        title: "Famílias Selecionadas",
+        value: selectedCount.toString(),
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            builder: (ctx) {
+              return StatefulBuilder(
+                builder: (ctx, setModalState) {
+                  final selected = selectedFamilies.entries
+                      .where((e) => e.value)
+                      .map((e) => e.key)
+                      .toList();
+
+                  for (var name in selected) {
+                    basketSizeByFamily.putIfAbsent(name, () => 'Média');
+                  }
+
+                  return BasketSelectedFamiliesModal(
+                    selectedFamilies: selected,
+                    familyIncome: familyIncome,
+                    basketSizeByFamily: basketSizeByFamily,
+                    basketSizes: basketSizes,
+                    onSizeChanged: (familyName, newSize) {
+                      setModalState(() {
+                        basketSizeByFamily[familyName] = newSize;
+                      });
+                    },
+                    onSave: () {
+                      if (selected.isEmpty) return;
+
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Cestas salvas para ${selected.length} família(s).',
+                          ),
+                        ),
+                      );
+                      setState(() {});
+                    },
+                    buildEditButton: (context, familyName) =>
+                        _buildButton(context, familyName),
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+      StatCard(
+        icon: Icons.shopping_basket,
+        colors: [Colors.orangeAccent, Colors.orangeAccent],
+        title: "Cestas Disponíveis",
+        value: "10",
+      ),
+    ];
+
+    final icons = [Icons.group, Icons.shopping_basket];
+
     return Scaffold(
-      appBar: AppBar(),
       drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
@@ -67,108 +133,8 @@ class _BasketPageState extends State<BasketPage> {
                   ),
                 ),
                 SizedBox(height: spacing),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    double maxWidth = constraints.maxWidth;
-                    double spacing = 16;
+                SegmentedCardSwitcher(options: cards, icons: icons),
 
-                    int maxColumns = maxWidth > 1300
-                        ? 4
-                        : maxWidth > 800
-                        ? 2
-                        : 1;
-                    int columns = 2 < maxColumns ? 2 : maxColumns;
-
-                    double totalSpacing = spacing * (columns - 1);
-                    double cardWidth = (maxWidth - totalSpacing) / columns;
-
-                    return Wrap(
-                      spacing: spacing,
-                      runSpacing: spacing,
-                      children: [
-                        SizedBox(
-                          width: cardWidth,
-                          child: StatCard(
-                            icon: Icons.group,
-                            colors: [Colors.green, Colors.green],
-                            title: "Famílias Selecionadas",
-                            value: selectedCount.toString(),
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(16),
-                                  ),
-                                ),
-                                builder: (ctx) {
-                                  return StatefulBuilder(
-                                    builder: (ctx, setModalState) {
-                                      final selected = selectedFamilies.entries
-                                          .where((e) => e.value)
-                                          .map((e) => e.key)
-                                          .toList();
-
-                                      for (var name in selected) {
-                                        basketSizeByFamily.putIfAbsent(
-                                          name,
-                                          () => 'Média',
-                                        );
-                                      }
-                                      return BasketSelectedFamiliesModal(
-                                        selectedFamilies: selected,
-                                        familyIncome: familyIncome,
-                                        basketSizeByFamily: basketSizeByFamily,
-                                        basketSizes: basketSizes,
-                                        onSizeChanged: (familyName, newSize) {
-                                          setModalState(() {
-                                            basketSizeByFamily[familyName] =
-                                                newSize;
-                                          });
-                                        },
-                                        onSave: () {
-                                          if (selected.isEmpty) return;
-
-                                          Navigator.pop(ctx);
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Cestas salvas para ${selected.length} família(s).',
-                                              ),
-                                            ),
-                                          );
-                                          setState(() {});
-                                        },
-                                        buildEditButton:
-                                            (context, familyName) =>
-                                                _buildButton(
-                                                  context,
-                                                  familyName,
-                                                ),
-                                      );
-                                    },
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: cardWidth,
-                          child: StatCard(
-                            icon: Icons.shopping_basket,
-                            colors: [Colors.orangeAccent, Colors.orangeAccent],
-                            title: "Cestas Disponíveis",
-                            value: "10",
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
                 SizedBox(height: spacing),
                 ...selectedFamilies.entries.map((entry) {
                   return Column(
