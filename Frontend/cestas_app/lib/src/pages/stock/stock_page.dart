@@ -137,6 +137,97 @@ class _StockPageState extends ConsumerState<StockPage> {
     );
   }
 
+  Future<Map<String, dynamic>?> _showEditQuantityDialog(
+    BuildContext context,
+    StockModel stock,
+  ) async {
+    final controller = TextEditingController();
+    String? operation;
+
+    return showDialog<Map<String, dynamic>>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Alterar estoque"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    stock.name ?? '',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text("Quantidade atual: ${stock.quantity}"),
+                  const SizedBox(height: 16),
+                  RadioListTile<String>(
+                    title: const Text("Entrada (Adicionar ao estoque)"),
+                    value: "entrada",
+                    groupValue: operation,
+                    onChanged: (value) {
+                      setState(() {
+                        operation = value;
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text("Retirada (Remover do estoque)"),
+                    value: "retirada",
+                    groupValue: operation,
+                    onChanged: (value) {
+                      setState(() {
+                        operation = value;
+                      });
+                    },
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    enabled: operation != null,
+                    decoration: const InputDecoration(
+                      labelText: "Valor",
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancelar"),
+                ),
+                TextButton(
+                  onPressed: operation == null || controller.text.isEmpty
+                      ? null
+                      : () {
+                          final value = int.tryParse(controller.text);
+                          if (value != null) {
+                            Navigator.pop(context, {
+                              "operation": operation,
+                              "value": value,
+                            });
+                          }
+                        },
+                  child: const Text("Salvar"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildSearchField() {
     return TextField(
       onChanged: (value) => setState(() => searchQuery = value),
@@ -156,7 +247,17 @@ class _StockPageState extends ConsumerState<StockPage> {
     StockController controller,
     StockState state,
   ) {
-    final visibleStocks = stocks.take(itemsToShow).toList();
+    //final visibleStocks = stocks.take(itemsToShow).toList();
+
+    final filtered = stocks.where((s) {
+      final name = s.name?.toLowerCase() ?? '';
+      final sku = s.sku?.toLowerCase() ?? '';
+      final query = searchQuery.toLowerCase();
+
+      return name.contains(query) || sku.contains(query);
+    }).toList();
+
+    final visibleStocks = filtered.take(itemsToShow).toList();
 
     return Column(
       children: [
@@ -223,7 +324,6 @@ class _StockPageState extends ConsumerState<StockPage> {
                           color: Colors.blue,
                         ),
                         const SizedBox(width: 6),
-
                         Text(
                           "Quantidade: ${stock.quantity}",
                           style: const TextStyle(fontSize: 14),
@@ -232,13 +332,31 @@ class _StockPageState extends ConsumerState<StockPage> {
                         Row(
                           children: [
                             IconButton(
-                              onPressed: () {
-                                // ação de editar
+                              onPressed: () async {
+                                final result = await _showEditQuantityDialog(
+                                  context,
+                                  stock,
+                                );
+
+                                if (result != null) {
+                                  var value = result["value"];
+                                  final op = result["operation"];
+
+                                  if (op == "retirada") {
+                                    value = value * -1;
+                                  }
+
+                                  final updated = stock.copyWith(
+                                    quantity: value,
+                                  );
+                                  await controller.updateQuantity(updated);
+                                }
                               },
                               icon: const Icon(Icons.tune_outlined),
-                              color: Colors.blue.shade600,
-                              tooltip: "Editar",
+                              color: Colors.blue,
+                              tooltip: "Editar quantidade",
                             ),
+
                             IconButton(
                               onPressed: () async {
                                 final shouldDelete = await showDialog<bool>(
