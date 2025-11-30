@@ -1076,6 +1076,8 @@ async def create_institution_visit(
     family_id: int,
     session: Session,
     payload: VisitationCreate,
+    current_account: Annotated[Account, Depends(get_current_account)],
+
 ):
     institution = await get_institution_or_404(session, institution_id)
     family = await get_family_or_404(session, family_id, institution_id)
@@ -1140,6 +1142,8 @@ async def create_institution_visit(
 async def list_institution_visits(
     institution_id: int,
     session: Session,
+    current_account: Annotated[Account, Depends(get_current_account)],
+
 ):
     institution = await get_institution_or_404(session, institution_id)
 
@@ -1196,6 +1200,7 @@ async def create_visit_response(
     institution_id: int,
     family_id: int,
     session: Session,
+    current_account: Annotated[Account, Depends(get_current_account)],
     payload: VisitationCreateReturn,
 ):
     
@@ -1251,6 +1256,7 @@ async def create_visit_response(
 async def create_basket_for_family(
     institution_id: int,
     payload: BasketCreateForInstitution,
+    current_account: Annotated[Account, Depends(get_current_account)],
     session: Session,
 ):
     await get_institution_or_404(session, institution_id)
@@ -1300,7 +1306,7 @@ async def create_basket_for_family(
         
     
 @router.get("/{institution_id}/baskets/families", response_model=List[BasketResp])
-async def list_all_baskets(institution_id: int, session: Session):
+async def list_all_baskets(institution_id: int, session: Session, current_account: Annotated[Account, Depends(get_current_account)]):
     institution = await get_institution_or_404(session, institution_id)
 
     query = select(InstitutionBasketFamily).where(
@@ -1314,10 +1320,11 @@ async def list_all_baskets(institution_id: int, session: Session):
 
 
 @router.get("/{institution_id}/baskets/{family_id}", response_model=int)
-async def list_all_baskets(institution_id: int, family_id: int, session: Session):
+async def list_all_baskets(institution_id: int, family_id: int, session: Session, current_account: Annotated[Account, Depends(get_current_account)]):
     institution = await get_institution_or_404(session, institution_id)
     family = await get_family_or_404(session, family_id, institution_id)
     basket_received = family.count_basket()
     return basket_received
 
 
+    
