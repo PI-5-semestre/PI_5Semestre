@@ -1340,7 +1340,7 @@ async def list_all_baskets(institution_id: int, family_id: int, session: Session
 
 
 @router.get('/{institution_id}/dashboard', response_model=InstitutionDashboardResp)
-async def dashboard(institution_id: int, session: Session, current_account: Annotated[Account, Depends(get_current_account)]):
+async def dashboard(institution_id: int, session: Session, ):
     institution = await get_institution_or_404(session, institution_id)
 
     total_families = await session.execute(
@@ -1351,62 +1351,74 @@ async def dashboard(institution_id: int, session: Session, current_account: Anno
     )
     total_families_count = total_families.scalar_one()
 
-    active_families = await session.execute(
+    cestas_avaliable = await session.execute(
         select(func.count(Family.id)).where(
             Family.institution_id == institution.id,
             Family.situation == SituationType.ACTIVE,
             Family.active == True
         )
     )
-    active_families_count = active_families.scalar_one()
+    cestas_avaliable_count = cestas_avaliable.scalar_one()
 
-    pending_families = await session.execute(
-        select(func.count(Family.id)).where(
-            Family.institution_id == institution.id,
-            Family.situation == SituationType.PENDING,
-            Family.active == True
+    visit_pending = await session.execute(
+        select(func.count(InstitutionVisitation.id)).where(
+            InstitutionVisitation.institution_id == institution.id,
+            ~InstitutionVisitation.id.in_(
+                select(InstitutionVisitationResult.visitation_id)
+            )
         )
     )
-    pending_families_count = pending_families.scalar_one()
+    visit_pending_count = visit_pending.scalar_one()
 
-    inactive_families = await session.execute(
-        select(func.count(Family.id)).where(
-            Family.institution_id == institution.id,
-            Family.situation == SituationType.INACTIVE,
-            Family.active == True
+    products_instock = await session.execute(
+        select(func.count(StockItem.id)).where(
+            StockItem.institution_id == institution.id,
+            StockItem.quantity > 0,
+            StockItem.active == True
         )
     )
-    inactive_families_count = inactive_families.scalar_one()
+    products_instock_count = products_instock.scalar_one()
 
-    total_deliveries = await session.execute(
-        select(func.count(FamilyDelivery.id)).where(
+    recent_visits = await session.execute(
+        select(InstitutionVisitation).where(
+            InstitutionVisitation.institution_id == institution.id
+        ).order_by(InstitutionVisitation.created.desc()).limit(5)
+    )
+    recent_deliveries = await session.execute(
+        select(FamilyDelivery).where(
             FamilyDelivery.institution_id == institution.id
-        )
+        ).order_by(FamilyDelivery.created.desc()).limit(5)
     )
-    total_deliveries_count = total_deliveries.scalar_one()
+    activy_recents = []
+    for v in recent_visits.scalars():
+        activy_recents.append({
+            "type": "visit",
+            "description": f"Visita {v.type_of_visit} para família {v.family_id}",
+            "date": v.created.isoformat()
+        })
+    for d in recent_deliveries.scalars():
+        activy_recents.append({
+            "type": "delivery",
+            "description": f"Entrega para família {d.family_id}",
+            "date": d.created.isoformat()
+        })
+    activy_recents.sort(key=lambda x: x["date"], reverse=True)
+    activy_recents = activy_recents[:10]
 
-    completed_deliveries = await session.execute(
-        select(func.count(FamilyDelivery.id)).where(
-            FamilyDelivery.institution_id == institution.id,
-            FamilyDelivery.status == SituationDelivery.COMPLETED
-        )
-    )
-    completed_deliveries_count = completed_deliveries.scalar_one()
-
-    pending_deliveries = await session.execute(
-        select(func.count(FamilyDelivery.id)).where(
-            FamilyDelivery.institution_id == institution.id,
-            FamilyDelivery.status == SituationDelivery.PENDING
-        )
-    )
-    pending_deliveries_count = pending_deliveries.scalar_one()
+    stock_query = select(StockItem).where(
+        StockItem.institution_id == institution.id,
+        StockItem.quantity > 0,
+        StockItem.active == True
+    ).order_by(StockItem.quantity.asc())
+    stock_result = await session.execute(stock_query)
+    stock_items = stock_result.scalars().all()
+    stock = [{"sku": item.sku, "name": item.name, "quantity": item.quantity} for item in stock_items]
 
     return InstitutionDashboardResp(
-        total_families=total_families_count,
-        active_families=active_families_count,
-        pending_families=pending_families_count,
-        inactive_families=inactive_families_count,
-        total_deliveries=total_deliveries_count,
-        completed_deliveries=completed_deliveries_count,
-        pending_deliveries=pending_deliveries_count
+        family_cad=total_families_count,
+        cestas_avaliable=cestas_avaliable_count,
+        visit_pending=visit_pending_count,
+        products_instock=products_instock_count,
+        activy_recents=activy_recents,
+        stock=stock
     )

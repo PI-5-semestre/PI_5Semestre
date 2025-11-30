@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 
@@ -159,9 +159,9 @@ class BasketResp(BaseModel):
     products: List[BasketRespItem]
     
 class InstitutionDashboardResp(BaseModel):
-    total_families: int
-    active_families: int
-    inactive_families: int
-    total_deliveries: int
-    completed_deliveries: int
-    pending_deliveries: int
+    family_cad: int
+    cestas_avaliable: int
+    visit_pending: int
+    products_instock: int
+    activy_recents: List[Any]
+    stock: List[Any]
