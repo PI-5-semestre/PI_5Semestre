@@ -1,6 +1,7 @@
 import 'package:core/features/family/data/models/family_model.dart';
 import 'package:core/features/family/providers/family_provider.dart';
 import 'package:core/widgets/forms/new_visit_form.dart';
+import 'package:core/widgets/forms/new_delivery_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,17 +20,6 @@ class FamilyCard extends ConsumerWidget {
         return Color(0xFF016630);
       case "Pendente":
         return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getDeliveryColor() {
-    switch (family.deliveryStatus) {
-      case "Recebendo":
-        return Color(0xFF193CB8);
-      case "Aguardando":
-        return Color(0xFF6E11B0);
       default:
         return Colors.grey;
     }
@@ -483,10 +473,6 @@ class FamilyCard extends ConsumerWidget {
                         children: [
                           // _buildChip(recommended, _getBasketColor(recommended)),
                           _buildChip(family.roleSituation, _getStatusColor()),
-                          _buildChip(
-                            family.deliveryStatus,
-                            _getDeliveryColor(),
-                          ),
                         ],
                       ),
                     ],
@@ -509,6 +495,24 @@ class FamilyCard extends ConsumerWidget {
                       );
                     },
                   child: const Icon(Icons.calendar_today),
+                )
+
+              else if (true)
+                FloatingActionButton.small(
+                  heroTag: "entrega_${family.id}",
+                  elevation: 1,
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                        ),
+                        builder: (_) => NewDeliveryForm(family_id: family.id ?? 0,),
+                      );
+                    },
+                  child: const Icon(Icons.local_shipping),
                 )
             ],
           ),

@@ -57,7 +57,7 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
     final familyState = ref.watch(familyControllerProvider);
     final familyController = ref.watch(familyControllerProvider.notifier);
 
-    final theme = Theme.of(context);
+    // final theme = Theme.of(context);
 
     final isBtnDisabled = isProcessing ||
         visitState.isLoading ||
@@ -65,7 +65,6 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
         statusController.text.trim() == "PENDING";
 
     return Scaffold(
-      appBar: AppBar(),
       body: Form(
         key: _formKey,
         child: Padding(

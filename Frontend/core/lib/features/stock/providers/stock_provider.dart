@@ -46,4 +46,28 @@ class StockController extends _$StockController {
       state = state.copyWith(isLoading: false, error: message);
     }
   }
+
+  Future<void> update(StockModel stock) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await ref.read(stockRepositoryProvider).update(stock, await token);
+      await findAll();
+    } catch (e) {
+      final message = e.toString().replaceFirst("Exception: ", "");
+      state = state.copyWith(isLoading: false, error: message);
+    }
+  }
+
+  Future<void> delete(StockModel stock) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await ref.read(stockRepositoryProvider).delete(stock, await token);
+      await findAll();
+    } catch (e) {
+      final message = e.toString().replaceFirst("Exception: ", "");
+      state = state.copyWith(isLoading: false, error: message);
+    }
+  }
 }
