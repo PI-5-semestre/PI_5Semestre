@@ -1,258 +1,302 @@
-import 'package:cesta_web/src/views/delivery/new_delivery_page.dart';
-import 'package:cesta_web/src/views/stock/new_stock_page.dart';
-import 'package:cesta_web/src/widgets/app_drawer.dart';
-import 'package:core/services/state/stock_provider.dart';
+import 'package:core/features/stock/application/stock_state.dart';
+import 'package:core/features/stock/data/models/stock_model.dart';
+import 'package:core/features/stock/providers/stock_provider.dart';
 import 'package:core/widgets/card_header.dart';
 import 'package:core/widgets/card_info.dart';
-import 'package:core/widgets/statCard.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class StockPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) {
-        final provider = StockProvider();
-        provider.fetchStocks();
-        return provider;
-      },
-      child: const _StockView(),
-    );
-  }
-}
-
-class _StockView extends StatefulWidget {
-  const _StockView({super.key});
+class StockPage extends ConsumerStatefulWidget {
+  const StockPage({super.key});
 
   @override
-  State<_StockView> createState() => _StockViewState();
+  ConsumerState<StockPage> createState() => _StockPageState();
 }
 
-class _StockViewState extends State<_StockView> {
+class _StockPageState extends ConsumerState<StockPage> {
   static const double _pagePadding = 16;
   static const double _spacing = 16;
-  
+
+  int itemsToShow = 10;
   String selectedStatus = "Todos";
   String searchQuery = "";
 
   @override
-  Widget build(BuildContext context) {
-    final provider = Provider.of<StockProvider>(context);
-    final stocks = provider.data ?? [];
-    final counts = provider.counts.isNotEmpty
-        ? provider.counts
-        : {
-            "Produtos Ativos": 0,
-            "Estoque Baixo": 0,
-            "Estoque Alto": 0,
-            "Sem Estoque": 0,
-          };
+  void initState() {
+    super.initState();
 
-    final filteredDeliveries = stocks.where((d) {
-      final matchesStatus =
-          selectedStatus == "Todos" || d.status == selectedStatus;
-      final matchesSearch = d.name.toLowerCase().contains(
-        searchQuery.toLowerCase(),
-      );
-      return matchesStatus && matchesSearch;
-    }).toList();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = ref.read(stockControllerProvider);
+
+      if (state.stocks.isEmpty && !state.isLoading) {
+        ref.read(stockControllerProvider.notifier).findAll();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(stockControllerProvider);
+    final controller = ref.read(stockControllerProvider.notifier);
+    final theme = Theme.of(context);
+
+    if (!state.isLoading && state.error != null && state.stocks.isEmpty) {
+      return Center(child: Text("Não foi possível carregar as famílias"));
+    }
+
+    // final List<StockModel> mockStocks = [
+    //   StockModel(id: 1, name: "Arroz Tipo 1", sku: "ARZ-001", quantity: 25),
+    //   StockModel(id: 2, name: "Feijão Carioca", sku: "FEI-002", quantity: 8),
+    //   StockModel(
+    //     id: 3,
+    //     name: "Macarrão Espaguete 500g",
+    //     sku: "MAC-003",
+    //     quantity: 40,
+    //   ),
+    //   StockModel(
+    //     id: 4,
+    //     name: "Óleo de Soja 900ml",
+    //     sku: "OLE-004",
+    //     quantity: 12,
+    //   ),
+    //   StockModel(
+    //     id: 5,
+    //     name: "Açúcar Refinado 1kg",
+    //     sku: "ACU-005",
+    //     quantity: 0,
+    //   ),
+    //   StockModel(id: 6, name: "Sal Refinado 1kg", sku: "SAL-006", quantity: 18),
+    //   StockModel(id: 7, name: "Café Torrado 500g", sku: "CAF-007", quantity: 7),
+    //   StockModel(
+    //     id: 8,
+    //     name: "Farinha de Trigo 1kg",
+    //     sku: "FAR-008",
+    //     quantity: 32,
+    //   ),
+    //   StockModel(
+    //     id: 9,
+    //     name: "Molho de Tomate 300g",
+    //     sku: "MOL-009",
+    //     quantity: 11,
+    //   ),
+    //   StockModel(
+    //     id: 10,
+    //     name: "Biscoito Cream Cracker",
+    //     sku: "BIS-010",
+    //     quantity: 15,
+    //   ),
+    // ];
 
     return Scaffold(
-      appBar: AppBar(),
-      drawer: const AppDrawer(),
-      body: provider.loading
-          ? const Center(child: CircularProgressIndicator())
-          : (provider.error != null && provider.error!.isNotEmpty)
-              ? Center(child: Text(provider.error!))
-              : ListView(
-                  padding: const EdgeInsets.all(_pagePadding),
+      body: ListView(
+        padding: const EdgeInsets.all(_pagePadding),
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: CardHeader(
+                  title: 'Controle de estoque',
+                  subtitle: 'Gerencie os produtos das cestas básicas',
+                  colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
+                  icon: Icons.archive_outlined,
+                ),
+              ),
+              const SizedBox(width: _spacing),
+            ],
+          ),
+          const SizedBox(height: _spacing),
+
+          InfoCard(
+            title: "Estoque Atual",
+            color: const Color(0xFF155DFC),
+            icon: Icons.today,
+            iconColor: Colors.white,
+            iconBackground: Colors.white54,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: _spacing),
+                Row(children: [Expanded(flex: 2, child: _buildSearchField())]),
+                const SizedBox(height: _spacing),
+                _buildList(state.stocks, controller, state),
+              ],
+            ),
+          ),
+        ],
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.go('/stock/new_stock');
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      onChanged: (value) => setState(() => searchQuery = value),
+      decoration: InputDecoration(
+        hintText: "Buscar produto...",
+        prefixIcon: const Icon(Icons.search),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildList(
+    List<StockModel> stocks,
+    StockController controller,
+    StockState state,
+  ) {
+    final visibleStocks = stocks.take(itemsToShow).toList();
+
+    return Column(
+      children: [
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: visibleStocks.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final stock = visibleStocks[index];
+
+            return Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Expanded(
-                          child: CardHeader(
-                            icon: Icons.archive_outlined,
-                            colors: [Color(0xFF00c64f), Color(0xFF00a73e)],
-                            title: "Controle de estoque",
-                            subtitle: "Gerencie os produtos das cestas básicas",
+                        Text(
+                          (stock.name == null || stock.name!.trim().isEmpty)
+                              ? "[Produto não encontrado]"
+                              : stock.name!,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(width: _spacing),
-                        _buildButton(context),
+
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            (stock.sku == null || stock.sku!.trim().isEmpty)
+                                ? "NE — 000"
+                                : stock.sku!,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: _spacing),
 
-                    Card(
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: TextField(
-                          onChanged: (value) {
-                            setState(() => searchQuery = value);
-                          },
-                          decoration: const InputDecoration(
-                            hintText: "Buscar produto...",
-                            prefixIcon: Icon(Icons.search),
-                            border: InputBorder.none,
-                          ),
+                    const SizedBox(height: 8),
+
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.inventory_2,
+                          size: 20,
+                          color: Colors.blue,
                         ),
-                      ),
-                    ),
+                        const SizedBox(width: 6),
 
-                    const SizedBox(height: _spacing),
-                    InfoCard(
-                      title: "Estoque Atual",
-                      color: const Color(0xFF00a73e),
-                      icon: Icons.today,
-                      iconColor: Colors.white,
-                      iconBackground: Colors.white.withOpacity(0.2),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildStatCards(counts),
-                          const SizedBox(height: _spacing),
-                          _buildTable(filteredDeliveries),
-                        ],
-                      ),
+                        Text(
+                          "Quantidade: ${stock.quantity}",
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const Spacer(),
+                        Row(
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                // ação de editar
+                              },
+                              icon: const Icon(Icons.tune_outlined),
+                              color: Colors.blue.shade600,
+                              tooltip: "Editar",
+                            ),
+                            IconButton(
+                              onPressed: () async {
+                                final shouldDelete = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const Text("Confirmar exclusão"),
+                                      content: Text(
+                                        "Tem certeza que deseja excluir o produto ?",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          child: const Text("Cancelar"),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          child: const Text(
+                                            "Excluir",
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+
+                                if (shouldDelete == true) {
+                                  controller.delete(
+                                    stock,
+                                  ); // <-- agora só exclui se confirmar
+                                }
+                              },
+
+                              icon: const Icon(Icons.delete_forever_rounded),
+                              color: Colors.red.shade400,
+                              tooltip: "Excluir",
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
-    );
-  }
-
-  Widget _buildTable(List stocks) {
-    if (stocks.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Text(
-            "Estoque Vazio",
-            style: TextStyle(fontSize: 16),
-          ),
-        ),
-      );
-    }
-
-    final availableHeight =
-        MediaQuery.of(context).size.height - kToolbarHeight - 350;
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: availableHeight),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              width: constraints.maxWidth,
-              child: DataTable(
-                columnSpacing: 24,
-                headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
-                dataRowMinHeight: 48,
-                dataRowMaxHeight: 56,
-                columns: const [
-                  DataColumn(label: Text("Nome")),
-                  DataColumn(label: Text("Cestas")),
-                  DataColumn(label: Text("Estoque Mínimo")),
-                  DataColumn(label: Text("Quantidade")),
-                ],
-                rows: stocks.map((delivery) {
-                  return DataRow(
-                    cells: [
-                      DataCell(Text(delivery.name)),
-                      DataCell(Text(delivery.cests.toString())),
-                      DataCell(Text(delivery.minStock.toString())),
-                      DataCell(Text(delivery.quantity.toString())),
-                    ],
-                  );
-                }).toList(),
               ),
+            );
+          },
+        ),
+        if (itemsToShow < stocks.length)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: ElevatedButton(
+              onPressed: () => setState(() => itemsToShow += 5),
+              child: const Text("Carregar mais"),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildStatCards(Map<String, int> counts) {
-    final cards = [
-      StatCard(
-        icon: Icons.inventory_2,
-        colors: [Color(0xFF3d89ff), Color(0xFF165ffc)],
-        title: "Cestas Disponíveis",
-        value: "15",
-      ),
-      StatCard(
-        icon: Icons.show_chart,
-        colors: [Color(0xFF00c64f), Color(0xFF00a73e)],
-        title: "Produtos Ativos",
-        value: counts["Produtos Ativos"].toString(),
-      ),
-      StatCard(
-        icon: Icons.warning_amber_rounded,
-        colors: [Color(0xFFecab00), Color(0xFFd69417)],
-        title: "Estoque Baixo",
-        value: counts["Estoque Baixo"].toString(),
-      ),
-      StatCard(
-        icon: Icons.error,
-        colors: [Color(0xFFf82632), Color(0xFFe90012)],
-        title: "Sem Estoque",
-        value: counts["Sem Estoque"].toString(),
-      ),
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
-        final maxColumns = maxWidth > 1300
-            ? 5
-            : maxWidth > 1200
-                ? 4
-                : maxWidth > 800
-                    ? 3
-                    : maxWidth > 500
-                        ? 2
-                        : 1;
-
-        final columns = cards.length < maxColumns ? cards.length : maxColumns;
-        final totalSpacing = _spacing * (columns - 1);
-        final cardWidth = (maxWidth - totalSpacing) / columns;
-
-        return Wrap(
-          spacing: _spacing,
-          runSpacing: _spacing,
-          children: cards
-              .map((c) => SizedBox(width: cardWidth, child: c))
-              .toList(),
-        );
-      },
-    );
-  }
-
-  Widget _buildButton(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => NewStockPage()),
-        );
-      },
-      icon: const Icon(Icons.add, color: Colors.white),
-      label: const Text(
-        "Adicionar produto",
-        style: TextStyle(color: Colors.white),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF00c64f),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
+          ),
+      ],
     );
   }
 }

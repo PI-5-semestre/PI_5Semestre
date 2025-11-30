@@ -1,394 +1,239 @@
-import 'package:core/widgets/card_info.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:cesta_web/src/views/delivery/new_delivery_page.dart';
-import 'package:cesta_web/src/widgets/app_drawer.dart';
-import 'package:core/services/state/delivery_provider.dart';
+import 'package:core/features/delivery/providers/delivery_provider.dart';
+import 'package:core/widgets2/skeleton/stat_card_skeleton.dart';
+import 'package:core/widgets2/skeleton/team_card_skeleton.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:core/widgets/card_header.dart';
+import 'package:core/widgets/delivery_card.dart';
 import 'package:core/widgets/statCard.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:core/widgets2/segmented_card_switcher.dart';
+import 'package:flutter/material.dart';
 
-class DeliveryPage extends StatefulWidget {
-  @override
-  State<DeliveryPage> createState() => _DeliveryPageState();
-}
-
-class _DeliveryPageState extends State<DeliveryPage> {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) {
-        final provider = DeliveryProvider();
-        provider.fetchDeliveries();
-        return provider;
-      },
-      child: const _DeliveryView(),
-    );
-  }
-}
-
-class _DeliveryView extends StatefulWidget {
-  const _DeliveryView({super.key});
+class DeliveryPage extends ConsumerStatefulWidget {
+  const DeliveryPage({super.key});
 
   @override
-  State<_DeliveryView> createState() => _DeliveryViewState();
+  ConsumerState<DeliveryPage> createState() => _DeliveryPageState();
 }
 
-class _DeliveryViewState extends State<_DeliveryView> {
-  static const double _pagePadding = 16;
-  static const double _spacing = 16;
+class _DeliveryPageState extends ConsumerState<DeliveryPage> {
+  @override
+  void initState() {
+    super.initState(); 
 
-  String selectedStatus = "Todos";
-  String searchQuery = "";
-  DateTime? selectedDate;
-
-  String _formattedToday() {
-    final now = DateTime.now();
-    return "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}";
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final deliveryState = ref.read(deliveryControllerProvider);
+      if (deliveryState.deliveries.isEmpty && !deliveryState.isLoading) {
+        ref.read(deliveryControllerProvider.notifier).fetchDeliverys();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<DeliveryProvider>(context);
-    final deliveries = provider.data ?? [];
-    final counts = provider.counts.isNotEmpty
-        ? provider.counts
-        : {"Pendente": 0, "Entregue": 0, "Não Entregue": 0, "Total": 0};
+    final deliveryState = ref.watch(deliveryControllerProvider);
+    final controller = ref.watch(deliveryControllerProvider.notifier);
+    final theme = Theme.of(context);
 
-    const statusOptions = ["Todos", "Pendente", "Entregue", "Não Entregue"];
+    final icons = [Icons.list_alt, Icons.access_time, Icons.check];
 
-    final filteredDeliveries = deliveries.where((d) {
-      final matchesStatus =
-          selectedStatus == "Todos" || d.status == selectedStatus;
-      final matchesSearch = d.name.toLowerCase().contains(
-        searchQuery.toLowerCase(),
+    if (!deliveryState.isLoading && deliveryState.error != null && deliveryState.deliveries.isEmpty) {
+      return Center(
+        child: Text('Erro ao carregar entregas: ${deliveryState.error}'),
       );
-      final matchesDate =
-          selectedDate == null ||
-          (d.date.year == selectedDate!.year &&
-              d.date.month == selectedDate!.month &&
-              d.date.day == selectedDate!.day);
-      return matchesStatus && matchesSearch && matchesDate;
-    }).toList();
+    }
 
     return Scaffold(
-      //appBar: AppBar(),
-      drawer: const AppDrawer(),
-      body: provider.loading
-          ? const Center(child: CircularProgressIndicator())
-          : (provider.error != null && provider.error!.isNotEmpty)
-          ? Center(child: Text(provider.error!))
-          : ListView(
-              padding: const EdgeInsets.all(_pagePadding),
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Expanded(
-                      child: CardHeader(
-                        title: 'Lista de entregas',
-                        subtitle: 'Confirme as entregas realizadas',
-                        colors: [Color(0xFF9810FA), Color(0xFFA223FC)],
-                        icon: Icons.check_box,
-                      ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          controller.fetchDeliverys();
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          child: ListView(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildCardHeader(),
+                  const SizedBox(height: 16),
+                  _buildTodayLabel(context, theme),
+                  const SizedBox(height: 16),
+                  _buildSearchField(ref),
+                  const SizedBox(height: 5),
+                  if (deliveryState.isLoading)
+                    Row(
+                      children: [
+                        Expanded(child: StatCardSkeleton())
+                      ],
+                    )
+                  else
+                    SegmentedCardSwitcher(
+                      options: _buildStatusCards(deliveryState.deliveries),
+                      icons: icons,
+                      onTap: (index) {
+                        switch (index) {
+                          case 0:
+                            controller.filterByRole(null);
+                          case 1:
+                            controller.filterByRole("PENDING");
+                          case 2:
+                            controller.filterByRole("COMPLETED");
+                        }
+                      },
                     ),
-                    const SizedBox(width: _spacing),
-                    _buildButton(context),
-                  ],
-                ),
-                const SizedBox(height: _spacing),
-                InfoCard(
-                  title: "Entregas do dia ${_formattedToday()}",
-                  color: const Color(0xFF9810FA),
-                  icon: Icons.calendar_today,
-                  iconColor: Colors.white,
-                  iconBackground: Colors.white.withOpacity(0.2),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildStatCards(counts),
-                      const SizedBox(height: _spacing),
-                      Row(
-                        children: [
-                          Expanded(flex: 2, child: _buildSearchField()),
-                          const SizedBox(width: _spacing),
-                          Expanded(
-                            flex: 1,
-                            child: _buildStatusDropdown(statusOptions),
-                          ),
-                          const SizedBox(width: _spacing),
-                          Expanded(flex: 1, child: _buildDatePicker(context)),
-                        ],
-                      ),
-                      const SizedBox(height: _spacing),
-                      _buildTable(filteredDeliveries),
-                    ],
+                ],
+              ),
+              const SizedBox(height: 20),
+              _buildDeliveryHeader(theme),
+              if (deliveryState.isLoading)
+                Column(
+                  children: List.generate(
+                    4,
+                    (_) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                      child: Center(child: TeamCardSkeleton()),
+                    )
                   ),
-                ),
-              ],
-            ),
+                )
+              else
+                Column(
+                  children: deliveryState.filtered.map((delivery) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                      child: DeliveryCard(delivery: delivery),
+                    );
+                  }).toList(),
+                )
+            ],
+          ),
+        ),
+      ),
     );
   }
 
-  Widget _buildStatCards(Map<String, int> counts) {
-    final cards = [
+  Widget _buildTodayLabel(BuildContext context, ThemeData theme) {
+    final now = DateTime.now().toUtc().subtract(const Duration(hours: 3));
+    final formattedDate = DateFormat("EEEE | dd/MM/yyyy", "pt_BR").format(now);
+    final capitalizedDate = formattedDate[0].toUpperCase() + formattedDate.substring(1);
+
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Ícone dentro do círculo
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.calendar_today,
+                color: theme.colorScheme.primary,
+                size: 30,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Texto principal
+            const Text(
+              "Entregas de Hoje",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Data
+            Text(
+              capitalizedDate,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF6F6F6F),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }  
+
+  List<Widget> _buildStatusCards(deliveries) {
+    return [
+      StatCard(
+        icon: Icons.list_alt,
+        colors: [const Color(0xFF46B4FF), const Color(0xFF1075FA)],
+        title: "Total",
+        value: deliveries.length.toString(),
+      ),
       StatCard(
         icon: Icons.access_time,
         colors: [const Color(0xFFF0B100), const Color(0xFFD08700)],
         title: "Pendentes",
-        value: (counts["Pendente"] ?? 0).toString(),
+        value: deliveries.where((d) => d.deliveryStatus == "Pendente").length.toString(),
+        backgroundColor: Colors.white,
       ),
       StatCard(
         icon: Icons.check,
         colors: [const Color(0xFF00C951), const Color(0xFF00A63E)],
         title: "Entregues",
-        value: (counts["Entregue"] ?? 0).toString(),
-      ),
-      StatCard(
-        icon: Icons.close,
-        colors: [const Color(0xFFFF5C5C), const Color(0xFFB20000)],
-        title: "Não Entregues",
-        value: (counts["Não Entregue"] ?? 0).toString(),
-      ),
-      StatCard(
-        icon: Icons.send,
-        colors: [const Color(0xFF46B4FF), const Color(0xFF1075FA)],
-        title: "Total",
-        value: (counts["Total"] ?? 0).toString(),
-      ),
+        value: deliveries.where((d) => d.deliveryStatus == "Entregue").length.toString(),
+      )
     ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
-        final maxColumns = maxWidth > 1300
-            ? 5
-            : maxWidth > 1200
-            ? 4
-            : maxWidth > 800
-            ? 3
-            : maxWidth > 500
-            ? 2
-            : 1;
-
-        final columns = cards.length < maxColumns ? cards.length : maxColumns;
-        final totalSpacing = _spacing * (columns - 1);
-        final cardWidth = (maxWidth - totalSpacing) / columns;
-
-        return Wrap(
-          spacing: _spacing,
-          runSpacing: _spacing,
-          children: cards
-              .map((c) => SizedBox(width: cardWidth, child: c))
-              .toList(),
-        );
-      },
-    );
   }
 
-  Widget _buildSearchField() {
-    return TextField(
-      onChanged: (value) => setState(() => searchQuery = value),
-      decoration: InputDecoration(
-        hintText: "Buscar família...",
-        prefixIcon: const Icon(Icons.search),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-    );
-  }
-
-  Widget _buildStatusDropdown(List<String> options) {
-    return DropdownButtonFormField<String>(
-      value: selectedStatus,
-      items: options
-          .map((status) => DropdownMenuItem(value: status, child: Text(status)))
-          .toList(),
-      onChanged: (value) {
-        if (value != null) setState(() => selectedStatus = value);
-      },
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-    );
-  }
-
-  Widget _buildDatePicker(BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        final pickedDate = await showDatePicker(
-          context: context,
-          initialDate: selectedDate ?? DateTime.now(),
-          firstDate: DateTime(2020),
-          lastDate: DateTime(2100),
-        );
-        if (pickedDate != null) setState(() => selectedDate = pickedDate);
-      },
-      child: InputDecorator(
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.date_range),
-          hintText: "Filtrar por data",
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 14,
+  Widget _buildSearchField(WidgetRef ref) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: TextField(
+          onChanged: (v) => ref.read(deliveryControllerProvider.notifier).search(v),
+          decoration: const InputDecoration(
+            hintText: "Nome, CPF, CEP ou Endereço...",
+            prefixIcon: Icon(Icons.search),
+            border: InputBorder.none,
           ),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          filled: true,
-          fillColor: Colors.white,
         ),
+      ),
+    );
+  }
+
+  Widget _buildCardHeader() {
+    return const CardHeader(
+      title: 'Lista de entregas',
+      subtitle: 'Confirme as entregas realizadas',
+      colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
+      icon: Icons.check_box,
+    );
+  }
+
+  Widget _buildDeliveryHeader(ThemeData theme) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Text(
-          selectedDate == null
-              ? "Selecionar data"
-              : "${selectedDate!.day.toString().padLeft(2, '0')}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.year}",
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTable(List deliveries) {
-    if (deliveries.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Text(
-            "Nenhuma entrega encontrada",
-            style: TextStyle(fontSize: 16),
+          "Entregas",
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.outline,
           ),
         ),
-      );
-    }
-
-    final availableHeight =
-        MediaQuery.of(context).size.height - kToolbarHeight - 350;
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: availableHeight),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              width: constraints.maxWidth,
-              child: DataTable(
-                columnSpacing: 24,
-                headingRowColor: WidgetStateProperty.all(Colors.grey.shade200),
-                dataRowMinHeight: 48,
-                dataRowMaxHeight: 56,
-                columns: const [
-                  DataColumn(label: Text("Família")),
-                  DataColumn(label: Text("Telefone")),
-                  DataColumn(label: Text("Endereço")),
-                  DataColumn(label: Text("Status")),
-                  DataColumn(label: Text("Ações")),
-                ],
-                rows: deliveries.map((delivery) {
-                  return DataRow(
-                    cells: [
-                      DataCell(Text(delivery.name)),
-                      DataCell(Text(delivery.phone)),
-                      DataCell(Text(delivery.address)),
-                      DataCell(_buildStatusChip(delivery.status)),
-                      DataCell(
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.send,
-                                color: Colors.blueAccent,
-                              ),
-                              onPressed: () =>
-                                  _openInGoogleMaps(delivery.address),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                color: Colors.orange,
-                              ),
-                              onPressed: () {},
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                }).toList(),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildStatusChip(String status) {
-    Color textColor;
-    Color bgColor;
-
-    switch (status.toLowerCase()) {
-      case "entregue":
-        textColor = Colors.green.shade800;
-        bgColor = const Color.fromARGB(50, 144, 254, 148);
-        break;
-      case "não entregue":
-        textColor = Colors.red.shade800;
-        bgColor = const Color.fromARGB(50, 236, 143, 137);
-        break;
-      default:
-        textColor = Colors.orange.shade800;
-        bgColor = const Color.fromARGB(50, 244, 244, 178);
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: textColor),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: textColor,
-        ),
-      ),
-    );
-  }
-
-  void _openInGoogleMaps(String address) async {
-    final query = Uri.encodeComponent(address);
-    final url = Uri.parse(
-      "https://www.google.com/maps/search/?api=1&query=$query",
-    );
-    try {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      debugPrint("Não foi possível abrir o Google Maps: $e");
-    }
-  }
-
-  Widget _buildButton(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: () {
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => NewDeliveryPage()));
-      },
-      icon: const Icon(Icons.add, color: Colors.white),
-      label: const Text(
-        'Adicionar entregas',
-        style: TextStyle(color: Colors.white),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF9810FA),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
