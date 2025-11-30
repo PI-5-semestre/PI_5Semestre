@@ -1,5 +1,6 @@
 import 'package:cesta_web/src/views/basket/basket_list_page.dart';
 import 'package:cesta_web/src/widgets/app_drawer.dart';
+import 'package:cesta_web/src/widgets/screen_size_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:core/widgets/statCard.dart';
 import 'package:core/widgets/card_header.dart';
@@ -106,66 +107,64 @@ class _BasketPageState extends State<BasketPage> {
       drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16),
-        child: ListView(
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [_buildCardHeader(), const SizedBox(height: 16)],
+        child: ScreenSizeWidget(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [_buildCardHeader(), const SizedBox(height: 16)],
+              ),
+              SizedBox(height: spacing),
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                SizedBox(height: spacing),
-                Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: "Buscar família...",
-                        prefixIcon: Icon(Icons.search),
-                        border: InputBorder.none,
-                      ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      hintText: "Buscar família...",
+                      prefixIcon: Icon(Icons.search),
+                      border: InputBorder.none,
                     ),
                   ),
                 ),
-                SizedBox(height: spacing),
-                SegmentedCardSwitcher(options: cards, icons: icons),
-
-                SizedBox(height: spacing),
-                ...selectedFamilies.entries.map((entry) {
-                  return Column(
-                    children: [
-                      // FamilyCard(
-                      //   name: entry.key,
-                      //   phone: "(19) 99999-0000",
-                      //   members: 4,
-                      //   income: 700,
-                      //   cpf: "000.000.000-00",
-                      //   address:
-                      //       "Rua Exemplo, 123 - Bairro Exemplo, São Paulo - SP",
-                      //   observations: "Família em situação de vulnerabilidade.",
-                      //   status: "ativa",
-                      //   deliveryStatus: "aguardando",
-                      //   recommended: "Recomendado Pequena",
-                      //   selected: entry.value,
-                      //   onSelected: (bool? v) {
-                      //     setState(() {
-                      //       selectedFamilies[entry.key] = v ?? false;
-                      //     });
-                      //   },
-                      // ),
-                      const SizedBox(height: 12),
-                    ],
-                  );
-                }).toList(),
-                const SizedBox(height: 24),
-              ],
-            ),
-          ],
+              ),
+              SizedBox(height: spacing),
+              SegmentedCardSwitcher(options: cards, icons: icons),
+          
+              SizedBox(height: spacing),
+              ...selectedFamilies.entries.map((entry) {
+                return Column(
+                  children: [
+                    // FamilyCard(
+                    //   name: entry.key,
+                    //   phone: "(19) 99999-0000",
+                    //   members: 4,
+                    //   income: 700,
+                    //   cpf: "000.000.000-00",
+                    //   address:
+                    //       "Rua Exemplo, 123 - Bairro Exemplo, São Paulo - SP",
+                    //   observations: "Família em situação de vulnerabilidade.",
+                    //   status: "ativa",
+                    //   deliveryStatus: "aguardando",
+                    //   recommended: "Recomendado Pequena",
+                    //   selected: entry.value,
+                    //   onSelected: (bool? v) {
+                    //     setState(() {
+                    //       selectedFamilies[entry.key] = v ?? false;
+                    //     });
+                    //   },
+                    // ),
+                    const SizedBox(height: 12),
+                  ],
+                );
+              }).toList(),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );

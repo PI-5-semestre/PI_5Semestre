@@ -42,7 +42,7 @@ final class DeliveryControllerProvider
 }
 
 String _$deliveryControllerHash() =>
-    r'5697fe537d3e880f67087581bf67df131066f020';
+    r'8acf823c2c10948be3cd58a73831a820703e6ac1';
 
 abstract class _$DeliveryController extends $Notifier<DeliveryState> {
   DeliveryState build();

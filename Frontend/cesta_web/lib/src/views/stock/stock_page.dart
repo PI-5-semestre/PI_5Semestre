@@ -1,3 +1,4 @@
+import 'package:cesta_web/src/widgets/screen_size_widget.dart';
 import 'package:core/features/stock/application/stock_state.dart';
 import 'package:core/features/stock/data/models/stock_model.dart';
 import 'package:core/features/stock/providers/stock_provider.dart';
@@ -89,42 +90,46 @@ class _StockPageState extends ConsumerState<StockPage> {
     // ];
 
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(_pagePadding),
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: ScreenSizeWidget(
+        child: Padding(
+          padding: const EdgeInsets.all(_pagePadding),
+          child: Column(
             children: [
-              const Expanded(
-                child: CardHeader(
-                  title: 'Controle de estoque',
-                  subtitle: 'Gerencie os produtos das cestas básicas',
-                  colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
-                  icon: Icons.archive_outlined,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: CardHeader(
+                      title: 'Controle de estoque',
+                      subtitle: 'Gerencie os produtos das cestas básicas',
+                      colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
+                      icon: Icons.archive_outlined,
+                    ),
+                  ),
+                  const SizedBox(width: _spacing),
+                ],
+              ),
+              const SizedBox(height: _spacing),
+          
+              InfoCard(
+                title: "Estoque Atual",
+                color: const Color(0xFF155DFC),
+                icon: Icons.today,
+                iconColor: Colors.white,
+                iconBackground: Colors.white54,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: _spacing),
+                    Row(children: [Expanded(flex: 2, child: _buildSearchField())]),
+                    const SizedBox(height: _spacing),
+                    _buildList(state.stocks, controller, state),
+                  ],
                 ),
               ),
-              const SizedBox(width: _spacing),
             ],
           ),
-          const SizedBox(height: _spacing),
-
-          InfoCard(
-            title: "Estoque Atual",
-            color: const Color(0xFF155DFC),
-            icon: Icons.today,
-            iconColor: Colors.white,
-            iconBackground: Colors.white54,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: _spacing),
-                Row(children: [Expanded(flex: 2, child: _buildSearchField())]),
-                const SizedBox(height: _spacing),
-                _buildList(state.stocks, controller, state),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
 
       floatingActionButton: FloatingActionButton(

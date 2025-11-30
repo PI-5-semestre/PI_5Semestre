@@ -34,5 +34,6 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> logout() async {
     if (ref.mounted) state = const AsyncData(null);
     await ref.read(storageServiceProvider.notifier).remove('token');
+    await ref.read(storageServiceProvider.notifier).remove('user');
   }
 }

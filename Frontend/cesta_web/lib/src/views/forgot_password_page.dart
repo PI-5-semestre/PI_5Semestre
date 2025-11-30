@@ -1,3 +1,4 @@
+import 'package:cesta_web/src/widgets/screen_size_widget.dart';
 import 'package:core/widgets/button_widget.dart';
 import 'package:core/widgets/input_widget.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +13,7 @@ class ForgotPasswordPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("")),
       body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+        child: ScreenSizeWidget(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 400),
             padding: const EdgeInsets.all(24),
