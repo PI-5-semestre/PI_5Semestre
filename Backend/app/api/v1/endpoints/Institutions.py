@@ -5,7 +5,7 @@ from io import BytesIO
 
 from fastapi import APIRouter, Depends, Query, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -25,6 +25,7 @@ from app.schemas.Institutions import (
     DeliveryPut,
     DeliveryReschedule,
     DeliveryResp,
+    InstitutionDashboardResp,
     InstitutionUpdate,
     InstitutionResp,
     UserCorporateResp,
@@ -1338,4 +1339,74 @@ async def list_all_baskets(institution_id: int, family_id: int, session: Session
     return basket_received
 
 
-    
+@router.get('/{institution_id}/dashboard', response_model=InstitutionDashboardResp)
+async def dashboard(institution_id: int, session: Session, current_account: Annotated[Account, Depends(get_current_account)]):
+    institution = await get_institution_or_404(session, institution_id)
+
+    total_families = await session.execute(
+        select(func.count(Family.id)).where(
+            Family.institution_id == institution.id,
+            Family.active == True
+        )
+    )
+    total_families_count = total_families.scalar_one()
+
+    active_families = await session.execute(
+        select(func.count(Family.id)).where(
+            Family.institution_id == institution.id,
+            Family.situation == SituationType.ACTIVE,
+            Family.active == True
+        )
+    )
+    active_families_count = active_families.scalar_one()
+
+    pending_families = await session.execute(
+        select(func.count(Family.id)).where(
+            Family.institution_id == institution.id,
+            Family.situation == SituationType.PENDING,
+            Family.active == True
+        )
+    )
+    pending_families_count = pending_families.scalar_one()
+
+    inactive_families = await session.execute(
+        select(func.count(Family.id)).where(
+            Family.institution_id == institution.id,
+            Family.situation == SituationType.INACTIVE,
+            Family.active == True
+        )
+    )
+    inactive_families_count = inactive_families.scalar_one()
+
+    total_deliveries = await session.execute(
+        select(func.count(FamilyDelivery.id)).where(
+            FamilyDelivery.institution_id == institution.id
+        )
+    )
+    total_deliveries_count = total_deliveries.scalar_one()
+
+    completed_deliveries = await session.execute(
+        select(func.count(FamilyDelivery.id)).where(
+            FamilyDelivery.institution_id == institution.id,
+            FamilyDelivery.status == SituationDelivery.COMPLETED
+        )
+    )
+    completed_deliveries_count = completed_deliveries.scalar_one()
+
+    pending_deliveries = await session.execute(
+        select(func.count(FamilyDelivery.id)).where(
+            FamilyDelivery.institution_id == institution.id,
+            FamilyDelivery.status == SituationDelivery.PENDING
+        )
+    )
+    pending_deliveries_count = pending_deliveries.scalar_one()
+
+    return InstitutionDashboardResp(
+        total_families=total_families_count,
+        active_families=active_families_count,
+        pending_families=pending_families_count,
+        inactive_families=inactive_families_count,
+        total_deliveries=total_deliveries_count,
+        completed_deliveries=completed_deliveries_count,
+        pending_deliveries=pending_deliveries_count
+    )

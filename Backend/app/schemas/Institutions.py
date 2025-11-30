@@ -157,3 +157,11 @@ class BasketResp(BaseModel):
     family_id: int
     basket_type: str
     products: List[BasketRespItem]
+    
+class InstitutionDashboardResp(BaseModel):
+    total_families: int
+    active_families: int
+    inactive_families: int
+    total_deliveries: int
+    completed_deliveries: int
+    pending_deliveries: int
