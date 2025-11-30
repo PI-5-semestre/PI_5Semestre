@@ -14,10 +14,13 @@ class VisitRepositoryImpl implements VisitRepository {
   VisitRepositoryImpl({ required this.dio });
 
   @override
-  Future<List<Visit>> fetchVisits() async {
+  Future<List<Visit>> fetchVisits(String token) async {
     try {
       final response =  await dio.get(
-        '/institutions/1/visits'
+        '/institutions/1/visits',
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'}
+        )
       );
 
       return (response.data as List)
@@ -30,12 +33,15 @@ class VisitRepositoryImpl implements VisitRepository {
   }
 
   @override
-  Future<bool> createVisit(Visit visit, int family_id) async {
+  Future<bool> createVisit(Visit visit, int family_id, String token) async {
     final data = visit.toJson()..removeWhere((k, v) => v == null);
     try {
       final response = await dio.post(
         '/institutions/1/visit/$family_id',
-        data: jsonEncode(data)
+        data: jsonEncode(data),
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'}
+        )
       );
 
       return response.statusCode == 201;
@@ -46,11 +52,14 @@ class VisitRepositoryImpl implements VisitRepository {
   }
   
   @override
-  Future<bool> createResponseVisit(Response response) async {
+  Future<bool> createResponseVisit(Response response, int family_id, String token) async {
     try {
       final resp = await dio.post(
-        '/institutions/1/visit/${response.visitation_id}/response',
-        data: response.toJson()
+        '/institutions/1/visit/${family_id}/response',
+        data: response.toJson(),
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'}
+        )
       );
       return resp.statusCode == 201;
     } on DioException catch (e) {

@@ -76,9 +76,15 @@ class DeliveryController extends _$DeliveryController {
 
     try {
       await ref.read(deliveryRepositoryProvider).createDelivery(delivery, await token);
+
+      if (!ref.mounted) return;
+
       await fetchDeliverys();
     } catch (e) {
       final message =  e.toString().replaceFirst("Exception: ", "");
+
+      if (!ref.mounted) return;
+
       String translated = switch (message) {
         final String text when text.contains("Family with identifier") => "Família não encontrado",
         final String text when text.contains("Account with id") => "Entregador não encontrado",
@@ -86,6 +92,7 @@ class DeliveryController extends _$DeliveryController {
       };
       state = state.copyWith(error: translated);
     } finally {
+      if (!ref.mounted) return;
       state = state.copyWith(isLoading: false);
     }
   }

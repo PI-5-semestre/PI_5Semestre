@@ -6,8 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class VisitCard extends ConsumerWidget {
   final Visit visit;
+  final String? appType;
 
-  const VisitCard({super.key, required this.visit});
+  const VisitCard({super.key, required this.visit, this.appType = 'app'});
 
   Color _getStatusColor() {
     final status = visit.response?.roleStatus ?? "Agendada";
@@ -210,7 +211,7 @@ class VisitCard extends ConsumerWidget {
                               heroTag: "edit_${visit.id}",
                               onPressed: () {
                                 context.go(
-                                  '/more/visits/edit_visit',
+                                  appType == 'app' ? '/more/visits/edit_visit' : '/visits/edit_visit',
                                   extra: visit,
                                 );
                                 Navigator.pop(context);

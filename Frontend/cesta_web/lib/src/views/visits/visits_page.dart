@@ -141,7 +141,7 @@ class _VisitsPageState extends ConsumerState<VisitsPage>  {
                       children: visitState.filtered.map((visit) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                          child: VisitCard(visit: visit),
+                          child: VisitCard(visit: visit, appType: 'web'),
                         );
                       }).toList(),
                     )

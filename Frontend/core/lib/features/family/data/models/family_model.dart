@@ -46,18 +46,6 @@ abstract class FamilyModel with _$FamilyModel {
         return "Desconhecido";
     }
   }
-
-  // Status de entrega
-  String get deliveryStatus {
-    switch (situation) {
-      case "ACTIVE":
-        return "Recebendo";
-      case "PENDING":
-        return "Aguardando";
-      default:
-        return "Desconhecido";
-    }
-  }
 }
 
 @freezed

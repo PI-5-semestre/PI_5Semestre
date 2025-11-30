@@ -1,5 +1,3 @@
-import 'package:core/features/family/data/models/family_model.dart';
-import 'package:core/features/family/providers/family_provider.dart';
 import 'package:core/features/visits/data/models/visits.dart';
 import 'package:core/features/visits/providers/visit_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,14 +52,10 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
     final visitState = ref.watch(visitControllerProvider);
     final visitController = ref.watch(visitControllerProvider.notifier);
 
-    final familyState = ref.watch(familyControllerProvider);
-    final familyController = ref.watch(familyControllerProvider.notifier);
-
     // final theme = Theme.of(context);
 
     final isBtnDisabled = isProcessing ||
         visitState.isLoading ||
-        familyState.isLoading ||
         statusController.text.trim() == "PENDING";
 
     return Scaffold(
@@ -144,7 +138,7 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
                   status: statusController.text.trim(),
                 );
 
-                await visitController.createResponseVisit(resp);
+                await visitController.createResponseVisit(resp, widget.visit.family!.id as int);
 
                 if (visitState.error != null) {
                   setState(() => isProcessing = false);
@@ -152,21 +146,6 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
                     SnackBar(content: Text(visitState.error!)),
                   );
                   return;
-                }
-
-                if (statusController.text.trim() == "ACCEPTED") {
-                  final updatedFamily = (widget.visit.family as FamilyModel)
-                      .copyWith(situation: "ACTIVE");
-
-                  await familyController.updateFamily(updatedFamily);
-
-                  if (familyState.error != null) {
-                    setState(() => isProcessing = false);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(familyState.error!)),
-                    );
-                    return;
-                  }
                 }
 
                 setState(() => isProcessing = false);

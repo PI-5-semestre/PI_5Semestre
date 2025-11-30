@@ -20,6 +20,8 @@ class FamilyCard extends ConsumerWidget {
         return Color(0xFF016630);
       case "Pendente":
         return Colors.orange;
+      case "Inativa":
+        return Colors.red;
       default:
         return Colors.grey;
     }
@@ -479,7 +481,7 @@ class FamilyCard extends ConsumerWidget {
                   ),
                 ),
               ),
-              if (family.roleSituation == "Pendente")
+              if (family.roleSituation == "Inativa")
                 FloatingActionButton.small(
                   heroTag: "calendar_${family.id}",
                   elevation: 1,
@@ -497,7 +499,7 @@ class FamilyCard extends ConsumerWidget {
                   child: const Icon(Icons.calendar_today),
                 )
 
-              else if (true)
+              else if (family.roleSituation == "Pendente")
                 FloatingActionButton.small(
                   heroTag: "entrega_${family.id}",
                   elevation: 1,

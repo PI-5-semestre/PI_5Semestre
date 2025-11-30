@@ -54,14 +54,10 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
     final visitState = ref.watch(visitControllerProvider);
     final visitController = ref.watch(visitControllerProvider.notifier);
 
-    final familyState = ref.watch(familyControllerProvider);
-    final familyController = ref.watch(familyControllerProvider.notifier);
-
-    final theme = Theme.of(context);
+    // final theme = Theme.of(context);
 
     final isBtnDisabled = isProcessing ||
         visitState.isLoading ||
-        familyState.isLoading ||
         statusController.text.trim() == "PENDING";
 
     return Scaffold(
@@ -153,21 +149,6 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
                     SnackBar(content: Text(visitState.error!)),
                   );
                   return;
-                }
-
-                if (statusController.text.trim() == "ACCEPTED") {
-                  final updatedFamily = (widget.visit.family as FamilyModel)
-                      .copyWith(situation: "ACTIVE");
-
-                  await familyController.updateFamily(updatedFamily);
-
-                  if (familyState.error != null) {
-                    setState(() => isProcessing = false);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(familyState.error!)),
-                    );
-                    return;
-                  }
                 }
 
                 setState(() => isProcessing = false);
