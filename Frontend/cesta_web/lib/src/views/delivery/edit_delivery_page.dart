@@ -1,3 +1,4 @@
+import 'package:cesta_web/src/widgets/screen_size_widget.dart';
 import 'package:core/features/delivery/providers/delivery_provider.dart';
 import 'package:core/features/delivery/data/models/delivery.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -59,52 +60,54 @@ class _EditDeliveryPageState extends ConsumerState<EditDeliveryPage> {
         padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         child: Form(
           key: formKey,
-          child: ListView(
-            children: [
-              _buildCardHeader(),
-
-              _buildSection(
-                title: "Informações Pessoais",
-                icon: Icons.person,
-                children: [
-                  _buildTextField("Nome *",
-                    controller: nameController,
-                    readOnly: true
-                  ),
-                  _buildTextField("Observações",
-                    controller: descriptionController,
-                    maxLines: 3,
-                  ),
-                  DropdownButtonFormField<String>(
-                    initialValue: statusController.text.isNotEmpty
-                        ? statusController.text
-                        : widget.delivery.status,
-                    items: const [
-                      DropdownMenuItem(value: "COMPLETED", child: Text("Entregue")),
-                      DropdownMenuItem(value: "PENDING", child: Text("Pendente")),
-                      DropdownMenuItem(value: "CANCELED", child: Text("Não Entregue")),
-                    ],
-                    onChanged: (v) {
-                      setState(() {});
-                      statusController.text = v ?? '';
-                    },
-                    validator: Validatorless.required("Selecione uma opção"),
-                    decoration: InputDecoration(
-                      labelText: "Situação",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+          child: ScreenSizeWidget(
+            child: Column(
+              children: [
+                _buildCardHeader(),
+            
+                _buildSection(
+                  title: "Informações Pessoais",
+                  icon: Icons.person,
+                  children: [
+                    _buildTextField("Nome *",
+                      controller: nameController,
+                      readOnly: true
+                    ),
+                    _buildTextField("Observações",
+                      controller: descriptionController,
+                      maxLines: 3,
+                    ),
+                    DropdownButtonFormField<String>(
+                      initialValue: statusController.text.isNotEmpty
+                          ? statusController.text
+                          : widget.delivery.status,
+                      items: const [
+                        DropdownMenuItem(value: "COMPLETED", child: Text("Entregue")),
+                        DropdownMenuItem(value: "PENDING", child: Text("Pendente")),
+                        DropdownMenuItem(value: "CANCELED", child: Text("Não Entregue")),
+                      ],
+                      onChanged: (v) {
+                        setState(() {});
+                        statusController.text = v ?? '';
+                      },
+                      validator: Validatorless.required("Selecione uma opção"),
+                      decoration: InputDecoration(
+                        labelText: "Situação",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
-                  ),
-                  if (statusController.text == "CANCELED")
-                    _buildTextField(
-                      "Motivo *",
-                      controller: reasonController,
-                      maxLines: 3
-                    )
-                ],
-              ),
-            ],
+                    if (statusController.text == "CANCELED")
+                      _buildTextField(
+                        "Motivo *",
+                        controller: reasonController,
+                        maxLines: 3
+                      )
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

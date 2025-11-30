@@ -1,3 +1,4 @@
+import 'package:cesta_web/src/widgets/screen_size_widget.dart';
 import 'package:core/features/family/data/models/family_model.dart';
 import 'package:core/features/family/providers/family_provider.dart';
 import 'package:core/features/viacep/providers/cep_provider.dart';
@@ -155,229 +156,231 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
       appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        child: Form(
-          key: formKey,
-          child: ListView(
-            children: [
-              _buildCardHeader(),
-
-              _buildSection(
-                title: "Informações Pessoais",
-                icon: Icons.person,
-                children: [
-                  _buildTextField("Nome *",
-                    controller: nameController,
-                    validator: Validatorless.required("Campo obrigatório"),
-                  ),
-                  _buildTextField("CPF *",
-                    controller: cpfController,
-                    readOnly: true,
-                  ),
-                  _buildTextField("Telefone", controller: phoneController),
-                ],
-              ),
-
-              _buildSection(
-                title: "Membros da Família",
-                icon: Icons.group,
-                children: [
-                  ...familyMembers.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    var member = entry.value;
-
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Membro ${index + 1}",
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            _buildTextField("Nome *",
-                              controller: member["name"],
-                              validator: Validatorless.required("Campo obrigatório"),
-                            ),
-                            _buildTextField("CPF",
-                              controller: member["cpf"],
-                            ),
-                            DropdownButtonFormField<String>(
-                              value: member["kinship"] ?? "SON",
-                              items: const [
-                                DropdownMenuItem(value: "SON", child: Text("Filho(a)")),
-                                DropdownMenuItem(value: "SPOUSE", child: Text("Cônjuge")),
-                                DropdownMenuItem(value: "FATHER", child: Text("Pai")),
-                                DropdownMenuItem(value: "MOTHER", child: Text("Mãe")),
-                                DropdownMenuItem(value: "OTHER", child: Text("Outro")),
-                              ],
-                              onChanged: (value) {
-                                setState(() => member["kinship"] = value as dynamic);
-                              },
-                              decoration: const InputDecoration(
-                                labelText: "Grau de Parentesco",
-                                border: OutlineInputBorder(),
+        child: ScreenSizeWidget(
+          child: Form(
+            key: formKey,
+            child: Column(
+              children: [
+                _buildCardHeader(),
+          
+                _buildSection(
+                  title: "Informações Pessoais",
+                  icon: Icons.person,
+                  children: [
+                    _buildTextField("Nome *",
+                      controller: nameController,
+                      validator: Validatorless.required("Campo obrigatório"),
+                    ),
+                    _buildTextField("CPF *",
+                      controller: cpfController,
+                      readOnly: true,
+                    ),
+                    _buildTextField("Telefone", controller: phoneController),
+                  ],
+                ),
+          
+                _buildSection(
+                  title: "Membros da Família",
+                  icon: Icons.group,
+                  children: [
+                    ...familyMembers.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      var member = entry.value;
+          
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Membro ${index + 1}",
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
-                            ),
-                            if (member["kinship"] == "OTHER") ...[
-                              _buildTextField("Informe o grau *",
-                                controller: member["otherController"],
+                              _buildTextField("Nome *",
+                                controller: member["name"],
                                 validator: Validatorless.required("Campo obrigatório"),
                               ),
+                              _buildTextField("CPF",
+                                controller: member["cpf"],
+                              ),
+                              DropdownButtonFormField<String>(
+                                value: member["kinship"] ?? "SON",
+                                items: const [
+                                  DropdownMenuItem(value: "SON", child: Text("Filho(a)")),
+                                  DropdownMenuItem(value: "SPOUSE", child: Text("Cônjuge")),
+                                  DropdownMenuItem(value: "FATHER", child: Text("Pai")),
+                                  DropdownMenuItem(value: "MOTHER", child: Text("Mãe")),
+                                  DropdownMenuItem(value: "OTHER", child: Text("Outro")),
+                                ],
+                                onChanged: (value) {
+                                  setState(() => member["kinship"] = value as dynamic);
+                                },
+                                decoration: const InputDecoration(
+                                  labelText: "Grau de Parentesco",
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                              if (member["kinship"] == "OTHER") ...[
+                                _buildTextField("Informe o grau *",
+                                  controller: member["otherController"],
+                                  validator: Validatorless.required("Campo obrigatório"),
+                                ),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
-                      ),
-                    );
-                  }).toList(),
-
-                  OutlinedButton.icon(
-                    onPressed: _addMember,
-                    icon: const Icon(Icons.add),
-                    label: const Text("Adicionar Membro",
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ],
-              ),
-
-              _buildSection(
-                title: "Pessoas Autorizadas",
-                icon: Icons.group_add,
-                children: [
-                  const Text("Selecione até 2 membros para receber benefícios."),
-                  const SizedBox(height: 8),
-
-                  // Mostrar lista atual de autorizados
-                  ...familyMembers.asMap().entries.where((entry) {
-                    return entry.value["can_receive"] == true;
-                  }).map((entry) {
-                    int index = entry.key;
-                    var member = entry.value;
-
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      child: ListTile(
-                        title: Text(member["name"]?.text ?? "Sem nome"),
-                        subtitle: Text("Pessoa Autorizada"),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.close, color: Colors.red),
-                          onPressed: () {
+                      );
+                    }).toList(),
+          
+                    OutlinedButton.icon(
+                      onPressed: _addMember,
+                      icon: const Icon(Icons.add),
+                      label: const Text("Adicionar Membro",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+          
+                _buildSection(
+                  title: "Pessoas Autorizadas",
+                  icon: Icons.group_add,
+                  children: [
+                    const Text("Selecione até 2 membros para receber benefícios."),
+                    const SizedBox(height: 8),
+          
+                    // Mostrar lista atual de autorizados
+                    ...familyMembers.asMap().entries.where((entry) {
+                      return entry.value["can_receive"] == true;
+                    }).map((entry) {
+                      int index = entry.key;
+                      var member = entry.value;
+          
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        child: ListTile(
+                          title: Text(member["name"]?.text ?? "Sem nome"),
+                          subtitle: Text("Pessoa Autorizada"),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.close, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                familyMembers[index]["can_receive"] = false;
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+          
+                    if (familyMembers.where((m) => m["can_receive"] == true).length < 2)
+                      DropdownButtonFormField<int>(
+                        decoration: const InputDecoration(
+                          labelText: "Selecionar Membro",
+                          border: OutlineInputBorder(),
+                        ),
+                        items: familyMembers.asMap().entries.map((entry) {
+                          int index = entry.key;
+                          var member = entry.value;
+                          return DropdownMenuItem<int>(
+                            value: index,
+                            child: Text(member["name"]?.text.isEmpty
+                                ? "Sem nome"
+                                : member["name"].text),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
                             setState(() {
-                              familyMembers[index]["can_receive"] = false;
+                              familyMembers[value]["can_receive"] = true;
                             });
-                          },
+                          }
+                        },
+                      ),
+                  ],
+                ),
+          
+                _buildSection(
+                  title: "Endereço",
+                  icon: Icons.location_on,
+                  children: [
+                    _buildTextField("CEP *",
+                      controller: cepController,
+                      validator: Validatorless.required("Campo obrigatório"),
+                      onChanged: _searchCep,
+                    ),
+                    _buildTextField("Rua *",
+                      controller: streetController,
+                      validator: Validatorless.required("Campo obrigatório"),
+                    ),
+                    _buildTextField("Número *",
+                      controller: numberController,
+                      validator: Validatorless.required("Campo obrigatório"),
+                    ),
+                    _buildTextField("Bairro *",
+                      controller: neighborhoodController,
+                      validator: Validatorless.required("Campo obrigatório"),
+                    ),
+                    _buildTextField("Cidade *",
+                      controller: cityController,
+                      validator: Validatorless.required("Campo obrigatório"),
+                    ),
+                    _buildTextField("Estado *",
+                      controller: stateController,
+                      validator: Validatorless.required("Campo obrigatório"),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: comprovanteController,
+                      readOnly: true,
+                      onTap: _pickComprovante,
+                      decoration: InputDecoration(
+                        labelText: "Comprovante (Arquivo)",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        suffixIcon: const Icon(Icons.upload_file),
+                      ),
+                    ),
+                  ],
+                ),
+          
+                _buildSection(
+                  title: "Informações Socioeconômicas",
+                  icon: Icons.info,
+                  children: [
+                    _buildTextField("Renda Mensal (R\$)", controller: incomeController),
+                    DropdownButtonFormField<String>(
+                      value: situationController.text.isNotEmpty
+                          ? situationController.text
+                          : widget.family.situation,
+                      items: const [
+                        DropdownMenuItem(value: "PENDING", child: Text("Pendente")),
+                        DropdownMenuItem(value: "ACTIVE", child: Text("Aprovado")),
+                        DropdownMenuItem(value: "SUSPENDED", child: Text("Suspenso")),
+                      ],
+                      onChanged: (v) => situationController.text = v ?? '',
+                      validator: Validatorless.required("Selecione uma opção"),
+                      decoration: InputDecoration(
+                        labelText: "Situação",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                    );
-                  }),
-
-                  if (familyMembers.where((m) => m["can_receive"] == true).length < 2)
-                    DropdownButtonFormField<int>(
-                      decoration: const InputDecoration(
-                        labelText: "Selecionar Membro",
-                        border: OutlineInputBorder(),
-                      ),
-                      items: familyMembers.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        var member = entry.value;
-                        return DropdownMenuItem<int>(
-                          value: index,
-                          child: Text(member["name"]?.text.isEmpty
-                              ? "Sem nome"
-                              : member["name"].text),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            familyMembers[value]["can_receive"] = true;
-                          });
-                        }
-                      },
                     ),
-                ],
-              ),
-
-              _buildSection(
-                title: "Endereço",
-                icon: Icons.location_on,
-                children: [
-                  _buildTextField("CEP *",
-                    controller: cepController,
-                    validator: Validatorless.required("Campo obrigatório"),
-                    onChanged: _searchCep,
-                  ),
-                  _buildTextField("Rua *",
-                    controller: streetController,
-                    validator: Validatorless.required("Campo obrigatório"),
-                  ),
-                  _buildTextField("Número *",
-                    controller: numberController,
-                    validator: Validatorless.required("Campo obrigatório"),
-                  ),
-                  _buildTextField("Bairro *",
-                    controller: neighborhoodController,
-                    validator: Validatorless.required("Campo obrigatório"),
-                  ),
-                  _buildTextField("Cidade *",
-                    controller: cityController,
-                    validator: Validatorless.required("Campo obrigatório"),
-                  ),
-                  _buildTextField("Estado *",
-                    controller: stateController,
-                    validator: Validatorless.required("Campo obrigatório"),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: comprovanteController,
-                    readOnly: true,
-                    onTap: _pickComprovante,
-                    decoration: InputDecoration(
-                      labelText: "Comprovante (Arquivo)",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      suffixIcon: const Icon(Icons.upload_file),
+                    _buildTextField("Observações",
+                      controller: descriptionController,
+                      maxLines: 3,
                     ),
-                  ),
-                ],
-              ),
-
-              _buildSection(
-                title: "Informações Socioeconômicas",
-                icon: Icons.info,
-                children: [
-                  _buildTextField("Renda Mensal (R\$)", controller: incomeController),
-                  DropdownButtonFormField<String>(
-                    value: situationController.text.isNotEmpty
-                        ? situationController.text
-                        : widget.family.situation,
-                    items: const [
-                      DropdownMenuItem(value: "PENDING", child: Text("Pendente")),
-                      DropdownMenuItem(value: "ACTIVE", child: Text("Aprovado")),
-                      DropdownMenuItem(value: "SUSPENDED", child: Text("Suspenso")),
-                    ],
-                    onChanged: (v) => situationController.text = v ?? '',
-                    validator: Validatorless.required("Selecione uma opção"),
-                    decoration: InputDecoration(
-                      labelText: "Situação",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  _buildTextField("Observações",
-                    controller: descriptionController,
-                    maxLines: 3,
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:cesta_web/src/widgets/screen_size_widget.dart';
 import 'package:core/features/shared_preferences/service/storage_service.dart';
 import 'package:core/features/stock/data/models/stock_model.dart';
 import 'package:core/features/stock/providers/stock_provider.dart';
@@ -34,34 +35,32 @@ class _NewStockPageState extends ConsumerState<NewStockPage> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        child: ListView(
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [_buildCardHeader()],
-                ),
-                _buildSection(
-                  title: "Produtos",
-                  icon: Icons.shopping_cart_checkout,
-                  children: [
-                    _buildTextField("SKU *", controller: skuController),
-                    _buildTextField(
-                      "Nome do produto *",
-                      controller: nameController,
-                    ),
-                    // _buildTextField(
-                    //   "Quantidade",
-                    //   controller: quantityController,
-                    // ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ],
+        child: ScreenSizeWidget(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [_buildCardHeader()],
+              ),
+              _buildSection(
+                title: "Produtos",
+                icon: Icons.shopping_cart_checkout,
+                children: [
+                  _buildTextField("SKU *", controller: skuController),
+                  _buildTextField(
+                    "Nome do produto *",
+                    controller: nameController,
+                  ),
+                  // _buildTextField(
+                  //   "Quantidade",
+                  //   controller: quantityController,
+                  // ),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
