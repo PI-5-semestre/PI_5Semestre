@@ -804,6 +804,17 @@ async def create_family_delivery(
     ]:
         raise NotFoundError(detail="Unauthorized to create deliveries")
 
+    if family.situation == SituationType.INACTIVE:
+        raise NotFoundError(
+            detail="Cannot create delivery for inactive families"
+        )
+
+    if family.situation == SituationType.PENDING:
+        family.situation = SituationType.ACTIVE
+        session.add(family)
+        await session.commit()
+        await session.refresh(family)
+    
     fd = FamilyDelivery(
         institution_id=institution.id,
         family_id=family.id,
