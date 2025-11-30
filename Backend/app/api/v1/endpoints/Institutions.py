@@ -1104,8 +1104,8 @@ async def create_institution_visit(
             )
     
     # apenas para primeira visita, apos isso ela entra no cycle do READMISSION
-    if visit_type == InstitutionVisitationType.ADMISSION:
-        family.situation = SituationType.PENDING
+    # if visit_type == InstitutionVisitationType.ADMISSION:
+    #     family.situation = SituationType.PENDING
     
     # quando ele entrar no cycle de readmissao, ele fica inativo apos ele receber os 3 meses.
     if visit_type == InstitutionVisitationType.READMISSION:
