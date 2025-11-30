@@ -146,7 +146,7 @@ class FamilyResp(BaseModel):
     description: Optional[str]
     institution_id: int
     members: Optional[List[FamilyMemberResp]] = None
-
+    basket_received: Optional[int] = 0
 
 class DocFamilyCreate(BaseModel):
     doc_type: str

@@ -15,14 +15,14 @@ from .base_modal import BaseModel
 from datetime import datetime, timezone, timedelta
 
 if TYPE_CHECKING:
-    from .Institutions import Institution
+    from .Institutions import Institution, InstitutionBasketFamily
     from .users import Account
 
 
 class SituationType(str, PyEnum):
-    PENDING = "PENDING"
-    ACTIVE = "ACTIVE"
-    INACTIVE = "INACTIVE"
+    PENDING = "PENDING" # aguar v
+    ACTIVE = "ACTIVE" # ativa ben
+    INACTIVE = "INACTIVE" # inativa no ben 
     SUSPENDED = "SUSPENDED"
 
 class DegreeOfKinship(str, PyEnum):
@@ -79,7 +79,7 @@ class Family(BaseModel):
     situation: Mapped[SituationType] = mapped_column(
         Enum(SituationType, native_enum=False),
         nullable=False,
-        default=SituationType.PENDING,
+        default=SituationType.INACTIVE,
         index=True,
         comment="Situação atual da família no programa",
     )
@@ -130,6 +130,12 @@ class Family(BaseModel):
         lazy="selectin",
     )
 
+    baskets: Mapped[List["InstitutionBasketFamily"]] = relationship(
+        "InstitutionBasketFamily",
+        back_populates="family",
+        lazy="selectin",
+    )
+
     __table_args__ = (
         CheckConstraint("length(cpf) = 11", name="check_cpf_length"),
         CheckConstraint("length(state) = 2", name="check_state_length"),
@@ -143,11 +149,15 @@ class Family(BaseModel):
     def __repr__(self) -> str:
         return f"<Family(id={self.id}, name='{self.name}', cpf='{self.cpf}', situation='{self.situation.value}')>"
 
-    
-    #TODO IMPLEMENTAR LOGICA
+    def count_basket(self) -> int:
+        return len(self.baskets)
+     
     @property
     def is_active_for_basket(self) -> bool:
-        return True
+        basket_count = self.count_basket()
+        if basket_count == 0:
+            return True
+        return basket_count % 3 != 0
     
     
 

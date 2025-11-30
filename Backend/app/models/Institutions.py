@@ -162,3 +162,49 @@ class InstitutionVisitationResult(BaseModel):
     
     def __repr__(self):
         return f"<InstitutionVisitationResult(id={self.id}, visitation_id={self.visitation_id})>"
+    
+class InstitutionBasketFamily(BaseModel):
+    __tablename__ = "institution_basket_families"
+
+    institution_id: Mapped[int] = mapped_column(
+        ForeignKey("institutions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    
+    family_id: Mapped[int] = mapped_column(
+        ForeignKey("account_families.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    
+    basket_type: Mapped[BasketType] = mapped_column(
+        Enum(BasketType, native_enum=False), nullable=False
+    )
+
+    family: Mapped["Family"] = relationship(
+            "Family", foreign_keys=[family_id], back_populates="baskets"
+    )
+
+    products: Mapped[List["InstitutionBasketFamilyLine"]] = relationship(
+        "InstitutionBasketFamilyLine", back_populates="basket", cascade="all, delete-orphan"
+    )
+
+    def __repr__(self):
+        return f"<InstitutionBasketFamily(id={self.id}, institution_id={self.institution_id}, basket_type='{self.basket_type.value}')>"
+    
+class InstitutionBasketFamilyLine(BaseModel):
+    __tablename__ = "institution_basket_family_lines"
+
+    basket_family_id: Mapped[int] = mapped_column(
+        ForeignKey("institution_basket_families.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    product_sku: Mapped[str] = mapped_column(
+        String(100), nullable=False
+    )
+    quantity: Mapped[int] = mapped_column(
+        default=1, nullable=False
+    )
+    basket: Mapped["InstitutionBasketFamily"] = relationship(
+        "InstitutionBasketFamily", back_populates="products"
+    )
+    
+    
+    def __repr__(self):
+        return f"<InstitutionBasketProduct(id={self.id}, basket_family_id={self.basket_family_id}, product_sku='{self.product_sku}', quantity={self.quantity})>"

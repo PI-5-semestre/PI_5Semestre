@@ -3,6 +3,7 @@ from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 
 from app.schemas.families import FamilyResp
+from app.schemas.products import CreateProductBasketItem, StockItemCreateForInstitution
 from app.schemas.users import UserResp
 
 
@@ -132,3 +133,27 @@ class VisitationResp(BaseModel):
     type_of_visit: str
     response: Optional[VisitationResponseReturn] = None
     family: Optional["FamilyResp"] = None
+    
+class BasketCreateForInstitution(BaseModel):
+    family_id: int
+    type: str
+    products: List[CreateProductBasketItem]
+
+
+class BasketRespItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    product_sku: str
+    quantity: int
+    
+class BasketResp(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    created: datetime
+    modified: datetime
+    active: bool
+    institution_id: int
+    family_id: int
+    basket_type: str
+    products: List[BasketRespItem]
