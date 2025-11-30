@@ -1,3 +1,4 @@
+import 'package:cesta_web/src/widgets/screen_size_widget.dart';
 import 'package:core/features/visits/data/models/visits.dart';
 import 'package:core/features/visits/providers/visit_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,63 +64,65 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-          child: ListView(
-            children: [
-              _buildCardHeader(),
-
-              _buildSection(
-                title: "Informações da Visita",
-                icon: Icons.person,
-                children: [
-                  _buildTextField(
-                    "Nome",
-                    controller: nameController,
-                    readOnly: true,
-                  ),
-                  _buildTextField(
-                    "Telefone",
-                    controller: phoneController,
-                    readOnly: true,
-                  ),
-                  _buildTextField(
-                    "Observações",
-                    controller: descriptionController,
-                    maxLines: 3,
-                  ),
-
-                  DropdownButtonFormField<String>(
-                    value: statusController.text,
-                    items: const [
-                      DropdownMenuItem(
-                        value: "ACCEPTED",
-                        child: Text("Aprovada"),
-                      ),
-                      DropdownMenuItem(
-                        value: "REJECTED",
-                        child: Text("Reprovada"),
-                      ),
-                      DropdownMenuItem(
-                        value: "PENDING",
-                        child: Text("Agendada"),
-                      ),
-                    ],
-                    onChanged: (v) {
-                      statusController.text = v ?? '';
-                      setState(() {});
-                    },
-                    validator: Validatorless.required("Selecione uma opção"),
-                    decoration: InputDecoration(
-                      labelText: "Situação",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+          child: ScreenSizeWidget(
+            child: Column(
+              children: [
+                _buildCardHeader(),
+            
+                _buildSection(
+                  title: "Informações da Visita",
+                  icon: Icons.person,
+                  children: [
+                    _buildTextField(
+                      "Nome",
+                      controller: nameController,
+                      readOnly: true,
+                    ),
+                    _buildTextField(
+                      "Telefone",
+                      controller: phoneController,
+                      readOnly: true,
+                    ),
+                    _buildTextField(
+                      "Observações",
+                      controller: descriptionController,
+                      maxLines: 3,
+                    ),
+            
+                    DropdownButtonFormField<String>(
+                      value: statusController.text,
+                      items: const [
+                        DropdownMenuItem(
+                          value: "ACCEPTED",
+                          child: Text("Aprovada"),
+                        ),
+                        DropdownMenuItem(
+                          value: "REJECTED",
+                          child: Text("Reprovada"),
+                        ),
+                        DropdownMenuItem(
+                          value: "PENDING",
+                          child: Text("Agendada"),
+                        ),
+                      ],
+                      onChanged: (v) {
+                        statusController.text = v ?? '';
+                        setState(() {});
+                      },
+                      validator: Validatorless.required("Selecione uma opção"),
+                      decoration: InputDecoration(
+                        labelText: "Situação",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-            ],
+                  ],
+                ),
+            
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),

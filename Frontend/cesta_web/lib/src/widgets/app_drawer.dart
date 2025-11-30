@@ -205,11 +205,6 @@ class AppDrawer extends ConsumerWidget {
                       ),
                       child: Row(
                         children: [
-                          const CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Colors.grey,
-                            child: Icon(Icons.person, color: Colors.white),
-                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(

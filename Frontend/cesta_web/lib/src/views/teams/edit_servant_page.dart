@@ -1,3 +1,4 @@
+import 'package:cesta_web/src/widgets/screen_size_widget.dart';
 import 'package:core/features/auth/data/models/user.dart';
 import 'package:core/features/user/data/models/create_user.dart';
 import 'package:core/features/user/providers/user_provider.dart';
@@ -55,86 +56,89 @@ class _EditServantPageState extends ConsumerState<EditServantPage> {
     final controller = ref.read(userControllerProvider.notifier);
 
     return Scaffold(
+      appBar: AppBar(),
       body: Form(
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-          child: ListView(
-            children: [
-              _buildCardHeader(),
-
-              _buildSection(
-                title: "Informações de Acesso",
-                icon: Icons.login,
-                children: [
-                  _buildTextField(
-                    "E-mail *",
-                    controller: emailController,
-                    validator: Validatorless.multiple([
-                      Validatorless.required("Campo obrigatório"),
-                      Validatorless.email("E-mail inválido"),
-                    ]),
-                  ),
-                ],
-              ),
-
-              _buildSection(
-                title: "Informações Pessoais",
-                icon: Icons.person,
-                children: [
-                  _buildTextField(
-                    "Nome *",
-                    controller: nameController,
-                    validator: Validatorless.required("Campo obrigatório"),
-                  ),
-                  _buildTextField(
-                    "CPF *",
-                    controller: cpfController,
-                    validator: Validatorless.multiple([
-                      Validatorless.required("Campo obrigatório"),
-                      Validatorless.min(11, "CPF deve ter 11 dígitos"),
-                      Validatorless.max(11, "CPF deve ter 11 dígitos"),
-                      Validatorless.regex(RegExp(r'^\d{11}'), "Apenas números, 11 dígitos"),
-                    ]),
-                  ),
-                  _buildTextField(
-                    "Telefone *",
-                    controller: phoneController,
+          child: ScreenSizeWidget(
+            child: Column(
+              children: [
+                _buildCardHeader(),
+            
+                _buildSection(
+                  title: "Informações de Acesso",
+                  icon: Icons.login,
+                  children: [
+                    _buildTextField(
+                      "E-mail *",
+                      controller: emailController,
                       validator: Validatorless.multiple([
                         Validatorless.required("Campo obrigatório"),
-                        Validatorless.min(10, "Mínimo 11 dígitos"),
-                        Validatorless.max(11, "Máximo 11 dígitos"),
-                        Validatorless.regex(RegExp(r'^\d+$'), "Apenas números"),
+                        Validatorless.email("E-mail inválido"),
                       ]),
-                  ),
-                ],
-              ),
-
-              _buildSection(
-                title: "Tipo de Atividade",
-                icon: Icons.info,
-                children: [
-                  DropdownButtonFormField<String>(
-                    initialValue: typeController.text.isEmpty ? null : typeController.text,
-                    items: const [
-                      DropdownMenuItem(value: "OWNER", child: Text("Coordenador")),
-                      DropdownMenuItem(value: "DELIVERY_MAN", child: Text("Entregador")),
-                      DropdownMenuItem(value: "ASSISTANT", child: Text("Assistente Social")),
-                      DropdownMenuItem(value: "VOLUNTEER", child: Text("Voluntário")),
-                    ],
-                    onChanged: (v) => typeController.text = v ?? '',
-                    validator: Validatorless.required("Selecione um tipo de atividade"),
-                    decoration: InputDecoration(
-                      labelText: "Atividade",
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                     ),
-                  )
-                ],
-              ),
-
-              const SizedBox(height: 20),
-            ],
+                  ],
+                ),
+            
+                _buildSection(
+                  title: "Informações Pessoais",
+                  icon: Icons.person,
+                  children: [
+                    _buildTextField(
+                      "Nome *",
+                      controller: nameController,
+                      validator: Validatorless.required("Campo obrigatório"),
+                    ),
+                    _buildTextField(
+                      "CPF *",
+                      controller: cpfController,
+                      validator: Validatorless.multiple([
+                        Validatorless.required("Campo obrigatório"),
+                        Validatorless.min(11, "CPF deve ter 11 dígitos"),
+                        Validatorless.max(11, "CPF deve ter 11 dígitos"),
+                        Validatorless.regex(RegExp(r'^\d{11}'), "Apenas números, 11 dígitos"),
+                      ]),
+                    ),
+                    _buildTextField(
+                      "Telefone *",
+                      controller: phoneController,
+                        validator: Validatorless.multiple([
+                          Validatorless.required("Campo obrigatório"),
+                          Validatorless.min(10, "Mínimo 11 dígitos"),
+                          Validatorless.max(11, "Máximo 11 dígitos"),
+                          Validatorless.regex(RegExp(r'^\d+$'), "Apenas números"),
+                        ]),
+                    ),
+                  ],
+                ),
+            
+                _buildSection(
+                  title: "Tipo de Atividade",
+                  icon: Icons.info,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: typeController.text.isEmpty ? null : typeController.text,
+                      items: const [
+                        DropdownMenuItem(value: "OWNER", child: Text("Coordenador")),
+                        DropdownMenuItem(value: "DELIVERY_MAN", child: Text("Entregador")),
+                        DropdownMenuItem(value: "ASSISTANT", child: Text("Assistente Social")),
+                        DropdownMenuItem(value: "VOLUNTEER", child: Text("Voluntário")),
+                      ],
+                      onChanged: (v) => typeController.text = v ?? '',
+                      validator: Validatorless.required("Selecione um tipo de atividade"),
+                      decoration: InputDecoration(
+                        labelText: "Atividade",
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      ),
+                    )
+                  ],
+                ),
+            
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),

@@ -141,7 +141,7 @@ class _EditVisitPageState extends ConsumerState<EditVisitPage> {
                   status: statusController.text.trim(),
                 );
 
-                await visitController.createResponseVisit(resp);
+                await visitController.createResponseVisit(resp, widget.visit.family_id as int);
 
                 if (visitState.error != null) {
                   setState(() => isProcessing = false);

@@ -12,7 +12,7 @@ class ScreenSizeWidget extends StatelessWidget {
     return SingleChildScrollView(
       child: Center(
         child: Container(
-          width: 1300,
+          width: 1150,
           padding: screenWidth > 800
               ? const EdgeInsets.only(left: 16, right: 16, top: 50)
               : EdgeInsets.only(left: 16, right: 16),

@@ -4,7 +4,7 @@ library core;
 // Widgets 1.0
 
 export 'widgets/card_header.dart';
-export 'widgets/family_card.dart';
+export 'widgets/card/family/family_card.dart';
 export 'widgets/statCard.dart';
 export 'widgets/modal/modal_agenda.dart';
 export 'widgets/button_widget.dart';
