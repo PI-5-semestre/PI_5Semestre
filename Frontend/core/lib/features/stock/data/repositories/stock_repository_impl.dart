@@ -64,7 +64,7 @@ class StockRepositoryImpl implements StockRepository {
       final stockJson = stock.toJson();
 
       final response = await dio.put(
-        '/institutions/${stock.institution_id}/families/${stockJson['sku']}',
+        '/institutions/1/stock/${stockJson['sku']}',
         data: stockJson,
         options: Options(
           headers: {
@@ -87,6 +87,30 @@ class StockRepositoryImpl implements StockRepository {
     try {
       var response = await dio.get('/institutions/1/stock/$sku');
       return (response.data as StockModel);
+    } on DioException catch (e) {
+      final message =
+          e.response?.data['detail']?.toString() ?? 'Erro Inesperado';
+      throw Exception(message);
+    }
+  }
+
+  @override
+  Future<bool> updateQuantity(StockModel stock, String token) async {
+    try {
+      final response = await dio.post(
+        '/institutions/1/stock/control',
+        data: [
+          {'sku': stock.sku, 'quantity': stock.quantity},
+        ],
+        options: Options(
+          headers: {
+            'content-type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      return response.statusCode == 200;
     } on DioException catch (e) {
       final message =
           e.response?.data['detail']?.toString() ?? 'Erro Inesperado';

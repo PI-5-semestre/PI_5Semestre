@@ -6,4 +6,5 @@ abstract interface class StockRepository {
   Future<bool> add(StockModel stock, String token);
   Future<bool> update(StockModel stock, String token);
   Future<bool> delete(StockModel stock, String token);
+  Future<bool> updateQuantity(StockModel stock, String token);
 }
