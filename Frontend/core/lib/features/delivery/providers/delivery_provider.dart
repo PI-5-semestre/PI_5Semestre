@@ -71,6 +71,32 @@ class DeliveryController extends _$DeliveryController {
     state = state.copyWith(filtered: list, filterRole: role);
   }
 
+  Future<void> createDelivery(Map<String, dynamic> delivery) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      await ref.read(deliveryRepositoryProvider).createDelivery(delivery, await token);
+
+      if (!ref.mounted) return;
+
+      await fetchDeliverys();
+    } catch (e) {
+      final message =  e.toString().replaceFirst("Exception: ", "");
+
+      if (!ref.mounted) return;
+
+      String translated = switch (message) {
+        final String text when text.contains("Family with identifier") => "Família não encontrado",
+        final String text when text.contains("Account with id") => "Entregador não encontrado",
+        _ => message
+      };
+      state = state.copyWith(error: translated);
+    } finally {
+      if (!ref.mounted) return;
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
   Future<void> updateDelivery(Map<String, dynamic> delivery) async {
     state = state.copyWith(isLoading: true, error: null);
 

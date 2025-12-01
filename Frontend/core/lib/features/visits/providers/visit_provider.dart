@@ -1,3 +1,4 @@
+import 'package:core/features/shared_preferences/service/storage_service.dart';
 import 'package:core/features/visits/application/visit_state.dart';
 import 'package:core/features/visits/data/models/visits.dart';
 import 'package:core/features/visits/data/repositories/visit_repository_impl.dart';
@@ -10,11 +11,32 @@ class VisitController extends _$VisitController {
   @override
   VisitState build() => VisitState();
 
+  Future<String> get token async {
+    return await ref.read(storageServiceProvider.notifier).get<String>('token') ?? '';
+  }
+
+
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    final normalizedNow = DateTime(now.year, now.month, now.day);
+    
+    return normalizedDate == normalizedNow;
+  }
+
   Future<void> fetchVisits() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final data = await ref.read(visitRepositoryProvider).fetchVisits();
-      final onlyActive = data.where((v) => v.active!).toList();
+      final data = await ref.read(visitRepositoryProvider).fetchVisits(await token);
+
+      final onlyActive = data.where((v) {
+        final activeVisit = v.active == true;
+        final activefamily = v.family?.active == true;
+        final isTodayDelivery = _isToday(DateTime.parse(v.visit_at));
+
+        return activeVisit && activefamily && isTodayDelivery;
+      }).toList();
+
       state = state.copyWith(
         visities: onlyActive,
         filtered: onlyActive,
@@ -37,30 +59,8 @@ class VisitController extends _$VisitController {
   }
 
   void filterByRole(String? role) {
-    int index = 0;
-
-    // Determina o índice da aba
-    switch (role) {
-      case null:
-        index = 0;
-        break;
-      case 'ACCEPTED':
-        index = 1;
-        break;
-      case 'PENDING':
-        index = 2;
-        break;
-      case 'REJECTED':
-        index = 3;
-        break;
-    }
-
     if (role == null) {
-      state = state.copyWith(
-        filtered: state.visities,
-        filterRole: null,
-        selectedIndex: index,
-      );
+      state = state.copyWith(filtered: state.visities, filterRole: null);
       return;
     }
 
@@ -72,11 +72,7 @@ class VisitController extends _$VisitController {
           : status == role;
     }).toList();
 
-    state = state.copyWith(
-      filtered: list,
-      filterRole: role,
-      selectedIndex: index,
-    );
+    state = state.copyWith(filtered: list, filterRole: role);
   }
 
 
@@ -84,10 +80,10 @@ class VisitController extends _$VisitController {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      await ref.read(visitRepositoryProvider).createVisit(visit, family_id);
+      await ref.read(visitRepositoryProvider).createVisit(visit, family_id, await token);
 
       if (!ref.mounted) return;
-
+      await fetchVisits();
     } catch (e) {
       final msg = e.toString().replaceFirst("Exception: ", "");
       if (!ref.mounted) return;
@@ -100,14 +96,14 @@ class VisitController extends _$VisitController {
     }
   }
 
-  Future<void> createResponseVisit(Response response) async {
+  Future<void> createResponseVisit(Response response, int family_id) async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      await ref.read(visitRepositoryProvider).createResponseVisit(response);
+      await ref.read(visitRepositoryProvider).createResponseVisit(response, family_id, await token);
 
       if (!ref.mounted) return;
-
+      await fetchVisits();
     } catch (e) {
       final msg = e.toString().replaceFirst("Exception: ", "");
       String translated = switch (msg) {

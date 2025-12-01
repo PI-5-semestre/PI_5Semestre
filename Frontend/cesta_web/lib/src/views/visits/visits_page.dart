@@ -1,3 +1,4 @@
+import 'package:cesta_web/src/widgets/screen_size_widget.dart';
 import 'package:core/core.dart';
 import 'package:core/features/family/providers/family_provider.dart';
 import 'package:core/features/visits/providers/visit_provider.dart';
@@ -81,73 +82,71 @@ class _VisitsPageState extends ConsumerState<VisitsPage>  {
         },
         child: Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),
-          child: ListView(
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildCardHeader(), 
-                      const SizedBox(height: 16),
-                      _buildTodayLabel(context, theme), 
-                      const SizedBox(height: 16),
-                      _buildSearchField(ref),
-                      const SizedBox(height: 5),
-                      if (visitState.isLoading)
-                        Row(
-                          children: const [
-                            Expanded(child: StatCardSkeleton()),
-                          ],
-                        )
-                      else
-                        SegmentedCardSwitcher(
-                          options: cards, 
-                          icons: iconCards,
-                          onTap: (index){
-                            switch (index) {
-                              case 0:
-                                controller.filterByRole(null);
-                                break;
-                              case 1:
-                                controller.filterByRole('ACCEPTED');
-                                break;
-                              case 2:
-                                controller.filterByRole('PENDING');
-                                break;
-                              case 3:
-                                controller.filterByRole('REJECTED');
-                                break;
-                            } 
-                          },
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  _buildfamilyHeader(theme),
-                  if (visitState.isLoading)
-                    Column(
-                      children: List.generate(
-                        4,
-                        (_) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                          child: const TeamCardSkeleton(),
-                        ),
+          child: ScreenSizeWidget(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildCardHeader(), 
+                    const SizedBox(height: 16),
+                    _buildTodayLabel(context, theme), 
+                    const SizedBox(height: 16),
+                    _buildSearchField(ref),
+                    const SizedBox(height: 5),
+                    if (visitState.isLoading)
+                      Row(
+                        children: const [
+                          Expanded(child: StatCardSkeleton()),
+                        ],
+                      )
+                    else
+                      SegmentedCardSwitcher(
+                        options: cards, 
+                        icons: iconCards,
+                        onTap: (index){
+                          switch (index) {
+                            case 0:
+                              controller.filterByRole(null);
+                              break;
+                            case 1:
+                              controller.filterByRole('ACCEPTED');
+                              break;
+                            case 2:
+                              controller.filterByRole('PENDING');
+                              break;
+                            case 3:
+                              controller.filterByRole('REJECTED');
+                              break;
+                          } 
+                        },
                       ),
-                    )
-                  else
-                    Column(
-                      children: visitState.filtered.map((visit) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                          child: VisitCard(visit: visit),
-                        );
-                      }).toList(),
-                    )
-                ],
-              ),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildfamilyHeader(theme),
+                if (visitState.isLoading)
+                  Column(
+                    children: List.generate(
+                      4,
+                      (_) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: const TeamCardSkeleton(),
+                      ),
+                    ),
+                  )
+                else
+                  Column(
+                    children: visitState.filtered.map((visit) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: VisitCard(visit: visit, appType: 'web'),
+                      );
+                    }).toList(),
+                  )
+              ],
+            ),
           ),
         ),
       ),
