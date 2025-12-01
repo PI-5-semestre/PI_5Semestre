@@ -201,7 +201,6 @@ class StockCardModal extends ConsumerWidget {
                         ),
                       ),
 
-                      // Buttons (Delete + Edit)
                       Positioned(
                         bottom: 16,
                         left: 16,
@@ -304,7 +303,7 @@ class StockCardModal extends ConsumerWidget {
                         child: FloatingActionButton(
                           heroTag: "edit_${stock.id}",
                           onPressed: () {
-                            context.go('/more/stock/edit', extra: stock);
+                            context.go('/more/stock/edit_stock', extra: stock);
                             Navigator.pop(context);
                           },
                           child: const Icon(Icons.edit),
