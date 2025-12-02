@@ -375,6 +375,7 @@ class _EditFamilyPageState extends ConsumerState<EditFamilyPage> {
                       DropdownMenuItem(value: "PENDING", child: Text("Pendente")),
                       DropdownMenuItem(value: "ACTIVE", child: Text("Aprovado")),
                       DropdownMenuItem(value: "SUSPENDED", child: Text("Suspenso")),
+                      DropdownMenuItem(value: "INACTIVE", child: Text("Inativa")),
                     ],
                     onChanged: (v) => situationController.text = v ?? '',
                     validator: Validatorless.required("Selecione uma opção"),

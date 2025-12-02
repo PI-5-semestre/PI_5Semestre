@@ -41,7 +41,7 @@ final class StockControllerProvider
   }
 }
 
-String _$stockControllerHash() => r'a685668e5d603ca97e2915b1235276cabd834363';
+String _$stockControllerHash() => r'a15d7b8900821397ecc9f4d87316d85fed4ef168';
 
 abstract class _$StockController extends $Notifier<StockState> {
   StockState build();
