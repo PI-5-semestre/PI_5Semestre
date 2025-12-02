@@ -6,8 +6,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class VisitCard extends ConsumerWidget {
   final Visit visit;
+  final String? appType;
 
-  const VisitCard({super.key, required this.visit});
+  const VisitCard({super.key, required this.visit, this.appType = 'app'});
 
   Color _getStatusColor() {
     final status = visit.response?.roleStatus ?? "Agendada";
@@ -43,231 +44,115 @@ class VisitCard extends ConsumerWidget {
     final address =
         '${family.street}, n° ${family.number} - ${family.neighborhood}, ${family.city}/${family.state} - ${family.zip_code}';
     final theme = Theme.of(context);
+
     return Card(
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: () {
-          showDialog<void>(
+          showDialog(
             context: context,
-            builder: (BuildContext context) {
-              return Material(
-                type: MaterialType.transparency,
-                child: Center(
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).canvasColor,
-                        ),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'Detalhes da Família',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Divider(),
-                            Expanded(
-                              child: ListView(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                children: [
-                                  ListTile(
-                                    leading: Icon(Icons.person),
-                                    title: Text(
-                                      'Nome',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.outline,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      family.name,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.phone),
-                                    title: Text(
-                                      'Telefone',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.outline,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      family.mobile_phone,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.location_on),
-                                    title: Text(
-                                      'Endereço',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.outline,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      address,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.group),
-                                    title: Text(
-                                      'Pessoas Autorizadas',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.outline,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      (family.members?.isNotEmpty ?? false)
-                                          ? family.members!
-                                                .map(
-                                                  (a) =>
-                                                      '• ${a.name} (${a.roleKinship})',
-                                                )
-                                                .join('\n')
-                                          : 'Nenhuma pessoa autorizada',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
-                                  ListTile(
-                                    leading: const Icon(Icons.article),
-                                    title: Text(
-                                      'Observações',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: theme.colorScheme.outline,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      visit.description ?? '',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ),
+            barrierDismissible: true,
+            builder: (context) {
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final bool isMobile = constraints.maxWidth < 600;
 
-                                  const SizedBox(height: 80),
-                                ],
-                              ),
-                            ),
-                          ],
+                  if (isMobile) {
+                    return Scaffold(
+                      backgroundColor: Colors.black54,
+                      body: SafeArea(
+                        child: Container(
+                          width: double.infinity,
+                          height: double.infinity,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius:
+                                const BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          child: _VisitDetailsModal(
+                            visit: visit,
+                            address: address,
+                            appType: appType,
+                            isMobile: true,
+                            onClose: () => Navigator.pop(context),
+                          ),
                         ),
                       ),
+                    );
+                  }
 
-                      Stack(
-                        children: [
-                          Positioned(
-                            bottom: 16,
-                            left: 16,
-                            child: FloatingActionButton(
-                              heroTag: "visita_${visit.id}",
-                              onPressed: () {},
-                              child: const Icon(Icons.check),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 16,
-                            right: 16,
-                            child: FloatingActionButton(
-                              heroTag: "edit_${visit.id}",
-                              onPressed: () {
-                                context.go(
-                                  '/more/visits/edit_visit',
-                                  extra: visit,
-                                );
-                                Navigator.pop(context);
-                              },
-                              child: Icon(Icons.edit),
-                            ),
-                          ),
-                        ],
+                  final maxWidth =
+                      (constraints.maxWidth > 800 ? 800 : constraints.maxWidth * 0.95).toDouble();
+                  final maxHeight =
+                      (constraints.maxHeight > 650 ? 650 : constraints.maxHeight * 0.90).toDouble();
+
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: maxWidth,
+                        maxHeight: maxHeight,
                       ),
-                    ],
-                  ),
-                ),
+                      child: Material(
+                        elevation: 12,
+                        borderRadius: BorderRadius.circular(16),
+                        clipBehavior: Clip.hardEdge,
+                        color: theme.colorScheme.surface,
+                        child: _VisitDetailsModal(
+                          visit: visit,
+                          address: address,
+                          appType: appType,
+                          isMobile: false,
+                          onClose: () => Navigator.pop(context),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               );
             },
           );
         },
+
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               Expanded(
-                child: SizedBox(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        family.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      family.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        _buildChip(
+                          visit.response?.roleStatus ?? 'Agendada',
+                          _getStatusColor(),
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        alignment: WrapAlignment.start,
-                        children: [
-                          _buildChip(
-                            visit.response?.roleStatus ?? 'Agendada',
-                            _getStatusColor(),
-                          ),
-                          _buildChip(visit.roleTypeVisit, _getTypeVisitColor()),
-                        ],
-                      ),
-                    ],
-                  ),
+                        _buildChip(
+                          visit.roleTypeVisit,
+                          _getTypeVisitColor(),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              if (visit.response == null || visit.response?.roleStatus == "Agendado")
+
+              if (visit.response == null ||
+                  visit.response?.roleStatus == "Agendado")
                 FloatingActionButton.small(
-                  heroTag: "visita_${visit.id}",
-                  onPressed: () {
-                    _openInGoogleMaps(address);
-                  },
-                  elevation: 1,
+                  heroTag: "maps_${visit.id}",
+                  onPressed: () => _openInGoogleMaps(address),
                   child: const Icon(Icons.location_on),
                 ),
             ],
@@ -281,7 +166,7 @@ class VisitCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color),
       ),
@@ -298,14 +183,121 @@ class VisitCard extends ConsumerWidget {
 
   void _openInGoogleMaps(String address) async {
     final query = Uri.encodeComponent(address);
-    final url = Uri.parse(
-      "https://www.google.com/maps/search/?api=1&query=$query",
-    );
+    final url = Uri.parse("https://www.google.com/maps/search/?api=1&query=$query");
+    await launchUrl(url, mode: LaunchMode.externalApplication);
+  }
+}
 
-    try {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      debugPrint("Não foi possível abrir o Google Maps: $e");
-    }
+class _VisitDetailsModal extends StatelessWidget {
+  final Visit visit;
+  final String address;
+  final String? appType;
+  final bool isMobile;
+  final VoidCallback onClose;
+
+  const _VisitDetailsModal({
+    required this.visit,
+    required this.address,
+    required this.appType,
+    required this.isMobile,
+    required this.onClose,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final family = visit.family!;
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Detalhes da Família',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: onClose,
+              ),
+            ],
+          ),
+        ),
+
+        const Divider(height: 1),
+
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text("Nome"),
+                subtitle: Text(family.name),
+              ),
+              ListTile(
+                leading: const Icon(Icons.phone),
+                title: const Text("Telefone"),
+                subtitle: Text(family.mobile_phone),
+              ),
+              ListTile(
+                leading: const Icon(Icons.location_on),
+                title: const Text("Endereço"),
+                subtitle: Text(address),
+              ),
+              ListTile(
+                leading: const Icon(Icons.group),
+                title: const Text("Pessoas Autorizadas"),
+                subtitle: Text(
+                  (family.members?.isNotEmpty ?? false)
+                      ? family.members!
+                          .map((a) => "• ${a.name} (${a.roleKinship})")
+                          .join("\n")
+                      : "Nenhuma pessoa autorizada",
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.article),
+                title: const Text("Observações"),
+                subtitle: Text(visit.description ?? ''),
+              ),
+
+              const SizedBox(height: 100),
+            ],
+          ),
+        ),
+
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              FloatingActionButton(
+                heroTag: "approve_${visit.id}",
+                onPressed: () {},
+                child: const Icon(Icons.check),
+              ),
+
+              FloatingActionButton(
+                heroTag: "edit_${visit.id}",
+                onPressed: () {
+                  context.go(
+                    appType == 'app'
+                        ? '/more/visits/edit_visit'
+                        : '/visits/edit_visit',
+                    extra: visit,
+                  );
+                  onClose();
+                },
+                child: const Icon(Icons.edit),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

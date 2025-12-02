@@ -1,215 +1,172 @@
-import 'package:cesta_web/src/views/family/new_family_page.dart';
-import 'package:cesta_web/src/widgets/app_drawer.dart';
 import 'package:cesta_web/src/widgets/screen_size_widget.dart';
-import 'package:core/widgets/card_header.dart';
-import 'package:core/widgets/family_card.dart';
-import 'package:core/widgets/statCard.dart';
+import 'package:core/core.dart';
+import 'package:core/features/family/providers/family_provider.dart';
+import 'package:core/widgets2/skeleton/stat_card_skeleton.dart';
+import 'package:core/widgets2/skeleton/team_card_skeleton.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-class FamilyPage extends StatelessWidget {
+class FamilyPage extends ConsumerStatefulWidget {
   const FamilyPage({super.key});
 
   @override
+  ConsumerState<FamilyPage> createState() => _FamilyPageState();
+}
+
+class _FamilyPageState extends ConsumerState<FamilyPage>  {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = ref.read(familyControllerProvider);
+      if (state.families.isEmpty && !state.isLoading) {
+        ref.read(familyControllerProvider.notifier).fetchFamilies();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final spacing = screenWidth < 600 ? 8.0 : 16.0; // menos espaço no mobile
+    final familyState = ref.watch(familyControllerProvider);
+    final controller = ref.watch(familyControllerProvider.notifier);
+    final theme = Theme.of(context);
+
+    if (!familyState.isLoading &&
+        familyState.error != null &&
+        familyState.families.isEmpty) {
+      return Center(child: Text("Não foi possível carregar as famílias"));
+    }
 
     final cards = [
       StatCard(
-        icon: Icons.group,
+        icon: Icons.groups,
+        colors: [Color(0xFFAD46FF), Color(0xFF9810FA)],
+        title: "Total Cadastradas",
+        value: familyState.families.length.toString(),
+      ),
+      StatCard(
+        icon: Icons.check,
         colors: [Color(0xFF00C951), Color(0xFF00A63E)],
         title: "Famílias Ativas",
-        value: "2",
+        value: familyState.families.where((f) => f.roleSituation == "Ativa").length.toString(),
       ),
       StatCard(
         icon: Icons.event,
         colors: [Color(0xFFF0B100), Color(0xFFD08700)],
         title: "Aguardando Visita",
-        value: "1",
-      ),
-      StatCard(
-        icon: Icons.groups,
-        colors: [Color(0xFFAD46FF), Color(0xFF9810FA)],
-        title: "Total Cadastradas",
-        value: "3",
+        value: familyState.families.where((f) => f.roleSituation == "Pendente").length.toString(),
       ),
     ];
 
-    final families = [
-      // FamilyCard(
-      //   name: "Maria da Silva Santos",
-      //   phone: "(11) 99999-0001",
-      //   members: 4,
-      //   income: 800,
-      //   cpf: "123.456.789-00",
-      //   address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
-      //   observations:
-      //       "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
-      //   status: "ativa",
-      //   deliveryStatus: "recebendo",
-      //   recommended: "teste"
-      // ),
-      // FamilyCard(
-      //   name: "João Carlos Santos",
-      //   phone: "(11) 99999-0002",
-      //   members: 3,
-      //   income: 600,
-      //   cpf: "987.654.321-00",
-      //   address: "Av. Central, 456 - Centro, São Paulo - SP",
-      //   observations:
-      //       "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
-      //   status: "pendente",
-      //   deliveryStatus: "aguardando",
-      //   recommended: "teste"
-      // ),
-      // FamilyCard(
-      //   name: "Maria da Silva Santos",
-      //   phone: "(11) 99999-0001",
-      //   members: 4,
-      //   income: 800,
-      //   cpf: "123.456.789-00",
-      //   address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
-      //   observations:
-      //       "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
-      //   status: "ativa",
-      //   deliveryStatus: "recebendo",
-      //   recommended: "teste"
-      // ),
-      // FamilyCard(
-      //   name: "João Carlos Santos",
-      //   phone: "(11) 99999-0002",
-      //   members: 3,
-      //   income: 600,
-      //   cpf: "987.654.321-00",
-      //   address: "Av. Central, 456 - Centro, São Paulo - SP",
-      //   observations:
-      //       "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
-      //   status: "pendente",
-      //   deliveryStatus: "aguardando",
-      //   recommended: "teste"
-      // ),
-      // FamilyCard(
-      //   name: "Maria da Silva Santos",
-      //   phone: "(11) 99999-0001",
-      //   members: 4,
-      //   income: 800,
-      //   cpf: "123.456.789-00",
-      //   address: "Rua das Flores, 123, Apto 45 - Vila Nova, São Paulo - SP",
-      //   observations:
-      //       "Família com 2 crianças pequenas, muito necessitada. Mãe desempregada.",
-      //   status: "ativa",
-      //   deliveryStatus: "recebendo",
-      //   recommended: "teste"
-      // ),
-      // FamilyCard(
-      //   name: "João Carlos Santos",
-      //   phone: "(11) 99999-0002",
-      //   members: 3,
-      //   income: 600,
-      //   cpf: "987.654.321-00",
-      //   address: "Av. Central, 456 - Centro, São Paulo - SP",
-      //   observations:
-      //       "Aguardando primeira visita de avaliação. Situação de desemprego recente.",
-      //   status: "pendente",
-      //   deliveryStatus: "aguardando",
-      //   recommended: "teste"
-      // ),
-    ];
+    final iconCards = [Icons.groups, Icons.check, Icons.event];
 
     return Scaffold(
-      // appBar: AppBar(),
-      drawer: const AppDrawer(),
-      body: ScreenSizeWidget(
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          controller.fetchFamilies();
+        },
+        child: ScreenSizeWidget(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
               children: [
-                Expanded(child: _buildCardHeader()),
-                const SizedBox(width: 16),
-                _buildButton(context),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildCardHeader(), 
+                    const SizedBox(height: 16),
+                    _buildSearchField(ref),
+                    if (familyState.isLoading)
+                      Row(
+                        children: const [
+                          Expanded(child: StatCardSkeleton())
+                        ],
+                      )
+                    else
+                      SegmentedCardSwitcher(
+                        options: cards, 
+                        icons: iconCards,
+                        onTap: (index) {
+                          switch (index) {
+                            case 0:
+                              controller.filterByRole(null);
+                            case 1:
+                              controller.filterByRole("ACTIVE");
+                            case 2:
+                              controller.filterByRole("PENDING");
+                            default:
+                          }
+                        },
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildfamilyHeader(theme),
+                if (familyState.isLoading)
+                  Column(
+                    children: List.generate(
+                      4,
+                      (_) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: Center(child: TeamCardSkeleton()),
+                      )
+                    ),
+                  )
+                else
+                  Column(
+                    children: familyState.filtered.map((family) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: FamilyCard(family: family),
+                      );
+                    }).toList(),
+                  )
               ],
             ),
-            
-            SizedBox(height: spacing),
-            
-            LayoutBuilder(
-              builder: (context, constraints) {
-                double maxWidth = constraints.maxWidth;
-                double spacing = 16;
-            
-                // Define o número máximo de colunas baseado na largura da tela
-                int maxColumns = maxWidth > 1300
-                    ? 5
-                    : maxWidth > 1200
-                    ? 4
-                    : maxWidth > 800
-                    ? 3
-                    : maxWidth > 500
-                    ? 2
-                    : 1;
-            
-                // Número de colunas não pode ser maior que a quantidade de cards
-                int columns = cards.length < maxColumns
-                    ? cards.length
-                    : maxColumns;
-            
-                double totalSpacing = spacing * (columns - 1);
-                double cardWidth = (maxWidth - totalSpacing) / columns;
-            
-                return Wrap(
-                  spacing: spacing,
-                  runSpacing: spacing,
-                  children: cards
-                      .map(
-                        (card) =>
-                            SizedBox(width: cardWidth, child: card),
-                      )
-                      .toList(),
-                );
-              },
-            ),
-            
-            SizedBox(height: spacing),
-            
-            // Search
-            Card(
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: "Buscar família...",
-                    prefixIcon: Icon(Icons.search),
-                    border: InputBorder.none,
-                  ),
-                ),
-              ),
-            ),
-            
-            SizedBox(height: spacing),
-            
-            // Lista de famílias
-            Column(
-              children: families.map((family) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8.0,
-                    horizontal: 4.0,
-                  ), // horizontal agora
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: family,
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.go('/family/new_family');
+        },
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildSearchField(WidgetRef ref) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: TextField(
+          onChanged: (v) => ref.read(familyControllerProvider.notifier).search(v),
+          decoration: const InputDecoration(
+            hintText: "Nome, CPF, CEP ou Endereço...",
+            prefixIcon: Icon(Icons.search),
+            border: InputBorder.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildfamilyHeader(ThemeData theme) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Text(
+          "Famílias",
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.outline,
+          ),
         ),
       ),
     );
@@ -221,23 +178,6 @@ class FamilyPage extends StatelessWidget {
       subtitle: 'Gerencie as famílias beneficiárias',
       colors: [Color(0xFF2B7FFF), Color(0xFF155DFC)],
       icon: Icons.group,
-    );
-  }
-
-  Widget _buildButton(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: () {
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const NewFamilyPage()));
-      },
-      icon: const Icon(Icons.add, color: Colors.white),
-      label: const Text('Nova Família', style: TextStyle(color: Colors.white)),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF155DFC),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
     );
   }
 }

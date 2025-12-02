@@ -1,4 +1,5 @@
 import 'package:cestas_app/src/pages/basket/basket_page.dart';
+import 'package:cestas_app/src/pages/basket/create_basket_page.dart';
 import 'package:cestas_app/src/pages/delivery/delivery_page.dart';
 import 'package:cestas_app/src/pages/delivery/edit_delivery_page.dart';
 import 'package:cestas_app/src/pages/family/edit_family_page.dart';
@@ -10,6 +11,7 @@ import 'package:cestas_app/src/pages/login_page.dart';
 import 'package:cestas_app/src/pages/more_page.dart';
 import 'package:cestas_app/src/pages/new_password_page.dart';
 import 'package:cestas_app/src/pages/register_page.dart';
+import 'package:cestas_app/src/pages/stock/edit_stock_page.dart';
 import 'package:cestas_app/src/pages/stock/new_stock_page.dart';
 import 'package:cestas_app/src/pages/stock/stock_page.dart';
 import 'package:cestas_app/src/pages/teams/edit_servant_page.dart';
@@ -21,6 +23,7 @@ import 'package:cestas_app/src/widgets/navigator_shell_route.dart';
 import 'package:core/features/auth/data/models/user.dart';
 import 'package:core/features/delivery/data/models/delivery.dart';
 import 'package:core/features/family/data/models/family_model.dart';
+import 'package:core/features/stock/data/models/stock_model.dart';
 import 'package:core/features/visits/data/models/visits.dart';
 import 'package:go_router/go_router.dart';
 
@@ -71,7 +74,7 @@ final routes = GoRouter(
                   builder: (context, state) {
                     final delivery = state.extra as DeliveryModel;
                     return EditDeliveryPage(delivery: delivery);
-                  }
+                  },
                 ),
               ],
             ),
@@ -91,6 +94,13 @@ final routes = GoRouter(
                       path: 'new_stock',
                       builder: (context, state) => NewStockPage(),
                     ),
+                    GoRoute(
+                      path: 'edit_stock',
+                      builder: (context, state) {
+                        final stock = state.extra as StockModel;
+                        return EditStockPage(stock: stock);
+                      },
+                    ),
                   ],
                 ),
                 GoRoute(
@@ -99,16 +109,25 @@ final routes = GoRouter(
                   routes: [
                     GoRoute(
                       path: 'edit_visit',
-                      builder: (context, state){
+                      builder: (context, state) {
                         final visit = state.extra as Visit;
                         return EditVisitPage(visit: visit);
                       },
-                    )
-                  ]
+                    ),
+                  ],
                 ),
                 GoRoute(
                   path: 'basket',
                   builder: (context, state) => BasketPage(),
+                  routes: [
+                    GoRoute(
+                      path: 'create_basket',
+                      builder: (context, state) {
+                        final family = state.extra as FamilyModel;
+                        return CreateBasketPage(family: family);
+                      },
+                    ),
+                  ],
                 ),
                 GoRoute(
                   path: 'team',
