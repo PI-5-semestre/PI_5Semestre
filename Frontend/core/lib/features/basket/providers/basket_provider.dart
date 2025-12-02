@@ -38,10 +38,25 @@ class BasketController extends _$BasketController {
       );
 
       await ref.read(basketRepositoryProvider).create(basket, await token);
-      //await findAll();
+      await findAll();
     } catch (e) {
       final message = e.toString().replaceFirst("Exception: ", "");
       state = state.copyWith(isLoading: false, error: message);
+    }
+  }
+
+  Future<void> findAll() async {
+    try {
+      state = state.copyWith(isLoading: true, error: null);
+      final data = await ref
+          .read(basketRepositoryProvider)
+          .FindAll(await token);
+      state = state.copyWith(isLoading: false, baskets: data);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: "Erro ao carregar as cestas",
+      );
     }
   }
 }

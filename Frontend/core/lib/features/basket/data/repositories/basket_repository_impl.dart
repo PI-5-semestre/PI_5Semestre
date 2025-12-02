@@ -12,9 +12,12 @@ class BasketRepositoryImpl implements BasketRepository {
   BasketRepositoryImpl({required this.dio});
 
   @override
-  Future<List<BasketModel>> FindAll() async {
+  Future<List<BasketModel>> FindAll(String token) async {
     try {
-      var response = await dio.get('/institutions/1/baskets/families');
+      var response = await dio.get(
+        '/institutions/1/baskets/families',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
       return (response.data as List)
           .map((stock) => BasketModel.fromJson(stock))
           .toList();

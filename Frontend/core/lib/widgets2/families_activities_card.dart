@@ -4,11 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class FamiliesActivitiesCardModal extends ConsumerWidget {
   final FamilyModel family;
+  final bool hasBasket;
   final VoidCallback? onTap;
 
   const FamiliesActivitiesCardModal({
     super.key,
     required this.family,
+    required this.hasBasket,
     this.onTap,
   });
 
@@ -37,23 +39,30 @@ class FamiliesActivitiesCardModal extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
+
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.orange.shade100,
+                        color: hasBasket
+                            ? Colors.green.shade100
+                            : Colors.red.shade100,
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text(
-                        "1 Cesta",
-                        style: TextStyle(fontSize: 12, color: Colors.orange),
+                      child: Text(
+                        hasBasket ? "Cesta criada" : "Sem cesta",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: hasBasket ? Colors.green : Colors.red,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
+
               Icon(
                 Icons.arrow_forward_ios,
                 size: 18,
