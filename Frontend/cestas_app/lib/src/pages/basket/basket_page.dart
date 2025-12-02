@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:core/widgets2/families_activities_card.dart';
 import 'package:core/widgets2/skeleton/families_activities_card_skeleton.dart';
+import 'package:go_router/go_router.dart';
 
 class BasketPage extends ConsumerStatefulWidget {
   const BasketPage({super.key});
@@ -113,7 +114,12 @@ class _BasketPageState extends ConsumerState<BasketPage> {
         children: families.map((family) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: FamiliesActivitiesCardModal(family: family, onTap: () {}),
+            child: FamiliesActivitiesCardModal(
+              family: family,
+              onTap: () {
+                context.go('/more/basket/create_basket', extra: family);
+              },
+            ),
           );
         }).toList(),
       );
