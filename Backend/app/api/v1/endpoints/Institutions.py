@@ -5,10 +5,11 @@ from io import BytesIO
 
 from fastapi import APIRouter, Depends, Query, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from datetime import datetime, timedelta
 
 from app.core.database import get_session
 from app.core.security import get_current_account
@@ -18,13 +19,20 @@ from app.api.v1.dependencies import PaginationParams
 from app.models.users import Account, AccountType
 from app.util.file_validation import validate_file_upload
 from app.schemas.Institutions import (
+    BasketCreateForInstitution,
+    BasketResp,
     DeliveryCreate,
     DeliveryPut,
     DeliveryReschedule,
     DeliveryResp,
+    InstitutionDashboardResp,
     InstitutionUpdate,
     InstitutionResp,
     UserCorporateResp,
+    VisitationCreate,
+    VisitationCreateReturn,
+    VisitationResp,
+    VisitationResponseReturn,
 )
 from app.schemas.products import (
     StockItemResp,
@@ -39,7 +47,7 @@ from app.schemas.families import (
     FamilyUpdate,
     DocFamilyResp,
 )
-from app.models.Institutions import Institution, InstitutionType
+from app.models.Institutions import Institution, InstitutionType, InstitutionVisitation, InstitutionVisitationResult, InstitutionVisitationResultType, InstitutionVisitationType, BasketType, InstitutionBasketFamily, InstitutionBasketFamilyLine
 from app.models.products import StockItem, StockHistory
 from app.models.families import DeliveryAttempt, DeliveryAttemptStatus, Family, DocFamily, FamilyDelivery, FamilyMember, SituationDelivery, SituationType
 
@@ -476,7 +484,9 @@ async def create_family_for_institution(
         await session.commit()
         await session.refresh(new_family)
 
-        return FamilyResp.model_validate(new_family)
+        resp = FamilyResp.model_validate(new_family)
+        resp.basket_received = new_family.count_basket()
+        return resp
     except IntegrityError as e:
         await session.rollback()
         error_msg = str(e.orig).lower()
@@ -510,8 +520,13 @@ async def list_families_from_institution(
 
     result = await session.execute(query)
     families = result.scalars().all()
-
-    return [FamilyResp.model_validate(f) for f in families]
+    
+    responses = []
+    for f in families:
+        resp = FamilyResp.model_validate(f)
+        resp.basket_received = f.count_basket()
+        responses.append(resp)
+    return responses
 
 
 @router.get("/{institution_id}/families/{cpf}", response_model=FamilyResp)
@@ -533,7 +548,9 @@ async def get_family_from_institution(institution_id: int, cpf: str, session: Se
             detail=f"Family with CPF '{cpf}' not found in this institution"
         )
 
-    return FamilyResp.model_validate(family)
+    resp = FamilyResp.model_validate(family)
+    resp.basket_received = family.count_basket()
+    return resp
 
 
 @router.put("/{institution_id}/families/{cpf}", response_model=FamilyResp)
@@ -605,7 +622,9 @@ async def update_family_from_institution(
              raise DuplicatedError(detail="One of the authorized persons (or the family head) has a CPF that is already registered.")
         raise
 
-    return FamilyResp.model_validate(family)
+    resp = FamilyResp.model_validate(family)
+    resp.basket_received = family.count_basket()
+    return resp
 
 
 @router.delete("/{institution_id}/families/{cpf}", status_code=204)
@@ -756,7 +775,13 @@ async def list_family_deliveries(
         if d.status is None:
             d.status = SituationDelivery.PENDING
     
-    return [DeliveryResp.model_validate(d) for d in deliveries]
+    responses = []
+    for d in deliveries:
+        resp = DeliveryResp.model_validate(d)
+        if resp.family:
+            resp.family.basket_received = d.family.count_basket()
+        responses.append(resp)
+    return responses
 
 
 @router.post(
@@ -780,6 +805,17 @@ async def create_family_delivery(
     ]:
         raise NotFoundError(detail="Unauthorized to create deliveries")
 
+    if family.situation == SituationType.INACTIVE:
+        raise NotFoundError(
+            detail="Cannot create delivery for inactive families"
+        )
+
+    if family.situation == SituationType.PENDING:
+        family.situation = SituationType.ACTIVE
+        session.add(family)
+        await session.commit()
+        await session.refresh(family)
+    
     fd = FamilyDelivery(
         institution_id=institution.id,
         family_id=family.id,
@@ -822,7 +858,10 @@ async def create_family_delivery(
     result = await session.execute(query)
     fd = result.scalar_one()
 
-    return DeliveryResp.model_validate(fd)
+    resp = DeliveryResp.model_validate(fd)
+    if resp.family:
+        resp.family.basket_received = fd.family.count_basket()
+    return resp
 
 
 @router.put("/{institution_id}/deliveries/{delivery_id}", response_model=DeliveryResp)
@@ -880,8 +919,7 @@ async def update_family_delivery(
                     detail=f"No delivery attempts found for delivery id {delivery.id}"
                 )
                 
-            if delivery.family.is_active_for_basket:
-                from datetime import datetime, timedelta
+            if delivery.family.is_active_for_basket: 
                 new_delivery_date = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%S')
                 new_delivery = FamilyDelivery(
                     institution_id=delivery.institution_id,
@@ -894,6 +932,8 @@ async def update_family_delivery(
                 session.add(new_delivery)
                 await session.commit()
                 await session.refresh(new_delivery)
+            else:
+                pass
                 
         except NotFoundError:
             raise
@@ -919,7 +959,10 @@ async def update_family_delivery(
     result = await session.execute(query)
     delivery = result.scalar_one()
 
-    return DeliveryResp.model_validate(delivery)
+    resp = DeliveryResp.model_validate(delivery)
+    if resp.family:
+        resp.family.basket_received = delivery.family.count_basket()
+    return resp
 
 @router.post("/{institution_id}/deliveries/{delivery_id}/reschedule", status_code=201, response_model=DeliveryResp)
 async def reschedule_family_delivery(    
@@ -985,7 +1028,10 @@ async def reschedule_family_delivery(
     result = await session.execute(query)
     delivery = result.scalar_one()
 
-    return DeliveryResp.model_validate(delivery)
+    resp = DeliveryResp.model_validate(delivery)
+    if resp.family:
+        resp.family.basket_received = delivery.family.count_basket()
+    return resp
 
 
 @router.delete("/{institution_id}/deliveries/{delivery_id}", status_code=204)
@@ -1034,3 +1080,345 @@ async def get_users(
     result = await session.execute(query)
     users = result.scalars().all()
     return [UserCorporateResp(user=user) for user in users]
+
+
+@router.post("/{institution_id}/visit/{family_id}", status_code=201, response_model=VisitationResp)
+async def create_institution_visit(
+    institution_id: int,
+    family_id: int,
+    session: Session,
+    payload: VisitationCreate,
+    current_account: Annotated[Account, Depends(get_current_account)],
+
+):
+    institution = await get_institution_or_404(session, institution_id)
+    family = await get_family_or_404(session, family_id, institution_id)
+
+    visit_type = InstitutionVisitationType(payload.type_of_visit.upper())
+    
+    if visit_type == InstitutionVisitationType.ADMISSION:
+        if family.situation not in [SituationType.INACTIVE, SituationType.PENDING]:
+            raise HTTPException(
+                status_code=400,
+                detail="Admission visit only allowed for pending or inactive families.",
+            )
+    elif visit_type == InstitutionVisitationType.READMISSION:
+        if family.situation not in [SituationType.INACTIVE, SituationType.SUSPENDED]:
+            raise HTTPException(
+                status_code=400,
+                detail="Readmission visit only allowed for inactive or suspended families.",
+            )
+    elif visit_type == InstitutionVisitationType.ROUTINE:
+        if family.situation not in [SituationType.ACTIVE]:
+            raise HTTPException(
+                status_code=400,
+                detail="Routine visit only allowed for active families.",
+            )
+    
+    # apenas para primeira visita, apos isso ela entra no cycle do READMISSION
+    # if visit_type == InstitutionVisitationType.ADMISSION:
+    #     family.situation = SituationType.PENDING
+    
+    # quando ele entrar no cycle de readmissao, ele fica inativo apos ele receber os 3 meses.
+    if visit_type == InstitutionVisitationType.READMISSION:
+        family.situation = SituationType.INACTIVE
+    
+    # se for de routina e for valida no ben fica ativa.
+    if visit_type == InstitutionVisitationType.ROUTINE:
+        if family.is_active_for_basket:
+            family.situation = SituationType.ACTIVE
+        else:
+            family.situation = SituationType.INACTIVE
+
+    visit = InstitutionVisitation(
+        family_id=family.id,
+        institution_id=institution.id,
+        account_id=payload.account_id,
+        visit_at=payload.visit_at,
+        description=payload.description,    
+        type_of_visit=visit_type,
+    )
+    
+    session.add(family)
+    session.add(visit)
+    
+    await session.commit()
+    await session.refresh(visit)
+
+    await session.refresh(family)
+    await session.refresh(institution)
+
+    return VisitationResp.model_validate(visit)
+
+@router.get("/{institution_id}/visits", status_code=200, response_model=List[VisitationResp])
+async def list_institution_visits(
+    institution_id: int,
+    session: Session,
+    current_account: Annotated[Account, Depends(get_current_account)],
+
+):
+    institution = await get_institution_or_404(session, institution_id)
+
+    query = select(InstitutionVisitation).options(selectinload(InstitutionVisitation.family)).where(
+        InstitutionVisitation.institution_id == institution.id
+    ).order_by(InstitutionVisitation.visit_at.desc())
+
+    result = await session.execute(query)
+    visits = result.scalars().all()
+
+    visit_ids = [v.id for v in visits]
+    if visit_ids:
+        responses_query = select(InstitutionVisitationResult).where(
+            InstitutionVisitationResult.visitation_id.in_(visit_ids)
+        )
+        responses_result = await session.execute(responses_query)
+        responses = responses_result.scalars().all()
+        responses_dict = {r.visitation_id: r for r in responses}
+    else:
+        responses_dict = {}
+
+    visits_data = []
+    for v in visits:
+        response_data = None
+        if v.id in responses_dict:
+            r = responses_dict[v.id]
+            response_data = VisitationResponseReturn(
+                visitation_id=r.visitation_id,
+                description=r.description,
+                status=r.status.value
+            )
+        visit_resp = VisitationResp(
+            id=v.id,
+            active=v.active,
+            created=v.created,
+            institution_id=v.institution_id,
+            account_id=v.account_id,
+            family_id=v.family_id,
+            visit_at=v.visit_at,
+            description=v.description,
+            type_of_visit=v.type_of_visit.value,
+            response=response_data,
+            family=FamilyResp.model_validate(v.family) if v.family else None
+        )
+        if visit_resp.family:
+            visit_resp.family.basket_received = v.family.count_basket()
+        visits_data.append(visit_resp)
+
+    return visits_data
+
+
+@router.post("/{institution_id}/visit/{family_id}/response", status_code=200, response_model=VisitationResponseReturn)
+async def create_visit_response(
+    institution_id: int,
+    family_id: int,
+    session: Session,
+    current_account: Annotated[Account, Depends(get_current_account)],
+    payload: VisitationCreateReturn,
+):
+    
+    institution = await get_institution_or_404(session, institution_id)
+    family = await get_family_or_404(session, family_id, institution_id)
+
+    query = select(InstitutionVisitation).where(
+        InstitutionVisitation.id == payload.visitation_id,
+        InstitutionVisitation.institution_id == institution_id,
+        InstitutionVisitation.family_id == family_id
+    )
+    result = await session.execute(query)
+    visitation = result.scalar_one_or_none()
+
+    if visitation is None:
+        raise NotFoundError(detail=f"Visitation with id {payload.visitation_id} not found in this institution")
+
+    try:
+        
+        result_obj = InstitutionVisitationResult(
+            visitation_id=payload.visitation_id,
+            description=payload.description,
+            status=InstitutionVisitationResultType(payload.status.upper())
+        )
+        
+        if InstitutionVisitationResultType(payload.status.upper()) == InstitutionVisitationResultType.ACCEPTED and visitation.type_of_visit == InstitutionVisitationType.ADMISSION:
+            family.situation = SituationType.PENDING
+            
+        elif InstitutionVisitationResultType(payload.status.upper()) == InstitutionVisitationResultType.ACCEPTED and visitation.type_of_visit == InstitutionVisitationType.READMISSION:
+            family.situation = SituationType.ACTIVE    
+    
+        elif InstitutionVisitationResultType(payload.status.upper()) == InstitutionVisitationResultType.REJECTED and visitation.type_of_visit == InstitutionVisitationType.READMISSION:
+            family.situation = SituationType.INACTIVE
+        
+        session.add(family)
+        session.add(result_obj)
+        await session.commit()
+        await session.refresh(result_obj)
+
+        return VisitationResponseReturn(
+            visitation_id=result_obj.visitation_id,
+            description=result_obj.description,
+            status=result_obj.status.value
+        )
+    except IntegrityError as e:
+        await session.rollback()
+        raise DuplicatedError(detail="A response for this visitation already exists")
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+@router.post("/{institution_id}/basket", response_model=List[StockItemResp])
+async def create_basket_for_family(
+    institution_id: int,
+    payload: BasketCreateForInstitution,
+    current_account: Annotated[Account, Depends(get_current_account)],
+    session: Session,
+):
+    await get_institution_or_404(session, institution_id)
+    family = await get_family_or_404(session, payload.family_id, institution_id)
+
+    try:
+        basket_type = BasketType(payload.type.upper())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid basket type")
+
+    basket = InstitutionBasketFamily(
+        institution_id=institution_id,
+        family_id=family.id,
+        basket_type=basket_type
+    )
+    session.add(basket)
+    await session.flush()
+
+    stock_items = []
+    for product in payload.products:
+        item = await get_stock_item_or_404(session, product.product_sku, institution_id)
+        if item.quantity < product.quantity:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=f"Insufficient stock for SKU '{product.product_sku}' in institution {institution_id}",
+            )
+        item.quantity -= product.quantity
+        session.add(item)
+        
+        history = StockHistory(
+            stock_item_id=item.id, quantity=-product.quantity
+        )
+        session.add(history)
+        
+        line = InstitutionBasketFamilyLine(
+            basket_family_id=basket.id,
+            product_sku=product.product_sku,
+            quantity=product.quantity
+        )
+        session.add(line)
+        stock_items.append(item)
+
+    await session.commit()
+    for item in stock_items:
+        await session.refresh(item)
+    return [StockItemResp.model_validate(item) for item in stock_items]
+        
+    
+@router.get("/{institution_id}/baskets/families", response_model=List[BasketResp])
+async def list_all_baskets(institution_id: int, session: Session, current_account: Annotated[Account, Depends(get_current_account)]):
+    institution = await get_institution_or_404(session, institution_id)
+
+    query = select(InstitutionBasketFamily).where(
+        InstitutionBasketFamily.institution_id == institution.id,
+    ).options(selectinload(InstitutionBasketFamily.products))
+
+    result = await session.execute(query)
+    baskets = result.scalars().all()
+
+    return [BasketResp.model_validate(basket) for basket in baskets]
+
+
+@router.get("/{institution_id}/baskets/{family_id}", response_model=int)
+async def list_all_baskets(institution_id: int, family_id: int, session: Session, current_account: Annotated[Account, Depends(get_current_account)]):
+    institution = await get_institution_or_404(session, institution_id)
+    family = await get_family_or_404(session, family_id, institution_id)
+    basket_received = family.count_basket()
+    return basket_received
+
+
+@router.get('/{institution_id}/dashboard', response_model=InstitutionDashboardResp)
+async def dashboard(institution_id: int, session: Session, ):
+    institution = await get_institution_or_404(session, institution_id)
+
+    total_families = await session.execute(
+        select(func.count(Family.id)).where(
+            Family.institution_id == institution.id,
+            Family.active == True
+        )
+    )
+    total_families_count = total_families.scalar_one()
+
+    cestas_avaliable = await session.execute(
+        select(func.count(Family.id)).where(
+            Family.institution_id == institution.id,
+            Family.situation == SituationType.ACTIVE,
+            Family.active == True
+        )
+    )
+    cestas_avaliable_count = cestas_avaliable.scalar_one()
+
+    visit_pending = await session.execute(
+        select(func.count(InstitutionVisitation.id)).where(
+            InstitutionVisitation.institution_id == institution.id,
+            ~InstitutionVisitation.id.in_(
+                select(InstitutionVisitationResult.visitation_id)
+            )
+        )
+    )
+    visit_pending_count = visit_pending.scalar_one()
+
+    products_instock = await session.execute(
+        select(func.count(StockItem.id)).where(
+            StockItem.institution_id == institution.id,
+            StockItem.quantity > 0,
+            StockItem.active == True
+        )
+    )
+    products_instock_count = products_instock.scalar_one()
+
+    recent_visits = await session.execute(
+        select(InstitutionVisitation).where(
+            InstitutionVisitation.institution_id == institution.id
+        ).order_by(InstitutionVisitation.created.desc()).limit(5)
+    )
+    recent_deliveries = await session.execute(
+        select(FamilyDelivery).where(
+            FamilyDelivery.institution_id == institution.id
+        ).order_by(FamilyDelivery.created.desc()).limit(5)
+    )
+    activy_recents = []
+    for v in recent_visits.scalars():
+        activy_recents.append({
+            "type": "visit",
+            "description": f"Visita {v.type_of_visit} para família {v.family_id}",
+            "date": v.created.isoformat()
+        })
+    for d in recent_deliveries.scalars():
+        activy_recents.append({
+            "type": "delivery",
+            "description": f"Entrega para família {d.family_id}",
+            "date": d.created.isoformat()
+        })
+    activy_recents.sort(key=lambda x: x["date"], reverse=True)
+    activy_recents = activy_recents[:10]
+
+    stock_query = select(StockItem).where(
+        StockItem.institution_id == institution.id,
+        StockItem.quantity > 0,
+        StockItem.active == True
+    ).order_by(StockItem.quantity.asc())
+    stock_result = await session.execute(stock_query)
+    stock_items = stock_result.scalars().all()
+    stock = [{"sku": item.sku, "name": item.name, "quantity": item.quantity} for item in stock_items]
+
+    return InstitutionDashboardResp(
+        family_cad=total_families_count,
+        cestas_avaliable=cestas_avaliable_count,
+        visit_pending=visit_pending_count,
+        products_instock=products_instock_count,
+        activy_recents=activy_recents,
+        stock=stock
+    )

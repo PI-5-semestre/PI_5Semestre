@@ -51,3 +51,7 @@ class StockHistoryResp(BaseModel):
     created: datetime
     stock_item_id: int
     quantity: int
+
+class CreateProductBasketItem(BaseModel):
+    product_sku: str
+    quantity: int

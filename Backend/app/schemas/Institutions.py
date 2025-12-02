@@ -1,8 +1,9 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import datetime
 
 from app.schemas.families import FamilyResp
+from app.schemas.products import CreateProductBasketItem, StockItemCreateForInstitution
 from app.schemas.users import UserResp
 
 
@@ -96,3 +97,71 @@ class UserCorporateResp(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     user: UserResp
+    
+class VisitationCreate(BaseModel):
+    account_id: int
+    visit_at: str
+    description: Optional[str] = None
+    type_of_visit: str
+    
+class VisitationCreateReturn(BaseModel):
+    visitation_id: int
+    description: str
+    status: str
+    
+class VisitationResponseReturn(BaseModel):
+    visitation_id: int
+    description: str
+    status: str
+    
+class VisitationUpdate(BaseModel):
+    visit_at: Optional[str] = None
+    description: Optional[str] = None
+    type_of_visit: Optional[str] = None
+    
+class VisitationResp(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    active: bool
+    created: datetime
+    institution_id: int
+    account_id: int
+    family_id: Optional[int]
+    visit_at: str
+    description: Optional[str] = None
+    type_of_visit: str
+    response: Optional[VisitationResponseReturn] = None
+    family: Optional["FamilyResp"] = None
+    
+class BasketCreateForInstitution(BaseModel):
+    family_id: int
+    type: str
+    products: List[CreateProductBasketItem]
+
+
+class BasketRespItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    product_sku: str
+    quantity: int
+    
+class BasketResp(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    created: datetime
+    modified: datetime
+    active: bool
+    institution_id: int
+    family_id: int
+    basket_type: str
+    products: List[BasketRespItem]
+    
+class InstitutionDashboardResp(BaseModel):
+    family_cad: int
+    cestas_avaliable: int
+    visit_pending: int
+    products_instock: int
+    activy_recents: List[Any]
+    stock: List[Any]
