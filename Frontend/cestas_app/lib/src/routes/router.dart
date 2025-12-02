@@ -1,4 +1,5 @@
 import 'package:cestas_app/src/pages/basket/basket_page.dart';
+import 'package:cestas_app/src/pages/basket/create_basket_page.dart';
 import 'package:cestas_app/src/pages/delivery/delivery_page.dart';
 import 'package:cestas_app/src/pages/delivery/edit_delivery_page.dart';
 import 'package:cestas_app/src/pages/family/edit_family_page.dart';
@@ -118,6 +119,15 @@ final routes = GoRouter(
                 GoRoute(
                   path: 'basket',
                   builder: (context, state) => BasketPage(),
+                  routes: [
+                    GoRoute(
+                      path: 'create_basket',
+                      builder: (context, state) {
+                        final family = state.extra as FamilyModel;
+                        return CreateBasketPage(family: family);
+                      },
+                    ),
+                  ],
                 ),
                 GoRoute(
                   path: 'team',
