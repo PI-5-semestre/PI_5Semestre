@@ -41,7 +41,7 @@ final class VisitControllerProvider
   }
 }
 
-String _$visitControllerHash() => r'fc4eeb2e58f617f8a333d6e246dc073946ae78e6';
+String _$visitControllerHash() => r'b2aed5bdc5f729bf510c302273728d86308833fd';
 
 abstract class _$VisitController extends $Notifier<VisitState> {
   VisitState build();
