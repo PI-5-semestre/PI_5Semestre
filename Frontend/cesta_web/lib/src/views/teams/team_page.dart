@@ -136,7 +136,7 @@ class TeamPage extends ConsumerWidget {
                     children: userState.filtered.map((account) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                        child: TeamCardModal(account: account),
+                        child: TeamCardModal(account: account, appType: 'web'),
                       );
                     }).toList(),
                   ),

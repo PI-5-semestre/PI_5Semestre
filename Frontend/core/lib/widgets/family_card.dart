@@ -43,7 +43,6 @@ class FamilyCard extends ConsumerWidget {
                 builder: (context, constraints) {
                   final bool isMobile = constraints.maxWidth < 600;
 
-                  // =========== MOBILE: tela inteira ===========
                   if (isMobile) {
                     return Scaffold(
                       backgroundColor: Colors.black54,
@@ -66,7 +65,6 @@ class FamilyCard extends ConsumerWidget {
                     );
                   }
 
-                  // =========== WEB: modal limitado ===========
                   final maxWidth = (constraints.maxWidth > 800 ? 800 : constraints.maxWidth * 0.95).toDouble();
                   final maxHeight = (constraints.maxHeight > 650 ? 650 : constraints.maxHeight * 0.90).toDouble();
 
@@ -184,10 +182,6 @@ class FamilyCard extends ConsumerWidget {
   }
 }
 
-//////////////////////////////////////////////////////////////////
-///     CONTEÚDO COMPLETO DO MODAL – NADA FOI REMOVIDO!!!       ///
-//////////////////////////////////////////////////////////////////
-
 class _FamilyDetailsModal extends StatelessWidget {
   final FamilyModel family;
   final WidgetRef ref;
@@ -207,7 +201,6 @@ class _FamilyDetailsModal extends StatelessWidget {
 
     return Column(
       children: [
-        // ======= CABEÇALHO =======
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
@@ -227,7 +220,6 @@ class _FamilyDetailsModal extends StatelessWidget {
 
         const Divider(height: 1),
 
-        // ======= CONTEÚDO ROLÁVEL COMPLETO =======
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -277,7 +269,6 @@ class _FamilyDetailsModal extends StatelessWidget {
                 subtitle: Text(family.description ?? ''),
               ),
 
-              // ================= DOCUMENTOS =================
               ListTile(
                 leading: const Icon(Icons.attachment),
                 title: const Text('Comprovantes de Residência'),
@@ -368,7 +359,6 @@ class _FamilyDetailsModal extends StatelessWidget {
           ),
         ),
 
-        // ======= RODAPÉ COM FLOATING BTNS =======
         Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
